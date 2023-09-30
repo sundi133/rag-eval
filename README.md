@@ -27,7 +27,13 @@ This project is a tool for generating question-answer pairs based on provided da
 To generate question-answer pairs, use the following command:
 
 ```bash
-poetry run python src/main.py --data_path ./data/fixtures/amazon_uk_shoes_cleaned.csv --number_of_questions 2 --sample_size 3 --products_group_size 3 --group_columns "brand,sub_category,category,gender" --output_file ./output/qa_sample.json
+poetry run python src/main.py \ 
+--data_path ./data/fixtures/amazon_uk_shoes_cleaned.csv \
+--number_of_questions 2 \
+--sample_size 3 \
+--products_group_size 3 \
+--group_columns "brand,sub_category,category,gender" \
+--output_file ./output/qa_sample.json
 ```
 
 ### Command Options
