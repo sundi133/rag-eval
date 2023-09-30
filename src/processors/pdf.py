@@ -6,13 +6,14 @@ import json
 from typing import List
 from abc import ABC, abstractmethod
 
+
 class PDFProcessor(FileProcessor):
     def __init__(self, data_path: str) -> None:
         super().__init__(data_path)
         self.file_extension = os.path.splitext(data_path)[-1].lower()
         self.data = self.parse()
-    
-    def parse(self)-> pd.DataFrame:
+
+    def parse(self) -> pd.DataFrame:
         pass
 
     def get_randomized_samples(

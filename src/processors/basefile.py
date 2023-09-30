@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 # TODO - Implement proper abstractions and oo design with logging
 # TODO - Implement proper error handling
 
+
 class FileProcessor:
     def __init__(self, data_path: str) -> None:
         self.data_path = data_path
@@ -17,11 +18,13 @@ class FileProcessor:
         pass
 
     @abstractmethod
-    def get_randomized_samples(self,
+    def get_randomized_samples(
+        self,
         data: pd.DataFrame,
         sample_size: int,
         products_group_size: int,
-        group_columns: List[str],):
+        group_columns: List[str],
+    ):
         pass
 
     @abstractmethod

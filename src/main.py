@@ -14,6 +14,7 @@ from langchain.chat_models import ChatOpenAI
 from prompts import QuestionGeneratorPromptTemplate
 from utils import create_processor
 
+
 class QuestionGenerator(LLMChain):
     """Chain to generate questions based on the products available"""
 
@@ -33,6 +34,7 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
 
 def generator(
     data_path: str,
@@ -56,7 +58,7 @@ def generator(
     logger.info("Starting Question Generator")
 
     data_processor = create_processor(data_path)
-    
+
     df = data_processor.parse()
     randomized_grouping = data_processor.get_randomized_samples(
         df, sample_size, products_group_size, group_columns

@@ -31,6 +31,5 @@ QuestionGeneratorPromptTemplate = {
     """,
     "prompt_key_2": """
     
-    """
-
+    """,
 }

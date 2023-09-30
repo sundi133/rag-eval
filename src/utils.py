@@ -9,6 +9,7 @@ file_extension_mapping = {
     ".pdf": PDFProcessor,
 }
 
+
 def create_processor(file_path):
     # Get the file extension
     file_extension = file_path.lower().split(".")[-1]
