@@ -12,17 +12,16 @@ from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 
 from prompts import QuestionGeneratorPromptTemplate
-from file_processor import FileProcessor
-
+from utils import create_processor
 
 class QuestionGenerator(LLMChain):
     """Chain to generate questions based on the products available"""
 
     @classmethod
-    def from_llm(cls, llm: BaseLLM, verbose: bool = True) -> LLMChain:
+    def from_llm(cls, llm: BaseLLM, prompt_key: str, verbose: bool = True) -> LLMChain:
         """Get the response parser."""
         prompt = PromptTemplate(
-            template=QuestionGeneratorPromptTemplate,
+            template=QuestionGeneratorPromptTemplate.get(prompt_key),
             input_variables=["products", "number_of_questions"],
         )
         return cls(prompt=prompt, llm=llm, verbose=verbose)
@@ -35,7 +34,6 @@ ch = logging.StreamHandler()
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-
 def generator(
     data_path: str,
     number_of_questions: int,
@@ -44,6 +42,7 @@ def generator(
     group_columns: List[str],
     output_file: str,
     model_name: str,
+    prompt_key: str = "prompt_key_1",
 ) -> None:
     # Initialize logger
 
@@ -52,14 +51,14 @@ def generator(
         model=model_name,
         request_timeout=120,
     )
-    qa_generator = QuestionGenerator.from_llm(llm_openai_gpt4, verbose=True)
+    qa_generator = QuestionGenerator.from_llm(llm_openai_gpt4, prompt_key, verbose=True)
 
     logger.info("Starting Question Generator")
 
-    file_processor = FileProcessor(data_path)
-
-    df = file_processor.parse_data()
-    randomized_grouping = file_processor.get_randomized_samples(
+    data_processor = create_processor(data_path)
+    
+    df = data_processor.parse()
+    randomized_grouping = data_processor.get_randomized_samples(
         df, sample_size, products_group_size, group_columns
     )
 
@@ -126,7 +125,7 @@ def generator(
             )
             qa_dict[record["question"]] = record["answer"]
 
-    file_processor.write(output_file, qa_dict)
+    data_processor.write(output_file, qa_dict)
 
     # Log completion of Question Generator
     logger.info("Completed Question Generator")

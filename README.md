@@ -43,6 +43,14 @@ poetry run python src/main.py --data_path ./data/fixtures/amazon_uk_shoes_cleane
 
 In the provided command, we are generating 2 questions based on the `amazon_uk_shoes_cleaned.csv` data file. We are using a sample size of 3 and require a minimum of 3 products per group to generate questions. The questions will be grouped by the columns "brand," "sub_category," "category," and "gender," and the results will be saved to `qa_sample.json` in the `output` directory.
 
+##### Example pair of QA dataset generated from the input csv file 
+- {"question": "What are the different categories of men's shoes available?", "answer": "The available categories of men's shoes are loafers & moccasins."}
+- {"question": "Are there any promotions available for the men's shoes?", "answer": "Yes, there is a promotion of up to 35% off on selected men's shoes."}
+- {"question": "What is the price range for Laredo Men's Lawton Western Boot?", "answer": - "The price range for Laredo Men's Lawton Western Boot is \u00a3117.19 - \u00a3143.41."}
+- {"question": "What is the material used for the outer sole of Laredo Men's Wanderer Boot?", "answer": "The outer sole of Laredo Men's Wanderer Boot is made of manmade material."}
+- {"question": "What promotions are currently available for the Saucony Women Sports Shoes Jazz Original Vintage Blue?", "answer": "The Saucony Women Sports Shoes Jazz Original Vintage Blue is currently on sale with a 25% discount."}
+- {"question": "What are the features of the Saucony Women's Jazz Original Trainers?", "answer": "The Saucony Women's Jazz Original Trainers have a leather outer material, rubber sole, lace-up closure, and a flat heel type."}
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
