@@ -1,5 +1,5 @@
 QuestionGeneratorPromptTemplate = {
-    "prompt_key_1": """
+    "prompt_key_csv": """
     
         Follow the instructions below:
         Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about products without knowing about these products in advance. The customer will ask about products available, promotions available, about categories of products etc based on the products available in the below list:
@@ -29,7 +29,61 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
-    "prompt_key_2": """
-    
+    "prompt_key_ner": """
+        You are a dataset generator that is used to train a named entity recognition model
+        There are a few sentences for which you have to generate training data in a specific JSON format like below:
+
+        [
+            {{
+                "text": "Who is Nishanth?",
+                "entities": [
+                    {{
+                        "start": 7,
+                        "end": 15,
+                        "label": "PERSON"
+                    }}
+                ]
+            }},
+            {{
+                "text": "Who is Kamal Khumar?",
+                "entities": [
+                    {{
+                        "start": 7,
+                        "end": 19,
+                        "label": "PERSON"
+                    }}
+                ]
+            }},
+            {{
+                "text": "I like London and Berlin.",
+                "entities": [
+                    {{
+                        "start": 7,
+                        "end": 13,
+                        "label": "LOC"
+                    }},
+                    {{
+                        "start": 18,
+                        "end": 24,
+                        "label": "LOC"
+                    }}
+                ]
+            }}
+        ]
+
+
+        Do the work for all the following sentences with the entity name {entity_name}
+
+        ===
+        {sentences}
+        ===
+
+        Instructions:
+        1. make sure the sentences are relevant to the entity name
+        2. make sure the sentences are not repeated
+        3. make sure the sentences the output is in the above format of json
+
+        [ Output format must be stringified json as mentioned above ]
+
     """,
 }

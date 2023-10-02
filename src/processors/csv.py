@@ -1,17 +1,27 @@
-from processors.basefile import FileProcessor
+from processors.basefile import DataProcessor
 import os
 import pandas as pd
 import os
+import io
+import logging
 import json
 from typing import List
-from abc import ABC, abstractmethod
+from langchain.chains import LLMChain
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 
-class CSVProcessor(FileProcessor):
+class CSVProcessor(DataProcessor):
     def __init__(self, data_path: str) -> None:
         super().__init__(data_path)
         self.file_extension = os.path.splitext(data_path)[-1].lower()
         self.data = self.parse()
+        self.qa_dict = {}
 
     def parse(self) -> pd.DataFrame:
         return pd.read_csv(self.data_path, index_col=False)
@@ -47,9 +57,82 @@ class CSVProcessor(FileProcessor):
         randomized_grouping = group_counts_filter.sample(n=sample_size, random_state=42)
         return randomized_grouping
 
-    def write(self, file_path: str, data: json) -> None:
+    def generate_qa_pairs(
+        self,
+        randomized_samples: pd.DataFrame,
+        df: pd.DataFrame,
+        sample_size: int,
+        products_group_size: int,
+        group_columns: List[str],
+        number_of_questions: int,
+        qa_generator: LLMChain,
+    ) -> None:
+        for _index, group_row in randomized_samples.iterrows():
+            filtered_dataframes = []
+            group_filters = []
+
+            # Create a filter for the current group
+            for column in group_columns:
+                # Create a filter condition for the current column and group_row
+                condition = df[column] == group_row[column]
+
+                # Append the condition to the group_filters list
+                group_filters.append(condition)
+
+            # Combine all the filter conditions using the "&" operator
+            group_filter = pd.DataFrame(group_filters).all(axis=0)
+
+            # Filter the DataFrame based on the group criteria
+            filtered_dataframes.append(df[group_filter])
+
+            # Combine the filtered DataFrames into a single DataFrame
+            combined_filtered_df = pd.concat(filtered_dataframes, ignore_index=True)
+
+            # Initialize a CSV buffer for writing
+            csv_buffer = io.StringIO()
+
+            # Write the DataFrame to the CSV buffer
+            combined_filtered_df.to_csv(csv_buffer, index=False, header=True)
+
+            # Get the CSV string from the buffer
+            records = csv_buffer.getvalue()
+
+            # Close the buffer (optional)
+            csv_buffer.close()
+
+            qa_pair = qa_generator.run(
+                products=records,
+                number_of_questions=number_of_questions,
+            )
+
+            # Log generated questions
+            logger.info(
+                {
+                    "message": "Generated question & answer pair",
+                    "questions": qa_pair,
+                }
+            )
+
+            # Split questions by newline and process each question
+            question_array = json.loads(qa_pair)
+
+            for record in question_array:
+                # Log each generated question
+                logger.info(
+                    {
+                        "message": "Generated question",
+                        "question_answer": record,
+                    }
+                )
+                self.add_output_sample(record)
+        return self.qa_dict
+
+    def add_output_sample(self, record: json) -> None:
+        self.qa_dict[record["question"]] = record["answer"]
+
+    def write(self, file_path: str, qa_pairs: json) -> None:
         with open(file_path, "w") as output_file:
             # Write each key-value pair as a separate JSON object per line
-            for key, value in data.items():
+            for key, value in qa_pairs.items():
                 json_record = json.dumps({"question": key, "answer": value})
                 output_file.write(json_record + "\n")

@@ -1,13 +1,12 @@
-from processors.basefile import FileProcessor
+from processors.basefile import DataProcessor
 import os
 import pandas as pd
 import os
 import json
 from typing import List
-from abc import ABC, abstractmethod
 
 
-class PGSQLProcessor(FileProcessor):
+class PGSQLProcessor(DataProcessor):
     def __init__(self, data_path: str) -> None:
         super().__init__(data_path)
         self.file_extension = os.path.splitext(data_path)[-1].lower()
@@ -25,5 +24,5 @@ class PGSQLProcessor(FileProcessor):
     ) -> pd.DataFrame:
         pass
 
-    def write(self, file_path: str, data: json) -> None:
+    def write(self, file_path: str, qa_pairs: json) -> None:
         pass
