@@ -1,6 +1,5 @@
 import logging
 import pandas as pd
-import io
 import json
 import argparse
 from typing import List
@@ -11,22 +10,8 @@ from langchain.llms import BaseLLM
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 
-from prompts import QuestionGeneratorPromptTemplate
-from utils import create_processor
-
-
-class QuestionGenerator(LLMChain):
-    """Chain to generate questions based on the products available"""
-
-    @classmethod
-    def from_llm(cls, llm: BaseLLM, prompt_key: str, verbose: bool = True) -> LLMChain:
-        """Get the response parser."""
-        prompt = PromptTemplate(
-            template=QuestionGeneratorPromptTemplate.get(prompt_key),
-            input_variables=["products", "number_of_questions"],
-        )
-        return cls(prompt=prompt, llm=llm, verbose=verbose)
-
+from utils import create_processor, create_generator_llm
+from llms import QuestionGenerator
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -44,90 +29,48 @@ def generator(
     group_columns: List[str],
     output_file: str,
     model_name: str,
-    prompt_key: str = "prompt_key_1",
+    prompt_key: str,
+    llm_type: str,
+    metadata_path: str,
 ) -> None:
-    # Initialize logger
+    """
+    Generate questions and answers or training dataset from provided files
+    """
 
     llm_openai_gpt4 = ChatOpenAI(
         temperature=0,
         model=model_name,
         request_timeout=120,
     )
-    qa_generator = QuestionGenerator.from_llm(llm_openai_gpt4, prompt_key, verbose=True)
 
     logger.info("Starting Question Generator")
 
-    data_processor = create_processor(data_path)
+    qa_generator = create_generator_llm(
+        llm_type, llm_openai_gpt4, prompt_key, verbose=True
+    )
+
+    data_processor = create_processor(data_path, llm_type)
+
+    if llm_type == "ner":
+        data_processor.set_entity(metadata_path)
 
     df = data_processor.parse()
-    randomized_grouping = data_processor.get_randomized_samples(
+
+    randomized_samples = data_processor.get_randomized_samples(
         df, sample_size, products_group_size, group_columns
     )
 
-    # Initialize a dictionary to store questions and answers
-    qa_dict = {}
+    qa_pairs = data_processor.generate_qa_pairs(
+        randomized_samples,
+        df,
+        sample_size,
+        products_group_size,
+        group_columns,
+        number_of_questions,
+        qa_generator,
+    )
 
-    for index, group_row in randomized_grouping.iterrows():
-        filtered_dataframes = []
-        group_filters = []
-
-        # Create a filter for the current group
-        for column in group_columns:
-            # Create a filter condition for the current column and group_row
-            condition = df[column] == group_row[column]
-
-            # Append the condition to the group_filters list
-            group_filters.append(condition)
-
-        # Combine all the filter conditions using the "&" operator
-        group_filter = pd.DataFrame(group_filters).all(axis=0)
-
-        # Filter the DataFrame based on the group criteria
-        filtered_dataframes.append(df[group_filter])
-
-        # Combine the filtered DataFrames into a single DataFrame
-        combined_filtered_df = pd.concat(filtered_dataframes, ignore_index=True)
-
-        # Initialize a CSV buffer for writing
-        csv_buffer = io.StringIO()
-
-        # Write the DataFrame to the CSV buffer
-        combined_filtered_df.to_csv(csv_buffer, index=False, header=True)
-
-        # Get the CSV string from the buffer
-        products = csv_buffer.getvalue()
-
-        # Close the buffer (optional)
-        csv_buffer.close()
-
-        qa_pair = qa_generator.run(
-            products=products,
-            number_of_questions=number_of_questions,
-        )
-
-        # Log generated questions
-        logger.info(
-            {
-                "message": "Generated question & answer pair",
-                "questions": qa_pair,
-            }
-        )
-
-        # Split questions by newline and process each question
-        question_array = json.loads(qa_pair)
-
-        for record in question_array:
-            # Log each generated question
-            logger.info(
-                {
-                    "message": "Generated question",
-                    "question": record["question"],
-                    "answer": record["answer"],
-                }
-            )
-            qa_dict[record["question"]] = record["answer"]
-
-    data_processor.write(output_file, qa_dict)
+    data_processor.write(output_file, qa_pairs)
 
     # Log completion of Question Generator
     logger.info("Completed Question Generator")
@@ -158,6 +101,24 @@ if __name__ == "__main__":
         default="gpt-3.5-turbo",
         help="Name of the model to use for generating questions",
     )
+    parser.add_argument(
+        "--prompt_key",
+        type=str,
+        default="prompt_key_csv",
+        help="Name of the prompt key to use for generating questions",
+    )
+    parser.add_argument(
+        "--llm_type",
+        type=str,
+        default="text",
+        help="Type of LLM to use for generating questions",
+    )
+    parser.add_argument(
+        "--metadata_path",
+        type=str,
+        default="",
+        help="Path to the metadata file",
+    )
 
     args = parser.parse_args()
 
@@ -167,6 +128,9 @@ if __name__ == "__main__":
     products_group_size = args.products_group_size
     output_file = args.output_file
     model_name = args.model_name
+    prompt_key_csv = args.prompt_key
+    llm_type = args.llm_type
+    metadata_path = args.metadata_path
     grouped_columns = []
     if args.group_columns:
         for column in args.group_columns[0].split(","):
@@ -181,6 +145,10 @@ if __name__ == "__main__":
             "products_group_size": products_group_size,
             "group_columns": grouped_columns,
             "output_file": output_file,
+            "model_name": model_name,
+            "prompt_key": prompt_key_csv,
+            "llm_type": llm_type,
+            "metadata_path": metadata_path,
         }
     )
     # Call the generator function with the specified arguments
@@ -192,4 +160,7 @@ if __name__ == "__main__":
         grouped_columns,
         output_file,
         model_name,
+        prompt_key_csv,
+        llm_type,
+        metadata_path,
     )

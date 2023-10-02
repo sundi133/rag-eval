@@ -24,7 +24,7 @@ This project is a tool for generating question-answer pairs based on provided da
 
 ## Usage
 
-To generate question-answer pairs, use the following command:
+To generate question-answer pairs for a csv, use the following command:
 
 ```bash
 poetry run python src/main.py \ 
@@ -36,6 +36,20 @@ poetry run python src/main.py \
 --output_file ./output/qa_sample.json
 ```
 
+To generate training dataset for NER model training:
+``` bash 
+poetry run python src/main.py \
+--data_path ./data/fixtures/ner/train_ad_ids.ner \
+--number_of_questions 1 \
+--sample_size 20 \
+--products_group_size 3 \
+--group_columns "brand,sub_category,category,gender" \
+--output_file ./output/ner_ad_ids.json \
+--prompt_key prompt_key_ner \
+--llm_type ner \
+--metadata_path ./data/fixtures/ner/entities_ad_ids.json
+```
+
 ### Command Options
 
 - `--data_path`: The path to the input data file (e.g., CSV, TXT, PDF).
@@ -44,6 +58,9 @@ poetry run python src/main.py \
 - `--products_group_size`: The minimum number of products per group.
 - `--group_columns`: Columns to group by (e.g., "brand,sub_category,category,gender").
 - `--output_file`: The path to the output JSON file where question-answer pairs will be saved.
+- `--prompt_key`: The prompt key to be used 
+- `--llm_type`: The class to use from llmchain extension 
+- `--metadata_path`: The path to any metadata file
 
 ### Example
 
@@ -62,5 +79,3 @@ In the provided command, we are generating 2 questions based on the `amazon_uk_s
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-You can customize this README to include additional information about your project, such as installation instructions, dependencies, and more.
