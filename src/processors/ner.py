@@ -107,7 +107,7 @@ class NERProcessor(DataProcessor):
                     "message": "Generated question",
                     "question_answer": record,
                 }
-            ) 
+            )
             self.add_output_sample(record)
 
         return self.qa_dict
@@ -122,6 +122,5 @@ class NERProcessor(DataProcessor):
             # Write each key-value pair as a separate JSON object per line
             for _key, values in qa_pairs.items():
                 for value in values:
-                    print(value)
                     json_data = json.dumps(value, separators=(",", ":"))
                     output_file.write(str(json_data) + "\n")
