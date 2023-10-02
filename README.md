@@ -3,15 +3,9 @@
 This project is a tool for generating question-answer pairs based on provided data. It allows you to generate questions related to product information by specifying various parameters such as the data file path, the number of questions to generate, and more.
 
 
-
-`Trying to evaluate an LLM on massive documents without data generation.`
-![Alt Text](data/images/confused_person.png)
-
-
-` Realizing the importance of data generation for accurate evaluation.`
-![Alt Text](data/images/confident_person.png)
-
-
+| Trying to evaluate an LLM on massive documents without data generation. | Realizing the importance of data generation for accurate evaluation. |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| ![Confused Person](data/images/confused_person.png)                    | ![Confident Person](data/images/confident_person.png)             |
 
 ### Prerequisites
 
