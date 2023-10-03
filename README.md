@@ -7,6 +7,10 @@ This project is a tool for generating question-answer pairs based on provided da
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | ![Confused Person](data/images/confused_person.png)                    | ![Confident Person](data/images/confident_person.png)             |
 
+## Why Dataset Generation Matters
+
+Evaluating LLM applications on massive documents can be a daunting task, especially when you don't have the right evaluation dataset. The quality and relevance of your dataset can significantly impact the accuracy of your LLM app evaluations. Manual dataset creation can be time-consuming and error-prone, leading to inaccurate results.
+
 ### Prerequisites
 
 - Python (>=3.9)
