@@ -13,6 +13,7 @@ QuestionGeneratorPromptTemplate = {
         3. make sure the questions are not repeated
         4. make sure the questions are not too long
         5. make sure the answers are relevant to the questions
+        6. Do not generate fake questions and answers
 
         [ Generate each question and the relevant answer based on the products available in json format with following format:
             [
@@ -84,6 +85,38 @@ QuestionGeneratorPromptTemplate = {
         3. make sure the sentences the output is in the above format of json
 
         [ Output format must be stringified json as mentioned above ]
+
+    """,
+    "prompt_key_readme": """
+    
+        Follow the instructions below:
+        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about readme documentation. The customer will ask about how the software will work, how to use the software, how to install the software etc based on the documentation provided below
+        :
+        ===
+        {products}
+        ===
+
+        Instructions:
+        1. make sure the questions are relevant to the software capabilities available in the documentation
+        2. make sure the questions asked vary from each other
+        3. make sure the questions are not repeated
+        4. make sure the questions are not too long
+        5. make sure the answers are relevant to the questions
+        6. Do not generate fake questions and answers
+
+        [ Generate each question and the relevant answer based on the documentation available in json format with following format:
+            [
+                {{
+                    "question": "question 1",
+                    "answer": "answer 1"
+                }},
+                {{
+                    "question": "question 2",
+                    "answer": "answer 2"
+                }},
+                ...
+            ]
+        ]
 
     """,
 }

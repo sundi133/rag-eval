@@ -3,6 +3,7 @@ from processors.pdf import PDFProcessor
 from processors.txt import TXTProcessor
 from processors.pgsql import PGSQLProcessor
 from processors.ner import NERProcessor
+from processors.html import HTMLProcessor
 from processors.basefile import DataProcessor
 from llms import QuestionGenerator, NERGenerator
 from langchain.chains import LLMChain
@@ -13,6 +14,7 @@ llm_type_processor_mapping = {
     ".txt": TXTProcessor,
     ".pdf": PDFProcessor,
     ".ner": NERProcessor,
+    ".html": HTMLProcessor,
 }
 
 llm_type_generator_mapping = {
@@ -26,7 +28,10 @@ def create_processor(file_path: str, llm_type: str) -> DataProcessor:
     file_extension = file_path.lower().split(".")[-1]
 
     # Look up the class based on the file extension
-    processor_class = llm_type_processor_mapping.get(f".{file_extension}")
+    if llm_type in llm_type_processor_mapping.keys():
+        processor_class = llm_type_processor_mapping.get(llm_type)
+    else:
+        processor_class = llm_type_processor_mapping.get(f".{file_extension}")
 
     if processor_class:
         # Create an instance of the chosen class
@@ -35,7 +40,7 @@ def create_processor(file_path: str, llm_type: str) -> DataProcessor:
         raise ValueError(f"Unsupported file extension: {file_extension}")
 
 
-def create_generator_llm(
+def create_processor_llm(
     generator_type: str, model_name: ChatOpenAI, prompt_key: str, verbose: bool
 ) -> LLMChain:
     generator_class = llm_type_generator_mapping.get(generator_type)

@@ -10,7 +10,7 @@ from langchain.llms import BaseLLM
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 
-from utils import create_processor, create_generator_llm
+from utils import create_processor, create_processor_llm
 from llms import QuestionGenerator
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,7 @@ def generator(
     model_name: str,
     prompt_key: str,
     llm_type: str,
+    generator_type: str,
     metadata_path: str,
 ) -> None:
     """
@@ -45,8 +46,8 @@ def generator(
 
     logger.info("Starting Question Generator")
 
-    qa_generator = create_generator_llm(
-        llm_type, llm_openai_gpt4, prompt_key, verbose=True
+    qa_generator = create_processor_llm(
+        generator_type, llm_openai_gpt4, prompt_key, verbose=True
     )
 
     data_processor = create_processor(data_path, llm_type)
@@ -114,6 +115,12 @@ if __name__ == "__main__":
         help="Type of LLM to use for generating questions",
     )
     parser.add_argument(
+        "--generator_type",
+        type=str,
+        default="text",
+        help="Type of generator to use for generating questions",
+    )
+    parser.add_argument(
         "--metadata_path",
         type=str,
         default="",
@@ -130,6 +137,7 @@ if __name__ == "__main__":
     model_name = args.model_name
     prompt_key_csv = args.prompt_key
     llm_type = args.llm_type
+    generator_type = args.generator_type
     metadata_path = args.metadata_path
     grouped_columns = []
     if args.group_columns:
@@ -148,6 +156,7 @@ if __name__ == "__main__":
             "model_name": model_name,
             "prompt_key": prompt_key_csv,
             "llm_type": llm_type,
+            "generator_type": generator_type,
             "metadata_path": metadata_path,
         }
     )
@@ -162,5 +171,6 @@ if __name__ == "__main__":
         model_name,
         prompt_key_csv,
         llm_type,
+        generator_type,
         metadata_path,
     )
