@@ -59,6 +59,18 @@ poetry run python src/main.py \
 --metadata_path ./data/fixtures/ner/entities_ad_ids.json
 ```
 
+To generate training dataset for readme documents:
+``` bash
+poetry run python src/main.py \
+--data_path https://docs.getjavelin.io/ \
+--number_of_questions 4 \
+--sample_size 50 \
+--llm_type ".html" \
+--generator_type text \
+--prompt_key prompt_key_readme \
+--output_file ./output/qa_readme.json
+```
+
 ### Command Options
 
 - `--data_path`: The path to the input data file (e.g., CSV, TXT, PDF).
