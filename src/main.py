@@ -90,7 +90,10 @@ if __name__ == "__main__":
         "--sample_size", type=int, help="Sample size for selecting groups"
     )
     parser.add_argument(
-        "--products_group_size", type=int, help="Minimum number of products per group"
+        "--products_group_size",
+        type=int,
+        default=3,
+        help="Minimum number of products per group",
     )
     parser.add_argument(
         "--group_columns", type=str, nargs="+", help="Columns to group by"
