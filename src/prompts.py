@@ -119,4 +119,35 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
+    "prompt_key_blogpost": """
+    
+        Follow the instructions below:
+        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about your blog posts. The customer will ask questions about the blog posts available in the below list:
+        ===
+        {products}
+        ===
+
+        Instructions:
+        1. make sure the questions are relevant to the blog posts content
+        2. make sure the questions asked vary from each other
+        3. make sure the questions are not repeated
+        4. make sure the questions are not too long
+        5. make sure the answers are relevant to the questions
+        6. Do not generate fake questions and answers
+
+        [ Generate each question and the relevant answer based on the documentation available in json format with following format:
+            [
+                {{
+                    "question": "question 1",
+                    "answer": "answer 1"
+                }},
+                {{
+                    "question": "question 2",
+                    "answer": "answer 2"
+                }},
+                ...
+            ]
+        ]
+
+    """,
 }
