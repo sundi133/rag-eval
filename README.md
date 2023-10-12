@@ -1,4 +1,10 @@
-# Question-Answer Generator
+## Question-Answer Generator for Blogs, API/SDK Docs, Readme, Product Catalogs and more for LLM Applications
+
+[![Python Version](https://img.shields.io/badge/python-3.9-blue.svg)](https://python.org)
+
+[![codecov](https://codecov.io/gh/yourusername/question-answer-generator/branch/main/graph/badge.svg?token=yourcodecovtoken)](https://codecov.io/gh/yourusername/question-answer-generator)
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 This project is a tool for generating question-answer pairs based on provided data. It allows you to generate questions related to product information by specifying various parameters such as the data file path, the number of questions to generate, and more.
 
