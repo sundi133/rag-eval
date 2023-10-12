@@ -90,17 +90,17 @@ QuestionGeneratorPromptTemplate = {
     "prompt_key_readme": """
     
         Follow the instructions below:
-        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about readme documentation. The customer will ask about how the software will work, how to use the software, how to install the software etc based on the documentation provided below
+        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring who is inquiring about the information provided in a API documentations. The customer will ask about how the API's and integrations of the software sdk will work, how to use it for their own purposes,  the customer might make purchases decisions based on the quality of the information provided in the generated pairs. Generate high quality pairs based on information provided as follows:
         :
         ===
         {products}
         ===
 
         Instructions:
-        1. make sure the questions are relevant to the software capabilities available in the documentation
+        1. make sure the questions are relevant to the content provided and available in the documentation provided
         2. make sure the questions asked vary from each other
-        3. make sure the questions are not repeated
-        4. make sure the questions are not too long
+        3. make sure the questions are not repeated and answers are detailed within 25 to 40 words
+        4. make sure the questions are crisp and short and attention grabbing
         5. make sure the answers are relevant to the questions
         6. Do not generate fake questions and answers
 
