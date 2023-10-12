@@ -87,19 +87,80 @@ poetry run python src/main.py \
 
 In the provided command, we are generating 2 questions based on the `amazon_uk_shoes_cleaned.csv` data file. We are using a sample size of 3 and require a minimum of 3 products per group to generate questions. The questions will be grouped by the columns "brand," "sub_category," "category," and "gender," and the results will be saved to `qa_sample.json` in the `output` directory.
 
-##### Example pair of QA dataset generated from the input csv file 
+##### Example pair of QA dataset generated from the input file of type csv with a sample product catalog
+
 ```
-{"question": "What are the different categories of men's shoes available?", "answer": "The available categories of men's shoes are loafers & moccasins."}
+{
+"question": "What are the different categories of men's shoes available?", 
+"answer": "The available categories of men's shoes are loafers & moccasins."
+}
 
-{"question": "Are there any promotions available for the men's shoes?", "answer": "Yes, there is a promotion of up to 35% off on selected men's shoes."}
+{
+"question": "Are there any promotions available for the men's shoes?", 
+"answer": "Yes, there is a promotion of up to 35% off on selected men's shoes."
+}
 
-{"question": "What is the price range for Laredo Men's Lawton Western Boot?", "answer": - "The price range for Laredo Men's Lawton Western Boot is \u00a3117.19 - \u00a3143.41."}
+{
+"question": "What is the price range for Laredo Men's Lawton Western Boot?", 
+"answer": - "The price range for Laredo Men's Lawton Western Boot is \u00a3117.19 - \u00a3143.41."
+}
 
-{"question": "What is the material used for the outer sole of Laredo Men's Wanderer Boot?", "answer": "The outer sole of Laredo Men's Wanderer Boot is made of manmade material."}
+{
+"question": "What is the material used for the outer sole of Laredo Men's Wanderer Boot?",
+"answer": "The outer sole of Laredo Men's Wanderer Boot is made of manmade material."
+}
 
-{"question": "What promotions are currently available for the Saucony Women Sports Shoes Jazz Original Vintage Blue?", "answer": "The Saucony Women Sports Shoes Jazz Original Vintage Blue is currently on sale with a 25% discount."}
+{
+"question": "What promotions are currently available for the Saucony Women Sports Shoes Jazz Original Vintage Blue?",
+"answer": "The Saucony Women Sports Shoes Jazz Original Vintage Blue is currently on sale with a 25% discount."
+}
 
-{"question": "What are the features of the Saucony Women's Jazz Original Trainers?", "answer": "The Saucony Women's Jazz Original Trainers have a leather outer material, rubber sole, lace-up closure, and a flat heel type."}
+{
+"question": "What are the features of the Saucony Women's Jazz Original Trainers?",
+"answer": "The Saucony Women's Jazz Original Trainers have a leather outer material, rubber sole, lace-up closure, and a flat heel type."
+}
+```
+
+##### Example pair of QA dataset generated from the input of type readme online docs
+
+```
+{
+"question":"What are some examples of exceptions thrown by Javelin Python SDK?",
+"answer":"Javelin Python SDK throws various exceptions for different error scenarios. For example, you can catch specific exceptions to handle errors related to authentication, network connectivity, or data validation.",
+"url":"https://docs.getjavelin.io/docs/javelin-python/quickstart"
+}
+
+{
+"question":"How can I access the data model in Javelin?",
+"answer":"To access the data model in Javelin, you can refer to the documentation provided at the given URL.",
+"url":"https://docs.getjavelin.io/docs/javelin-python/models#routes"
+}
+
+{
+"question":"What are the fields available in the Javelin data model?",
+"answer":"The Javelin data model includes various fields that can be used to store and manipulate data.",
+"url":"https://docs.getjavelin.io/docs/javelin-python/models#model"
+}
+
+{
+"question":"How does Javelin handle load balancing?",
+"answer":"The documentation does not provide specific information on how Javelin handles load balancing.",
+"url":"https://docs.getjavelin.io/docs/javelin-core/loadbalancing#__docusaurus_skipToContent_fallback"
+}
+
+{
+"question":"What can Javelin do?",
+"answer":"Javelin can send requests to models and retrieve responses based on the configured policies and route configurations.",
+"url":"https://docs.getjavelin.io/docs/javelin-core/integration#llm-response"
+}
+
+
+```
+
+## Linter
+```bash
+   poetry run flake8 src
+   poetry run black src
 ```
 
 ## License
