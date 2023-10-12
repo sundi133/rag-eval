@@ -28,8 +28,11 @@ class HTMLProcessor(DataProcessor):
         self.file_extension = os.path.splitext(data_path)[-1].lower()
         self.visited = {}
         self.data = []
-        self.depth = 4
+        self.depth = 2
         self.qa_dict = {}
+
+    def set_depth(self, depth: int) -> None:
+        self.depth = depth
 
     def extract_paragraphs_from_headers(self, url):
         if url in self.visited:

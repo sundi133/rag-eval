@@ -33,6 +33,7 @@ def generator(
     llm_type: str,
     generator_type: str,
     metadata_path: str,
+    crawl_depth: int,
 ) -> None:
     """
     Generate questions and answers or training dataset from provided files
@@ -54,6 +55,8 @@ def generator(
 
     if llm_type == "ner":
         data_processor.set_entity(metadata_path)
+    if llm_type == ".html":
+        data_processor.set_depth(crawl_depth)
 
     df = data_processor.parse()
 
@@ -129,6 +132,12 @@ if __name__ == "__main__":
         default="",
         help="Path to the metadata file",
     )
+    parser.add_argument(
+        "--crawl_depth",
+        type=int,
+        default=2,
+        help="Depth to crawl",
+    )
 
     args = parser.parse_args()
 
@@ -142,6 +151,7 @@ if __name__ == "__main__":
     llm_type = args.llm_type
     generator_type = args.generator_type
     metadata_path = args.metadata_path
+    crawl_depth = args.crawl_depth
     grouped_columns = []
     if args.group_columns:
         for column in args.group_columns[0].split(","):
@@ -161,6 +171,7 @@ if __name__ == "__main__":
             "llm_type": llm_type,
             "generator_type": generator_type,
             "metadata_path": metadata_path,
+            "crawl_depth": crawl_depth,
         }
     )
     # Call the generator function with the specified arguments
@@ -176,4 +187,5 @@ if __name__ == "__main__":
         llm_type,
         generator_type,
         metadata_path,
+        crawl_depth,
     )
