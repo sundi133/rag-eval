@@ -47,5 +47,5 @@ class DataProcessor:
         pass
 
     @abstractmethod
-    def write(self, file_path: str, qa_pairs: json) -> None:
+    def write(self, file_path: str) -> None:
         pass

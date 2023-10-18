@@ -117,12 +117,6 @@ class NERProcessor(DataProcessor):
         training_data.append(record)
         self.qa_dict["training_data"] = training_data
 
-    def write(self, file_path: str, qa_pairs: json) -> None:
+    def write(self, file_path: str) -> None:
         with open(file_path, "w") as output_file:
-            json.dump(qa_pairs, output_file)
-            # TODO @sundi133: if we want to write each key-value pair as a separate JSON object per line
-            # Write each key-value pair as a separate JSON object per line
-            # for _key, values in qa_pairs.items():
-            #    for value in values:
-            #        json_data = json.dumps(value, separators=(",", ":"))
-            #        output_file.write(str(json_data) + "\n")
+            json.dump( self.qa_dict, output_file)

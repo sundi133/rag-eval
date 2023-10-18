@@ -22,6 +22,7 @@ class CSVProcessor(DataProcessor):
         self.file_extension = os.path.splitext(data_path)[-1].lower()
         self.data = self.parse()
         self.qa_dict = {}
+        self.qa_array = []
 
     def parse(self) -> pd.DataFrame:
         return pd.read_csv(self.data_path, index_col=False)
@@ -128,11 +129,11 @@ class CSVProcessor(DataProcessor):
         return self.qa_dict
 
     def add_output_sample(self, record: json) -> None:
-        self.qa_dict[record["question"]] = record["answer"]
+        self.qa_array.append({
+            "question": record["question"],
+            "answer": record["answer"],
+        })
 
-    def write(self, file_path: str, qa_pairs: json) -> None:
+    def write(self, file_path: str) -> None:
         with open(file_path, "w") as output_file:
-            # Write each key-value pair as a separate JSON object per line
-            for key, value in qa_pairs.items():
-                json_record = json.dumps({"question": key, "answer": value})
-                output_file.write(json_record + "\n")
+            json.dump(self.qa_array, output_file, indent=4)
