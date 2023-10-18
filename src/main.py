@@ -74,7 +74,7 @@ def generator(
         qa_generator,
     )
 
-    data_processor.write(output_file, qa_pairs)
+    data_processor.write(output_file)
 
     # Log completion of Question Generator
     logger.info("Completed Question Generator")

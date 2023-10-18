@@ -24,5 +24,5 @@ class PDFProcessor(DataProcessor):
     ) -> pd.DataFrame:
         pass
 
-    def write(self, file_path: str, qa_pairs: json) -> None:
+    def write(self, file_path: str) -> None:
         pass
