@@ -1,402 +1,252 @@
 [
     {
-        "question": "How can I access configurations and settings from Javelin through the SDK?",
-        "answer": "You can access configurations and settings from Javelin through the SDK by using the provided API functions and methods.",
+        "question": "Why is being compliant with regulations like GDPR and CCPA important?",
+        "answer": "Being compliant with regulations like GDPR and CCPA is important because data privacy is a global concern and non-compliance can lead to legal consequences.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "What are the consequences of not being compliant with GDPR and CCPA?",
+        "answer": "Not being compliant with GDPR and CCPA can result in legal consequences such as fines and penalties.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "How does Javelin help with archiving and compliance?",
+        "answer": "Javelin helps with archiving and compliance by providing features and tools that ensure data privacy and help organizations meet regulatory requirements.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "What are some key features of Javelin's archiving capabilities?",
+        "answer": "Some key features of Javelin's archiving capabilities include data privacy compliance, secure storage, and easy retrieval of archived data.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "Can Javelin help with archiving and compliance for other regulations apart from GDPR and CCPA?",
+        "answer": "Yes, Javelin can help with archiving and compliance for other regulations as well. It provides a flexible framework that can be customized to meet various regulatory requirements.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "How can I search and review archived records?",
+        "answer": "You can use the intuitive interface provided by Javelin to query and review archived records.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#use-cases"
+    },
+    {
+        "question": "What is the benefit of archiving records with Javelin?",
+        "answer": "Archiving records with Javelin ensures smooth and hassle-free audits.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#use-cases"
+    },
+    {
+        "question": "Does Javelin provide an easy-to-use interface for archiving?",
+        "answer": "Yes, Javelin offers an intuitive interface for archiving records.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#use-cases"
+    },
+    {
+        "question": "Can I query archived records with Javelin?",
+        "answer": "Yes, you can query archived records using Javelin's interface.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#use-cases"
+    },
+    {
+        "question": "How does Javelin make audits hassle-free?",
+        "answer": "Javelin's archiving feature allows for easy searching and reviewing of records, ensuring smooth audits.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/auditarchive#use-cases"
+    },
+    {
+        "question": "What is LLM selection?",
+        "answer": "LLM selection refers to the process of choosing the best model for a specific task. It involves automatically and intelligently selecting the most suitable model from a range of options.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm"
+    },
+    {
+        "question": "How does Javelin help with LLM selection?",
+        "answer": "Javelin provides automatic and intelligent LLM selection capabilities. It helps users determine which model is best suited for a particular task, making the selection process easier and more efficient.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm"
+    },
+    {
+        "question": "Can Javelin recommend the best model for any task?",
+        "answer": "Yes, Javelin can recommend the best model for a particular task. It analyzes the requirements and characteristics of the task, and based on that, suggests the most suitable model from the available options.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm"
+    },
+    {
+        "question": "What factors are considered in the LLM selection process?",
+        "answer": "The LLM selection process takes into account various factors such as the task requirements, dataset characteristics, model performance metrics, and user preferences to determine the best model.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm"
+    },
+    {
+        "question": "Does Javelin provide explanations for the recommended LLM selection?",
+        "answer": "Yes, Javelin provides explanations for the recommended LLM selection. It offers insights into why a particular model is suggested, helping users understand the reasoning behind the recommendation.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm"
+    },
+    {
+        "question": "How does Javelin integrate with users?",
+        "answer": "Javelin seamlessly integrates with users through its interface.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm#benefits"
+    },
+    {
+        "question": "What is the benefit of Javelin's automatic LLM selection?",
+        "answer": "The benefit is that users receive results from the best LLM for the task without realizing the complex selection process happening behind the scenes.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm#benefits"
+    },
+    {
+        "question": "What does LLM stand for?",
+        "answer": "LLM stands for Language Model.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm#benefits"
+    },
+    {
+        "question": "Does Javelin's automatic LLM selection process require user input?",
+        "answer": "No, the selection process happens automatically without requiring user input.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm#benefits"
+    },
+    {
+        "question": "How does Javelin ensure the best LLM is selected for the task?",
+        "answer": "Javelin's intelligent selection process ensures that the best LLM is chosen for the task at hand.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/automaticllm#benefits"
+    },
+    {
+        "question": "How does semantic caching improve response time?",
+        "answer": "Semantic caching serves answers directly from the cache, accelerating response times by up to a hundredfold.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/caching#improved-response-time"
+    },
+    {
+        "question": "What is the benefit of serving answers from the cache?",
+        "answer": "Serving answers from the cache ensures users receive almost instantaneous responses, making it 100x faster.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/caching#improved-response-time"
+    },
+    {
+        "question": "How does semantic caching impact user experience?",
+        "answer": "Semantic caching significantly improves user experience by providing faster response times, resulting in almost instant answers.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/caching#improved-response-time"
+    },
+    {
+        "question": "What is the main advantage of semantic caching?",
+        "answer": "The main advantage of semantic caching is the ability to accelerate response times by up to a hundredfold, ensuring users receive answers quickly.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/caching#improved-response-time"
+    },
+    {
+        "question": "How does semantic caching benefit website performance?",
+        "answer": "Semantic caching improves website performance by reducing response times, allowing users to receive answers almost instantly.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/caching#improved-response-time"
+    },
+    {
+        "question": "What does the response from the model through the gateway look like?",
+        "answer": "The response from the model through the gateway would look like the following.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/integration#leveraging-the-gateway"
+    },
+    {
+        "question": "How can I leverage the gateway in Javelin?",
+        "answer": "You can leverage the gateway in Javelin by following the integration guidelines provided in the blog post.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/integration#leveraging-the-gateway"
+    },
+    {
+        "question": "What are the applications of Javelin?",
+        "answer": "Javelin has various applications, as mentioned in the blog post.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/integration#leveraging-the-gateway"
+    },
+    {
+        "question": "Where can I find more information about leveraging the gateway in Javelin?",
+        "answer": "You can find more information about leveraging the gateway in Javelin in the blog post provided.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/integration#leveraging-the-gateway"
+    },
+    {
+        "question": "How can the information in the blog post help me make purchase decisions?",
+        "answer": "The information in the blog post can help you make purchase decisions by providing insights into the capabilities and features of Javelin.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/integration#leveraging-the-gateway"
+    },
+    {
+        "question": "What are some use cases that drive load balancing needs for organizations?",
+        "answer": "Organizations have several use cases that drive their load balancing needs.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/loadbalancing#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "Why is load balancing important for organizations?",
+        "answer": "Load balancing is important for organizations because it helps distribute network traffic evenly across multiple servers, improving performance and reliability.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/loadbalancing#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "How can load balancing benefit organizations?",
+        "answer": "Load balancing can benefit organizations by increasing scalability, reducing downtime, and optimizing resource utilization.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/loadbalancing#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "What is the role of load balancing in improving performance?",
+        "answer": "Load balancing helps improve performance by ensuring that no single server is overwhelmed with traffic, leading to faster response times and better user experience.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/loadbalancing#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "What are some key considerations for implementing load balancing?",
+        "answer": "Some key considerations for implementing load balancing include choosing the right load balancing algorithm, monitoring server health, and ensuring high availability.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/loadbalancing#__docusaurus_skipToContent_fallback"
+    },
+    {
+        "question": "How seriously does Javelin take data security?",
+        "answer": "Javelin takes data security seriously.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/overview#enhanced-security-measures"
+    },
+    {
+        "question": "What measures does Javelin have in place to enhance security?",
+        "answer": "Javelin has enhanced security measures in place.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/overview#enhanced-security-measures"
+    },
+    {
+        "question": "Why is data security important for Javelin?",
+        "answer": "Data security is important for Javelin to protect customer information.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/overview#enhanced-security-measures"
+    },
+    {
+        "question": "Can I trust Javelin with my sensitive data?",
+        "answer": "Yes, you can trust Javelin with your sensitive data due to their focus on security.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/overview#enhanced-security-measures"
+    },
+    {
+        "question": "How does Javelin ensure the security of customer data?",
+        "answer": "Javelin ensures the security of customer data through their robust security measures.",
+        "url": "https://docs.getjavelin.io/docs/javelin-core/overview#enhanced-security-measures"
+    },
+    {
+        "question": "What are the fields in the Javelin data model?",
+        "answer": "The fields in the Javelin data model include various attributes that define the structure and properties of the data.",
+        "url": "https://docs.getjavelin.io/docs/javelin-python/models#routes"
+    },
+    {
+        "question": "How can I access the data model in Javelin Python?",
+        "answer": "You can access the data model in Javelin Python by using the provided routes and APIs.",
+        "url": "https://docs.getjavelin.io/docs/javelin-python/models#routes"
+    },
+    {
+        "question": "Are there any specific requirements for the fields in the Javelin data model?",
+        "answer": "Yes, there may be specific requirements for the fields in the Javelin data model, such as data types or validation rules.",
+        "url": "https://docs.getjavelin.io/docs/javelin-python/models#routes"
+    },
+    {
+        "question": "Can I customize the fields in the Javelin data model?",
+        "answer": "Yes, you can customize the fields in the Javelin data model according to your specific requirements.",
+        "url": "https://docs.getjavelin.io/docs/javelin-python/models#routes"
+    },
+    {
+        "question": "Where can I find more information about the Javelin data model?",
+        "answer": "You can find more information about the Javelin data model in the provided documentation, specifically in the 'Data Model' section.",
+        "url": "https://docs.getjavelin.io/docs/javelin-python/models#routes"
+    },
+    {
+        "question": "What is the purpose of the python SDK in Javelin?",
+        "answer": "The python SDK in Javelin is used for handling errors and catching exceptions for robust client-side error handling.",
         "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
     },
     {
-        "question": "What is the purpose of the Quickstart Guide for Javelin Python?",
-        "answer": "The Quickstart Guide for Javelin Python provides a step-by-step tutorial on how to quickly get started with using Javelin's Python SDK.",
+        "question": "How does the python SDK help in handling different error scenarios?",
+        "answer": "The python SDK throws helpful exceptions for catching different error scenarios, making it easier to handle errors effectively.",
         "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
     },
     {
-        "question": "Can I use the Javelin Python SDK for my own purposes?",
-        "answer": "Yes, you can use the Javelin Python SDK for your own purposes. It provides a set of tools and functions to integrate Javelin into your own software applications.",
+        "question": "Can you provide an example of how to handle errors using the python SDK?",
+        "answer": "Yes, with the python SDK, handling errors is as easy as catching the appropriate exception. It provides a number of helpful exceptions for different error scenarios.",
         "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
     },
     {
-        "question": "How can the quality of the information provided in the API documentation affect my purchase decision?",
-        "answer": "The quality of the information provided in the API documentation can greatly impact your purchase decision as it reflects the reliability and usability of the software SDK. Thorough and well-documented APIs indicate a well-designed and supported product.",
+        "question": "What is the benefit of using the python SDK for client-side error handling?",
+        "answer": "Using the python SDK for client-side error handling ensures robust error handling, allowing for better control and management of errors in the application.",
         "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
     },
     {
-        "question": "How does Javelin ensure data security?",
-        "answer": "Javelin takes data security seriously and implements measures to ensure the safety of your data.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "Can I integrate Javelin with other software or APIs?",
-        "answer": "Yes, Javelin supports integrations with other software and APIs, allowing you to extend its functionality.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How can I use Javelin's SDK for my own purposes?",
-        "answer": "You can use Javelin's SDK to build custom applications and solutions that leverage its features and capabilities.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "Does the quality of the API documentation affect my purchasing decision?",
-        "answer": "Yes, the quality of the API documentation is an important factor to consider when making purchasing decisions, as it reflects the overall quality and support of the software.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What is the purpose of the Javelin Python Client?",
-        "answer": "The Javelin Python Client is used to integrate Javelin's functionality into Python applications.",
+        "question": "How does the python SDK contribute to the overall quality of the client-side error handling?",
+        "answer": "The python SDK enhances the quality of client-side error handling by providing a reliable and efficient way to catch and handle errors, improving the overall stability and performance of the application.",
         "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "How can I set up the Javelin Python Client?",
-        "answer": "You can set up the Javelin Python Client by following the steps outlined in the Quickstart Guide provided in the documentation.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "Can I use the Javelin Python Client for my own purposes?",
-        "answer": "Yes, you can use the Javelin Python Client for your own purposes by integrating it into your Python applications.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "Where can I find more information about using the Javelin Python Client?",
-        "answer": "You can find more information about using the Javelin Python Client in the documentation provided, including detailed guides and examples.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "What is the Javelin client?",
-        "answer": "The Javelin client is a Python library for interacting with the Javelin API.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "What does the Quickstart Guide provide?",
-        "answer": "The Quickstart Guide provides a basic overview of setting up and using the Javelin client.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "How can I use the Javelin client for my own purposes?",
-        "answer": "You can use the Javelin client to interact with the Javelin API and perform various tasks based on your requirements.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "Where can I find the Javelin Python SDK documentation?",
-        "answer": "You can find the Javelin Python SDK documentation in the Quickstart Guide provided at the following URL: https://docs.getjavelin.io/docs/javelin-python/quickstart",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "What models does Javelin support?",
-        "answer": "Javelin supports both closed and open-source LLMs, including renowned models like OpenAI GPT-4 and Anthropic\u2019s Claude 100k.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What programming languages can be used to interact with Javelin?",
-        "answer": "Developers can engage with Javelin using REST, Python, or Javascript clients.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "Is Javelin compatible with third-party integrations?",
-        "answer": "Yes, Javelin can be integrated with other software and APIs to enhance its functionality.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How flexible is Javelin in terms of model usage?",
-        "answer": "Javelin offers flexibility in using preferred models, whether they are closed or open-source LLMs.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How do I make a request to an LLM through Javelin?",
-        "answer": "To make a request to an LLM through Javelin, you can follow the steps outlined in the Quickstart Guide provided in the Javelin Python documentation.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "What is the purpose of the Javelin Python Quickstart Guide?",
-        "answer": "The purpose of the Javelin Python Quickstart Guide is to provide a step-by-step tutorial on how to make a request to an LLM using Javelin.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "Can I use Javelin Python for integrating with other software SDKs?",
-        "answer": "Yes, Javelin Python can be used for integrating with other software SDKs. It provides a convenient way to make requests to LLMs and can be easily integrated into existing workflows.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "How can I use Javelin Python for my own purposes?",
-        "answer": "You can use Javelin Python for your own purposes by following the instructions in the Quickstart Guide. It provides the necessary information and code examples to get started with making requests to LLMs.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "How can I set up retries in the route configuration?",
-        "answer": "Retries can be set up in the route configuration. You can find more information on how to do this in the documentation provided.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/retries"
-    },
-    {
-        "question": "What is the purpose of retries in Javelin?",
-        "answer": "Retries in Javelin help maintain a smoother and more resilient interaction with the LLMs, even during occasional service hiccups.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/retries"
-    },
-    {
-        "question": "Does Javelin's retries feature help with handling service disruptions?",
-        "answer": "Yes, Javelin's retries feature aids in maintaining a smoother interaction with the LLMs, even when faced with occasional service hiccups.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/retries"
-    },
-    {
-        "question": "Can I customize the number of retries in Javelin?",
-        "answer": "Yes, you can customize the number of retries in Javelin. The documentation provides information on how to configure this according to your needs.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/retries"
-    },
-    {
-        "question": "How does Javelin's cost guardrails help in budget control?",
-        "answer": "Javelin's cost guardrails allow you to set financial limits for different routes, ensuring you won't exceed your LLM expenditure.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What is the purpose of Javelin's cost guardrails?",
-        "answer": "The purpose of Javelin's cost guardrails is to help you stay in control of your budgets by setting financial limits for different routes.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How can I use Javelin's cost guardrails for my own purposes?",
-        "answer": "You can use Javelin's cost guardrails to set financial limits for different routes based on your own requirements and budget control needs.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "Why should I consider using Javelin's cost guardrails?",
-        "answer": "Using Javelin's cost guardrails ensures that you can confidently manage your budgets and prevent exceeding your LLM expenditure, providing better financial control.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What is Javelin?",
-        "answer": "Javelin is an enterprise-grade LLM Gateway & Model Router designed for modern organizations.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How does Javelin work?",
-        "answer": "Javelin works by providing high-performance API's and integrations for seamless communication between different software systems.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How can I use Javelin for my own purposes?",
-        "answer": "You can use Javelin for your own purposes by leveraging its software sdk and integrating it into your existing systems.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "Is Javelin suitable for large organizations?",
-        "answer": "Yes, Javelin is designed to meet the needs of modern organizations, including large enterprises, with its high-performance and enterprise-grade features.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What is Javelin?",
-        "answer": "Javelin is a software SDK that provides Python SDK, in-depth guides, and references for exploring its features.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How can I use Javelin for my own purposes?",
-        "answer": "You can use Javelin for your own purposes by utilizing its Python SDK and following the in-depth guides and references provided.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What are the API's and integrations available in Javelin?",
-        "answer": "Javelin offers API's and integrations through its software SDK, allowing you to enhance your applications with its features.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "Does the quality of the information provided in the documentation affect purchase decisions?",
-        "answer": "Yes, the quality of the information provided in the documentation can influence purchase decisions as it reflects the reliability and usability of the software SDK.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What is Javelin?",
-        "answer": "Javelin is a cutting-edge gateway crafted to make Large Language Models (LLMs) seamlessly accessible to enterprises.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What concerns does Javelin address?",
-        "answer": "Javelin addresses concerns related to security, cost, and data management that arise from integrating LLMs.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How does Javelin ensure security and compliance?",
-        "answer": "Javelin provides an ultra-low latency solution that centralizes LLM interactions, ensuring robust security and compliance.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What programming language is Javelin developed in?",
-        "answer": "Javelin is developed using Golang.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How do I install javelin_sdk to interact with Javelin AI Gateway?",
-        "answer": "To install javelin_sdk, you can follow the quickstart guide provided in the Javelin documentation.",
-        "url": "https://docs.getjavelin.io/docs/javelin-langchain-python/quickstart"
-    },
-    {
-        "question": "What is Javelin AI Gateway?",
-        "answer": "Javelin AI Gateway is a software platform that allows you to interact with Javelin using the javelin_sdk.",
-        "url": "https://docs.getjavelin.io/docs/javelin-langchain-python/quickstart"
-    },
-    {
-        "question": "Can I use Javelin with Python?",
-        "answer": "Yes, you can use Javelin with Python by installing the javelin_sdk and following the provided documentation.",
-        "url": "https://docs.getjavelin.io/docs/javelin-langchain-python/quickstart"
-    },
-    {
-        "question": "How can I integrate Javelin with my own software?",
-        "answer": "You can integrate Javelin with your own software by using the javelin_sdk and following the integration guidelines provided in the documentation.",
-        "url": "https://docs.getjavelin.io/docs/javelin-langchain-python/quickstart"
-    },
-    {
-        "question": "What is Javelin?",
-        "answer": "Javelin is an Enterprise Scale LLM AI Gateway that provides API's and integrations for software SDKs.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "How do the API's and integrations of Javelin work?",
-        "answer": "The API's and integrations of Javelin work by allowing developers to easily connect their software SDKs to the AI Gateway for enhanced functionality.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "How can I use Javelin for my own purposes?",
-        "answer": "You can use Javelin for your own purposes by leveraging its API's and integrations to enhance the capabilities of your software SDKs.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "Does the quality of the information provided in the API documentation affect purchase decisions?",
-        "answer": "Yes, the quality of the information provided in the API documentation can greatly influence purchase decisions as it demonstrates the reliability and usability of the product.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "What is Javelin?",
-        "answer": "Javelin is an Enterprise Scale LLM AI Gateway that provides API's and integrations for software SDKs.",
-        "url": "https://docs.getjavelin.io/#__docusaurus_skipToContent_fallback"
-    },
-    {
-        "question": "How do the API's and integrations of Javelin's software SDK work?",
-        "answer": "Javelin's API's and integrations allow developers to easily incorporate LLM AI capabilities into their own software applications.",
-        "url": "https://docs.getjavelin.io/#__docusaurus_skipToContent_fallback"
-    },
-    {
-        "question": "How can I use Javelin for my own purposes?",
-        "answer": "You can use Javelin's API's and integrations to enhance your software applications with LLM AI functionalities, such as natural language processing and machine learning.",
-        "url": "https://docs.getjavelin.io/#__docusaurus_skipToContent_fallback"
-    },
-    {
-        "question": "Does the quality of Javelin's API documentation affect purchase decisions?",
-        "answer": "Yes, the quality of the API documentation is an important factor for customers when making purchase decisions, as it reflects the reliability and usability of the product.",
-        "url": "https://docs.getjavelin.io/#__docusaurus_skipToContent_fallback"
-    },
-    {
-        "question": "How does Javelin handle retries with Large Language Models?",
-        "answer": "Javelin has a robust mechanism that supports retrying interactions with any Large Language Model (LLM).",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/retries"
-    },
-    {
-        "question": "What is the purpose of Javelin's retry feature?",
-        "answer": "Javelin's retry feature allows for seamless interaction with Large Language Models by automatically retrying failed interactions.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/retries"
-    },
-    {
-        "question": "Can Javelin retry interactions with any type of Language Model?",
-        "answer": "Yes, Javelin can retry interactions with any Large Language Model (LLM) to ensure successful communication.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/retries"
-    },
-    {
-        "question": "How does Javelin's retry mechanism enhance the integration process?",
-        "answer": "Javelin's retry mechanism enhances integration by providing built-in support for retrying interactions, ensuring smooth communication with Large Language Models.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/retries"
-    },
-    {
-        "question": "How can I fetch configurations from Javelin using the Python SDK?",
-        "answer": "You can fetch configurations from Javelin using the Python SDK by following the steps mentioned in the Quickstart Guide provided in the documentation.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "What is the purpose of the Quickstart Guide in the Javelin Python API documentation?",
-        "answer": "The Quickstart Guide in the Javelin Python API documentation provides step-by-step instructions on how to get started with using the Python SDK and fetching configurations from Javelin.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "Can I use the Javelin Python SDK for my own purposes?",
-        "answer": "Yes, you can use the Javelin Python SDK for your own purposes. The documentation provides information on how to use the SDK effectively and integrate it into your own projects.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "Does the quality of the information provided in the API documentation affect my purchase decision?",
-        "answer": "Yes, the quality of the information provided in the API documentation can greatly impact your purchase decision. It is important to have clear and detailed documentation to ensure smooth integration and usage of the software SDK.",
-        "url": "https://docs.getjavelin.io/docs/javelin-python/quickstart"
-    },
-    {
-        "question": "How does Javelin ensure the security of my data?",
-        "answer": "Javelin is built with the latest security standards in mind, ensuring that your data remains protected and minimizing vulnerabilities.",
-        "url": "https://docs.getjavelin.io/#__docusaurus_skipToContent_fallback"
-    },
-    {
-        "question": "What threats does Javelin shield against?",
-        "answer": "Javelin shields against potential threats, providing an additional layer of security for your data.",
-        "url": "https://docs.getjavelin.io/#__docusaurus_skipToContent_fallback"
-    },
-    {
-        "question": "Can I integrate Javelin with other software SDKs?",
-        "answer": "Yes, Javelin supports integrations with other software SDKs, allowing you to extend its functionality for your own purposes.",
-        "url": "https://docs.getjavelin.io/#__docusaurus_skipToContent_fallback"
-    },
-    {
-        "question": "How can I use Javelin for my own purposes?",
-        "answer": "You can use Javelin for your own purposes by leveraging its API and integrations to build custom solutions and enhance your workflows.",
-        "url": "https://docs.getjavelin.io/#__docusaurus_skipToContent_fallback"
-    },
-    {
-        "question": "What is Javelin?",
-        "answer": "Javelin is a software SDK that allows you to centrally manage LLM credentials through configured Routes, streamlining credentials and configurations.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How does Javelin work with LLMs from diverse providers?",
-        "answer": "Javelin allows you to manage LLMs from diverse providers by configuring Routes, which represent these LLMs. This helps streamline credentials and configurations.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "Can Javelin grant selective access to different users?",
-        "answer": "Yes, Javelin allows you to grant selective access to different users, from data scientists to production applications, without compromising on security.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "What are the benefits of using Javelin for API integrations?",
-        "answer": "Using Javelin for API integrations provides centralized management of LLM credentials, streamlined configurations, and enhanced security for different users.",
-        "url": "https://docs.getjavelin.io/docs/javelin-core/overview"
-    },
-    {
-        "question": "How does Javelin ensure the security of my data?",
-        "answer": "Javelin is built with the latest security standards in mind, ensuring that your data remains protected and minimizing vulnerabilities.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "What threats does Javelin shield against?",
-        "answer": "Javelin shields against potential threats, providing an added layer of security for your data.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "Can I integrate Javelin with other software or APIs?",
-        "answer": "Yes, Javelin supports integrations with other software and APIs, allowing you to enhance its functionality and capabilities.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "How can I use Javelin for my own purposes?",
-        "answer": "You can use Javelin for various purposes, such as data protection, minimizing vulnerabilities, and ensuring the security of your information.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "Is the Javelin platform suitable for both beginners and experts?",
-        "answer": "Yes, our platform is designed to be accessible to both novices and experts, allowing users to get started quickly and effortlessly.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "What features does the Javelin platform offer?",
-        "answer": "The Javelin platform offers an intuitive interface and user-friendly features to enhance user experience.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "How can I get started with the Javelin platform?",
-        "answer": "You can quickly get started with the Javelin platform by following the intuitive interface and user-friendly features.",
-        "url": "https://docs.getjavelin.io/"
-    },
-    {
-        "question": "Is the Javelin platform easy to use?",
-        "answer": "Yes, the Javelin platform is designed to be user-friendly, making it easy for users to navigate and utilize its features.",
-        "url": "https://docs.getjavelin.io/"
     }
 ]
