@@ -1,5 +1,3 @@
-
-
 if __name__ == "__main__":
     import random
     import json
@@ -27,8 +25,6 @@ if __name__ == "__main__":
             print(f"The file '{json_file_path}' was not found.")
         except json.JSONDecodeError as e:
             print(f"Error parsing JSON: {e}")
-
-   
 
     # Function to read and process endpoint configurations
     def read_endpoint_configurations(file_path):
@@ -60,9 +56,8 @@ if __name__ == "__main__":
         # In this example, we use a random score (0 to 1) for illustration
         return random.uniform(0, 1)
 
-    
     question_ranking = []
-    
+
     for entry in qa_data:
         question = entry.get("question", "")
         answer = entry.get("answer", "")
@@ -84,7 +79,9 @@ if __name__ == "__main__":
             )
 
         # Sort the endpoints based on their scores (highest to lowest)
-        question_ranking = sorted(question_ranking, key=lambda x: x["score"], reverse=True)
+        question_ranking = sorted(
+            question_ranking, key=lambda x: x["score"], reverse=True
+        )
         ranked_endpoints.append({"question": question, "ranking": question_ranking})
 
     # Print the ranked endpoints for each question
@@ -93,8 +90,7 @@ if __name__ == "__main__":
         for i, endpoint in enumerate(ranking["ranking"], start=1):
             print(f"{i}. {endpoint['endpoint']} - Score: {endpoint['score']:.2f}")
             # log in wandb
-            wandb.log({"question": ranking['question']})
-            wandb.log({"endpoint": endpoint['endpoint']})
-            wandb.log({"score": endpoint['score']})
+            wandb.log({"question": ranking["question"]})
+            wandb.log({"endpoint": endpoint["endpoint"]})
+            wandb.log({"score": endpoint["score"]})
         print()
-            

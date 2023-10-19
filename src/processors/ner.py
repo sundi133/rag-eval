@@ -119,4 +119,4 @@ class NERProcessor(DataProcessor):
 
     def write(self, file_path: str) -> None:
         with open(file_path, "w") as output_file:
-            json.dump( self.qa_dict, output_file)
+            json.dump(self.qa_dict, output_file)

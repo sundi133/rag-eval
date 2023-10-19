@@ -42,7 +42,6 @@ class HTMLProcessor(DataProcessor):
         if url in self.visited:
             return
         try:
-            
             response = requests.get(url, headers=self.headers)
             self.visited[url] = True
             response.raise_for_status()
@@ -158,11 +157,13 @@ class HTMLProcessor(DataProcessor):
         return self.qa_dict
 
     def add_output_sample(self, record: json) -> None:
-        self.qa_array.append({
-            "question": record["question"],
-            "answer": record["answer"],
-            "url":  record["url"]
-        })
+        self.qa_array.append(
+            {
+                "question": record["question"],
+                "answer": record["answer"],
+                "url": record["url"],
+            }
+        )
 
     def write(self, file_path: str) -> None:
         sorted_data = sorted(self.qa_array, key=lambda x: x["url"])
