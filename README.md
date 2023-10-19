@@ -144,12 +144,26 @@ To generate training dataset for readme documents:
 ``` bash
 poetry run python src/main.py \
 --data_path https://docs.getjavelin.io/ \
---number_of_questions 4 \
---sample_size 50 \
+--number_of_questions 5 \
+--sample_size 10 \
 --llm_type ".html" \
 --generator_type text \
---prompt_key prompt_key_readme \
+--prompt_key prompt_key_blogpost \
+--crawl_depth 4 \
 --output_file ./output/qa_readme.json
+```
+
+To generate training dataset for blogs:
+``` bash
+poetry run python src/main.py \
+--data_path https://payfederate.ai/ais-new-frontier-payfederate-solves-pay-disparity-through-connected-compensation-systems/ \
+--number_of_questions 5 \
+--sample_size 10 \
+--llm_type ".html" \
+--generator_type text \
+--prompt_key prompt_key_blogpost \
+--crawl_depth 2 \
+--output_file ./output/qa_blog.json
 ```
 
 ### Command Options

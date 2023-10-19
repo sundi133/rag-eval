@@ -165,5 +165,6 @@ class HTMLProcessor(DataProcessor):
         })
 
     def write(self, file_path: str) -> None:
+        sorted_data = sorted(self.qa_array, key=lambda x: x["url"])
         with open(file_path, "w") as output_file:
-            json.dump(self.qa_array, output_file, indent=4)
+            json.dump(sorted_data, output_file, indent=4)
