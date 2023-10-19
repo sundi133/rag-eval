@@ -150,4 +150,35 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
+    "prompt_key_readme": """
+    
+        Follow the instructions below:
+        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about the information provided in a readme file. The customer might make ask any questions to make informed decision making based on the quality of the information provided in the readme file. Generate the pairs based on information provided as follows:
+        ===
+        {products}
+        ===
+
+        Instructions:
+        1. make sure the generate questions are relevant to the content provided
+        2. make sure the questions asked vary from each other
+        3. make sure the questions are not repeated and answers are detailed within 25 to 40 words
+        4. make sure the questions are crisp and short and attention grabbing
+        5. make sure the answers are relevant to the questions
+        6. Do not generate fake questions and answers
+
+        [ Generate each question and the relevant answer based on the documentation available in json format with following format:
+            [
+                {{
+                    "question": "question 1",
+                    "answer": "answer 1"
+                }},
+                {{
+                    "question": "question 2",
+                    "answer": "answer 2"
+                }},
+                ...
+            ]
+        ]
+
+    """,
 }

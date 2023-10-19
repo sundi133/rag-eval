@@ -129,10 +129,12 @@ class CSVProcessor(DataProcessor):
         return self.qa_dict
 
     def add_output_sample(self, record: json) -> None:
-        self.qa_array.append({
-            "question": record["question"],
-            "answer": record["answer"],
-        })
+        self.qa_array.append(
+            {
+                "question": record["question"],
+                "answer": record["answer"],
+            }
+        )
 
     def write(self, file_path: str) -> None:
         with open(file_path, "w") as output_file:
