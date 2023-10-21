@@ -21,6 +21,14 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
+from typing import List
+from chat_openai import ChatOpenAI
+from data_processor import create_processor, create_processor_llm
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 def generator(
     data_path: str,
     number_of_questions: int,
@@ -37,8 +45,21 @@ def generator(
 ) -> None:
     """
     Generate questions and answers or training dataset from provided files
-    """
 
+    Args:
+        data_path (str): Path to the input data file
+        number_of_questions (int): Number of questions to generate
+        sample_size (int): Number of samples to use for generating questions
+        products_group_size (int): Number of products to group together
+        group_columns (List[str]): List of columns to group by
+        output_file (str): Path to the output file
+        model_name (str): Name of the OpenAI model to use
+        prompt_key (str): Key to use for the prompt
+        llm_type (str): Type of LLM to use
+        generator_type (str): Type of generator to use
+        metadata_path (str): Path to the metadata file
+        crawl_depth (int): Depth to crawl for HTML files
+    """
     llm_openai_gpt4 = ChatOpenAI(
         temperature=0,
         model=model_name,
