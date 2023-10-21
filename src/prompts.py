@@ -181,4 +181,26 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
+    "prompt_ranking": """
+    Rank the following two responses based on their quality and relevance to the question asked. 
+    The question asked is: {question}
+    The actual answer is: {actual_answer}
+    Below are the two responses:
+    ===
+    The first response is: {answer1}
+    ===
+    The second response is: {answer2}
+    ===
+    Provide the ranking of the responses in the following format:
+    [
+        {{
+            "response_id": 1,
+            "relevance_score": relevance_score
+        }},
+        {{
+            "response_id": 2,
+            "relevance_score": relevance_score
+        }}
+    ]
+    """,
 }
