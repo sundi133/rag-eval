@@ -6,8 +6,10 @@ from nltk.translate.bleu_score import sentence_bleu
 from nltk.translate.meteor_score import meteor_score
 from nltk.translate.rouge_score import rouge_n, rouge_l, rouge_w
 import nltk
-import random
 import json
+import argparse
+from typing import List
+import wandb
 
 # Make sure NLTK data is downloaded (required for METEOR and ROUGE)
 nltk.download("wordnet")
@@ -116,7 +118,8 @@ def evaluate_qa_data(**args) -> None:
         print(f"Answer: {answer}")
 
     question_ranking = []
-
+    ranked_endpoints = []
+    
     for entry in qa_data:
         question = entry.get("question", "")
         reference_answer = entry.get("answer", "")
