@@ -1,6 +1,4 @@
 import logging
-import pandas as pd
-import json
 import argparse
 from typing import List
 
