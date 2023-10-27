@@ -1,15 +1,13 @@
 import os
 import pandas as pd
-import os
 import json
-import requests
 import io
-import json
 import logging
 
 from langchain.chains import LLMChain
 from typing import List
-from processors.basefile import DataProcessor
+from .basefile import DataProcessor
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

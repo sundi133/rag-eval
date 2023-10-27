@@ -1,4 +1,3 @@
-from processors.basefile import DataProcessor
 import os
 import pandas as pd
 import random
@@ -7,6 +6,7 @@ import io
 import logging
 from typing import List
 from langchain.chains import LLMChain
+from .basefile import DataProcessor
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

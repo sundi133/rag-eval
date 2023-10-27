@@ -1,5 +1,3 @@
-from processors.basefile import DataProcessor
-import os
 import pandas as pd
 import os
 import io
@@ -7,7 +5,9 @@ import logging
 import json
 from typing import List
 from langchain.chains import LLMChain
+from .basefile import DataProcessor
 
+# TODO move to central logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
