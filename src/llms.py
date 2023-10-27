@@ -3,7 +3,7 @@ from langchain.chains.base import Chain
 from langchain.llms import BaseLLM
 from langchain.prompts import PromptTemplate
 
-from prompts import QuestionGeneratorPromptTemplate
+from .prompts import QuestionGeneratorPromptTemplate
 
 
 class QuestionGenerator(LLMChain):

@@ -1,18 +1,15 @@
 import os
 import pandas as pd
-import os
 import json
 import requests
 import io
-import json
 import logging
 
-from typing import List
 from langchain.chains import LLMChain
 from urllib.parse import urljoin
 from typing import List
 from bs4 import BeautifulSoup
-from processors.basefile import DataProcessor
+from .basefile import DataProcessor
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

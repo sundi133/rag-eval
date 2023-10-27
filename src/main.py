@@ -1,15 +1,10 @@
 import logging
 import argparse
-from typing import List
+import asyncio
 
-from langchain.chains import LLMChain
-from langchain.chains.base import Chain
-from langchain.llms import BaseLLM
-from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
-
-from utils import create_processor, create_processor_llm
-from llms import QuestionGenerator
+from typing import List
+from .utils import create_processor, create_processor_llm
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -19,15 +14,10 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-from typing import List
-from chat_openai import ChatOpenAI
-from data_processor import create_processor, create_processor_llm
-import logging
-
 logger = logging.getLogger(__name__)
 
 
-def generator(
+async def generator(
     data_path: str,
     number_of_questions: int,
     sample_size: int,
@@ -83,7 +73,7 @@ def generator(
         df, sample_size, products_group_size, group_columns
     )
 
-    qa_pairs = data_processor.generate_qa_pairs(
+    data_processor.generate_qa_pairs(
         randomized_samples,
         df,
         sample_size,
@@ -194,17 +184,19 @@ if __name__ == "__main__":
         }
     )
     # Call the generator function with the specified arguments
-    generator(
-        data_path,
-        number_of_questions,
-        sample_size,
-        products_group_size,
-        grouped_columns,
-        output_file,
-        model_name,
-        prompt_key_csv,
-        llm_type,
-        generator_type,
-        metadata_path,
-        crawl_depth,
+    asyncio.run(
+        generator(
+            data_path,
+            number_of_questions,
+            sample_size,
+            products_group_size,
+            grouped_columns,
+            output_file,
+            model_name,
+            prompt_key_csv,
+            llm_type,
+            generator_type,
+            metadata_path,
+            crawl_depth,
+        )
     )

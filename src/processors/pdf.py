@@ -1,9 +1,7 @@
-from processors.basefile import DataProcessor
 import os
 import pandas as pd
-import os
-import json
 from typing import List
+from .basefile import DataProcessor
 
 
 class PDFProcessor(DataProcessor):
