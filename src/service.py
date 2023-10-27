@@ -72,13 +72,13 @@ async def generator(
     )
     return JSONResponse(
         content={
-            "message": "Generator in progress, Use the /download-qa-validation-pairs/gen_id endpoint to check the status of the generator",
+            "message": "Generator in progress, Use the /download/ endpoint to check the status of the generator",
             "gen_id": gen_id,
         }
     )
 
 
-@app.get("/download-qa-pairs/{gen_id}")
+@app.get("/download/")
 async def download(gen_id: str):
     """
     Downloads a dataset with the given `gen_id` and returns a FileResponse object if the dataset exists.
@@ -108,7 +108,7 @@ async def ranking(
         await evaluate_qa_data(qa_data, endpoint_configs, wandb_log)
         return JSONResponse(
             content={
-                "message": "Ranker is complete, Use the /report/gen_id endpoint to download ranked reports for each question",
+                "message": "Ranker is complete, Use the /ranking endpoint to download evaluated ranked reports for each question",
                 "gen_id": gen_id,
             }
         )
@@ -116,7 +116,7 @@ async def ranking(
         return {"message": "Dataset with id {gen_id} not found"}
 
 
-@app.get("/report/{gen_id}")
+@app.get("/ranking/")
 async def download(gen_id: str):
     """
     Downloads a dataset with the given `gen_id` and returns a FileResponse object if the dataset exists.

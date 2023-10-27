@@ -45,14 +45,26 @@ Evaluating LLM applications on massive documents can be a daunting task, especia
 4. Generate Dataset for LLM + RAG Evaluation
     ```bash
     curl -X POST http://localhost:8000/generate/ \
-    -F "file=@example.txt" \
+    -F "file=@example.txt" \ 
     -F "description=my_file_to_ingest"
-    
-    {
+    ```
+    ```
+     {
         "message":"Generator in progress, Use the /download-qa-pairs/ endpoint to check the status of the generator",
         "gen_id":"f8e3670f5ff9440a84f93b00197ad697"
-    }
+    } 
     ```
+    Options:
+    - `--data_path`: The path to the input data file (e.g., CSV, TXT, PDF or HTML Page Link).
+    - `--number_of_questions`: The number of questions to generate.
+    - `--sample_size`: The sample size for selecting groups.
+    - `--products_group_size`: The minimum number of products per group.
+    - `--group_columns`: Columns to group by (e.g., "brand,sub_category,category,gender").
+    - `--output_file`: The path to the output JSON file where question-answer pairs will be saved.
+    - `--prompt_key`: The prompt key to be used 
+    - `--llm_type`: The class to use from llmchain extension 
+    - `--metadata_path`: The path to any metadata file
+    
 5. Download Dataset
     ```bash
     curl -OJ http://localhost:8000/download-qa-pairs/f8e3670f5ff9440a84f93b00197ad697
