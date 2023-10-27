@@ -22,7 +22,7 @@ Evaluating LLM applications on massive documents can be a daunting task, especia
 - Python (>=3.9)
 - Poetry (for dependency management)
  
-### Installation & Usage
+### Installation
 
 1. Clone this repository to your local machine:
 
@@ -42,21 +42,36 @@ Evaluating LLM applications on massive documents can be a daunting task, especia
     poetry run uvicorn src.service:app --host 0.0.0.0 --port 8000
     ```
 4. Generate Dataset for LLM + RAG Evaluation
-    ```bash 
-    curl -X POST -F "file=@example.txt" -F "description=my_file_to_ingest" http://localhost:8000/generate/
-    {"message":"Generator in progress, Use the /download-qa-validation-pairs endpoint to check the status of the generator","gen_id":"f8e3670f5ff9440a84f93b00197ad697"}
+    ```bash
+    curl -X POST http://localhost:8000/generate/ \
+    -F "file=@example.txt" \
+    -F "description=my_file_to_ingest"
+    
+    {
+        "message":"Generator in progress, Use the /download-qa-pairs/ endpoint to check the status of the generator",
+        "gen_id":"f8e3670f5ff9440a84f93b00197ad697"
+    }
     ```
 5. Download Dataset
     ```bash
     curl -OJ http://localhost:8000/download-qa-pairs/f8e3670f5ff9440a84f93b00197ad697
     ```
 
-6. Run LLM Evaluator
+6. Run LLM + RAG Evaluator
     ```bash
-    curl -X GET -F "gen_id=f8e3670f5ff9440a84f93b00197ad697" -F "llm_endpoint=https://your_dns_llm_app/" -F "wandb_log=True" http://localhost:8000/evaluate/
+    curl -X GET http://localhost:8000/evaluate/ \
+    -F "gen_id=f8e3670f5ff9440a84f93b00197ad697" \
+    -F "llm_endpoint=https://your_dns_llm_app/" \
+    -F "wandb_log=True" 
+    
+    {
+        "message":"Ranker is complete, Use the /report/gen_id endpoint to download ranked reports for each question",
+        "gen_id":"f8e3670f5ff9440a84f93b00197ad697"
+    }
+
     ```
 
-7. Download LLM Evaluator Report
+7. Download LLM + RAG Evaluator Report
     ```bash
     curl -OJ http://localhost:8000/report/f8e3670f5ff9440a84f93b00197ad697
     ```
@@ -136,6 +151,72 @@ In the provided command, we are generating 2 questions based on the `amazon_uk_s
 
 
 ```
+
+## Usage
+
+To generate question-answer pairs for a csv, use the following command:
+
+```bash
+poetry run python src/main.py \ 
+--data_path ./data/fixtures/amazon_uk_shoes_cleaned.csv \
+--number_of_questions 2 \
+--sample_size 3 \
+--products_group_size 3 \
+--group_columns "brand,sub_category,category,gender" \
+--output_file ./output/qa_sample.json
+```
+
+To generate training dataset for NER model training:
+``` bash 
+poetry run python src/main.py \
+--data_path ./data/fixtures/ner/train_ad_ids.ner \
+--number_of_questions 1 \
+--sample_size 20 \
+--products_group_size 3 \
+--group_columns "brand,sub_category,category,gender" \
+--output_file ./output/ner_ad_ids.json \
+--prompt_key prompt_key_ner \
+--llm_type ner \
+--metadata_path ./data/fixtures/ner/entities_ad_ids.json
+```
+
+To generate training dataset for readme documents:
+``` bash
+poetry run python src/main.py \
+--data_path https://docs.getjavelin.io/ \
+--number_of_questions 5 \
+--sample_size 10 \
+--llm_type ".html" \
+--generator_type text \
+--prompt_key prompt_key_blogpost \
+--crawl_depth 4 \
+--output_file ./output/qa_readme.json
+```
+
+To generate training dataset for blogs:
+``` bash
+poetry run python src/main.py \
+--data_path https://payfederate.ai/ais-new-frontier-payfederate-solves-pay-disparity-through-connected-compensation-systems/ \
+--number_of_questions 5 \
+--sample_size 10 \
+--llm_type ".html" \
+--generator_type text \
+--prompt_key prompt_key_blogpost \
+--crawl_depth 2 \
+--output_file ./output/qa_blog.json
+```
+
+### Command Options
+
+- `--data_path`: The path to the input data file (e.g., CSV, TXT, PDF).
+- `--number_of_questions`: The number of questions to generate.
+- `--sample_size`: The sample size for selecting groups.
+- `--products_group_size`: The minimum number of products per group.
+- `--group_columns`: Columns to group by (e.g., "brand,sub_category,category,gender").
+- `--output_file`: The path to the output JSON file where question-answer pairs will be saved.
+- `--prompt_key`: The prompt key to be used 
+- `--llm_type`: The class to use from llmchain extension 
+- `--metadata_path`: The path to any metadata file
 
 ## Linter
 ```bash
