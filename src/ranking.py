@@ -6,11 +6,9 @@ import logging
 
 from nltk.translate.bleu_score import sentence_bleu
 from nltk.translate.bleu_score import SmoothingFunction
-from nltk.translate.bleu_score import corpus_bleu
-from nltk.translate.bleu_score import sentence_bleu
-from nltk.translate.bleu_score import sentence_bleu
-from nltk.translate.meteor_score import meteor_score
-from nltk.translate.rouge_score import rouge_n, rouge_l, rouge_w
+from nltk.translate.meteor_score import single_meteor_score
+from rouge_score import rouge_scorer
+
 from typing import List
 from .utils import read_endpoint_configurations, read_qa_data, get_llm_answer
 
@@ -59,6 +57,7 @@ async def evaluate_qa_data(
 
     question_ranking = []
     ranked_endpoints = []
+    scorer = rouge_scorer.RougeScorer(["rouge1", "rougeL"], use_stemmer=True)
 
     for entry in qa_data:
         question = entry.get("question", "")
@@ -76,17 +75,22 @@ async def evaluate_qa_data(
             candidate_tokens = nltk.word_tokenize(candidate.lower())
 
             # Calculate BLEU score
-            bleu_score = sentence_bleu(
+            bleu_score_val = sentence_bleu(
                 [reference_answer_tokens],
                 candidate_tokens,
                 smoothing_function=SmoothingFunction().method4,
-            )
+            ).round(4)
 
             # Calculate ROUGE-L score
-            rouge_l_score = rouge_l([reference_answer], [candidate])
+            rouge_l_score_val = round(
+                scorer.score(reference_answer, candidate)["rougeL"].fmeasure, 4
+            )
 
             # Calculate METEOR score
-            meteor_score = meteor_score([reference_answer], candidate)
+            meteor_score_val = round(
+                single_meteor_score(reference_answer.split(" "), candidate.split(" ")),
+                4,
+            )
 
             question_ranking.append(
                 {
@@ -94,9 +98,9 @@ async def evaluate_qa_data(
                     "url": endpoint_config["url"],
                     "question": question,
                     "answer": reference_answer,
-                    "rouge_l_score": rouge_l_score,
-                    "bleu_score": bleu_score,
-                    "meteor_score": meteor_score,
+                    "rouge_l_score": rouge_l_score_val,
+                    "bleu_score": bleu_score_val,
+                    "meteor_score": meteor_score_val,
                 }
             )
 
