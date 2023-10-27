@@ -21,8 +21,9 @@ Evaluating LLM applications on massive documents can be a daunting task, especia
 
 - Python (>=3.9)
 - Poetry (for dependency management)
+- Docker (>=4.25.0)
  
-### Installation
+### Installation & Usage
 
 1. Clone this repository to your local machine:
 
@@ -39,7 +40,7 @@ Evaluating LLM applications on massive documents can be a daunting task, especia
  
  3. Start service
     ```bash 
-    poetry run uvicorn src.service:app --host 0.0.0.0 --port 8000
+    docker compose up --build
     ```
 4. Generate Dataset for LLM + RAG Evaluation
     ```bash

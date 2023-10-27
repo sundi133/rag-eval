@@ -1,5 +1,6 @@
 import os
 import uuid
+import asyncio
 
 from .main import generator
 from .utils import (
@@ -10,7 +11,7 @@ from .utils import (
 )
 from .ranking import evaluate_qa_data
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile, WebSocket
 from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
 
@@ -129,3 +130,11 @@ async def download(gen_id: str):
         )
     else:
         return {"message": "Ranked dataset not found"}
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    for i in range(10):
+        await websocket.send_text(f"Streamed message {i}")
+        await asyncio.sleep(1)  # Simulate a delay between messages
