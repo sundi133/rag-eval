@@ -18,84 +18,130 @@ This project is a tool for generating question-answer pairs based on provided da
 Evaluating LLM applications on massive documents can be a daunting task, especially when you don't have the right evaluation dataset. The quality and relevance of your dataset can significantly impact the accuracy of your LLM app evaluations for production deploy. Manual dataset creation & versioning can be time-consuming and error-prone, leading to inaccurate results.
 
 ### Prerequisites
-
 - Python (>=3.9)
 - Poetry (for dependency management)
 - Docker (>=4.25.0)
- 
-### Installation & Usage
 
-1. Clone this repository to your local machine:
+### API EndPoints
+These endpoints allow you to handle generation, fetch, evaluation, ranking & reporting
+
+* POST
+/generate/
+/evaluate/{id}
+
+* GET
+/download/{id}/
+/report/{id}/
+
+
+# Installation & Usage
+
+### 1. Clone this repository to your local machine:
 
    ```bash
    git clone https://github.com/sundi133/llm-datacraft.git
    cd question-answer-generator
    ```
 
-2. Install the required dependencies using Poetry:
+### 2. Install the required dependencies using Poetry:
 
    ```bash
    poetry install
    ```
  
- 3. Start service
+### 3. Start service
     ```bash 
     docker compose up --build
     ```
-4. Generate Dataset for LLM + RAG Evaluation
-    ```bash
-    curl -X POST http://localhost:8000/generate/ \
-    -F "file=@example.txt" \ 
-    -F "description=my_file_to_ingest"
-    ```
-    ```
-     {
-        "message":"Generator in progress, Use the /download-qa-pairs/ endpoint to check the status of the generator",
-        "gen_id":"f8e3670f5ff9440a84f93b00197ad697"
-    } 
-    ```
-    Options:
-    - `--data_path`: The path to the input data file (e.g., CSV, TXT, PDF or HTML Page Link).
-    - `--number_of_questions`: The number of questions to generate.
-    - `--sample_size`: The sample size for selecting groups.
-    - `--products_group_size`: The minimum number of products per group.
-    - `--group_columns`: Columns to group by (e.g., "brand,sub_category,category,gender").
-    - `--output_file`: The path to the output JSON file where question-answer pairs will be saved.
-    - `--prompt_key`: The prompt key to be used 
-    - `--llm_type`: The class to use from llmchain extension 
-    - `--metadata_path`: The path to any metadata file
-    
-5. Download Dataset
-    ```bash
-    curl -OJ http://localhost:8000/download-qa-pairs/f8e3670f5ff9440a84f93b00197ad697
-    ```
 
-6. Run LLM + RAG Evaluator
-    ```bash
-    curl -X GET http://localhost:8000/evaluate/ \
-    -F "gen_id=f8e3670f5ff9440a84f93b00197ad697" \
-    -F "llm_endpoint=https://your_dns_llm_app/" \
-    -F "wandb_log=True" 
-    
-    {
-        "message":"Ranker is complete, Use the /report/gen_id endpoint to download ranked reports for each question",
-        "gen_id":"f8e3670f5ff9440a84f93b00197ad697"
-    }
+### 4. Generate Dataset for LLM + RAG Evaluation
 
-    ```
+### Parameters
 
-7. Download LLM + RAG Evaluator Report
-    ```bash
-    curl -OJ http://localhost:8000/report/f8e3670f5ff9440a84f93b00197ad697
-    ```
+|      Name           |   Required   |  Type   | Description                                                                                                              |
+| ------------------- |:------------:|:-------:| ------------------------------------------------------------ |
+| `file`              |   required   |  file   | The input data file (e.g., CSV, TXT, PDF, or HTML Page Link). |
+| `description`       |   required   | string  | A description for the file to be ingested.                  |
+
+### Request Example
+
+```bash
+curl -X POST http://localhost:8000/generate/ \
+-F "file=@example.txt" \
+-F "description=my_file_to_ingest"
+```
+
+### Response Example
+
+```
+{
+    "message": "Generator in progress, Use the /download-qa-pairs/ endpoint to check the status of the generator",
+    "gen_id": "f8e3670f5ff9440a84f93b00197ad697"
+}
+```
+
+### 5. Download Dataset
+
+### Parameters
+
+|      Name  |   Required   |   Type   | Description                            |
+| ----------- |:------------:|:--------:| -------------------------------------- |
+| `gen_id`    |   required   |  string  | The unique ID of the generated dataset. |
+
+### Request Example
+
+```bash
+curl -OJ http://localhost:8000/download/f8e3670f5ff9440a84f93b00197ad697
+```
+
+### 6. Run LLM + RAG Evaluator
+
+### Parameters
+
+|           Name  |   Required   |  Type   | Description                                |
+| --------------- |:------------:|:-------:| ------------------------------------------ |
+| `gen_id`        |   required   | string  | The unique ID of the generated dataset.     |
+| `llm_endpoint`  |   required   | string  | The endpoint for the LLM (Language Model). |
+| `wandb_log`     |   optional   | boolean | Whether to log using WandB.                 |
+
+### Request Example
+
+```bash
+curl -X GET http://localhost:8000/evaluate/ \
+-F "gen_id=f8e3670f5ff9440a84f93b00197ad697" \
+-F "llm_endpoint=http://localhost:8001/chat/" \
+-F "wandb_log=True"
+```
+
+### Response Example
+
+```
+{
+    "message": "Ranker is complete, Use the /report/gen_id endpoint to download ranked reports for each question",
+    "gen_id": "f8e3670f5ff9440a84f93b00197ad697"
+}
+```
+
+### 7. Download LLM + RAG Evaluator Report
+
+### Parameters
+
+|      Name  |   Required   |   Type   | Description                        |
+| ----------- |:------------:|:--------:| ---------------------------------- |
+| `gen_id`    |   required   |  string  | The unique ID of the generated report. |
+
+### Request Example
+
+```bash
+curl -OJ http://localhost:8000/report/f8e3670f5ff9440a84f93b00197ad697
+```
 
 
-
-### Example QA Datasets that are generated
+## Example QA Datasets that are generated
 
 In the provided command, we are generating 2 questions based on the `amazon_uk_shoes_cleaned.csv` data file. We are using a sample size of 3 and require a minimum of 3 products per group to generate questions. The questions will be grouped by the columns "brand," "sub_category," "category," and "gender," and the results will be saved to `qa_sample.json` in the `output` directory.
 
-##### Example pair of QA dataset generated from the input file of type csv with a sample product catalog
+**Example pair of QA dataset generated from the input file of type csv with a sample product catalog**
 
 ```
 {
@@ -129,7 +175,7 @@ In the provided command, we are generating 2 questions based on the `amazon_uk_s
 }
 ```
 
-##### Example pair of QA dataset generated from the input of type readme online docs along with links
+**Example pair of QA dataset generated from the input of type readme online docs along with links**
 
 ```
 {

@@ -95,7 +95,7 @@ async def download(gen_id: str):
 
 
 @app.get("/evaluate/")
-async def ranking(
+async def evaluate(
     gen_id: str = "",
     llm_endpoint: str = "",
     wandb_log: bool = False,
@@ -117,7 +117,7 @@ async def ranking(
 
 
 @app.get("/ranking/")
-async def download(gen_id: str):
+async def ranked_reports(gen_id: str):
     """
     Downloads a dataset with the given `gen_id` and returns a FileResponse object if the dataset exists.
     If the dataset does not exist, returns a dictionary with a "message" key and a corresponding error message.
