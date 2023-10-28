@@ -1,0 +1,6 @@
+version: '3'
+services:
+  llm-rag-app-2:
+    build: .
+    ports:
+      - "8002:8002"

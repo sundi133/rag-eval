@@ -1,0 +1,8 @@
+version: '3'
+services:
+  llm-rag-app-1:
+    build: .
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
