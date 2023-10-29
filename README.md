@@ -17,24 +17,28 @@ This project is a tool for generating question-answer pairs based on provided da
 
 Evaluating LLM applications on massive documents can be a daunting task, especially when you don't have the right evaluation dataset. The quality and relevance of your dataset can significantly impact the accuracy of your LLM app evaluations for production deploy. Manual dataset creation & versioning can be time-consuming and error-prone, leading to inaccurate results.
 
-### Prerequisites
+## Prerequisites
 - Python (>=3.9)
 - Poetry (for dependency management)
 - Docker (>=4.25.0)
 
-### API EndPoints
+## API EndPoints
 These endpoints allow you to handle generation, fetch, evaluation, ranking & reporting
 
-* POST
- -- /generate/
- -- /evaluate/{id}
+#### POST
+```bash
+* /generate/
+* /evaluate/{id}
+```
 
-* GET
- -- /download/{id}/
- -- /report/{id}/
+#### GET
+```bash
+* /download/{id}/
+* /report/{id}/
+```
 
 
-# Installation & Usage
+## Installation & Usage
 
 ### 1. Clone this repository to your local machine:
 
