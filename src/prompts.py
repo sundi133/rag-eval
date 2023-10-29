@@ -266,6 +266,7 @@ QuestionGeneratorPromptTemplate = {
         4. make sure the questions are crisp and short and attention grabbing
         5. make sure the answers are relevant to the questions
         6. Do not generate fake questions and answers
+        7. If the content is less then 10 words, generate a empty list
 
         [ Generate each question and the relevant answer based on the documentation available in json format with following format:
             [

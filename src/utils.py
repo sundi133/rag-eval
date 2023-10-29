@@ -1,4 +1,6 @@
 import json
+import requests
+import logging
 
 from .processors.basefile import DataProcessor
 from .processors.csv import CSVProcessor
@@ -11,6 +13,13 @@ from .processors.basefile import DataProcessor
 from .llms import QuestionGenerator, NERGenerator
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 llm_type_processor_mapping = {
     ".csv": CSVProcessor,
@@ -110,7 +119,7 @@ def score_answer(question: str, answer: str, endpoint_answer: str) -> float:
     pass
 
 
-def get_llm_answer(question: str, endpoint_config: str) -> str:
+async def get_llm_answer(question: str, endpoint_config: str) -> str:
     """
     This function takes a question and an endpoint configuration as input and returns an answer.
 
@@ -121,4 +130,17 @@ def get_llm_answer(question: str, endpoint_config: str) -> str:
     Returns:
         str: The answer to the input question.
     """
-    pass
+
+    url = endpoint_config["url"]
+    headers = {"Content-Type": "application/json"}
+    data = {"query": f"{question}"}
+    logging.info(f"URL: {url}")
+    logging.info(f"Headers: {headers}")
+    logging.info(f"Data: {data}")
+
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+
+    if response.status_code == 200:
+        return response
+    else:
+        return ""

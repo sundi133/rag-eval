@@ -1,62 +1,80 @@
 import os
 import uuid
 import asyncio
+import logging
 
-from .main import generator
+from typing import List
+from .main import qa_generator
 from .utils import (
     read_qa_data,
     read_endpoint_configurations,
     score_answer,
     get_llm_answer,
 )
+from pydantic import BaseModel, ValidationError
+from fastapi.encoders import jsonable_encoder
+from fastapi import status
 from .ranking import evaluate_qa_data
-
-from fastapi import FastAPI, File, Form, UploadFile, WebSocket
+from fastapi import FastAPI, File, Form, UploadFile, WebSocket, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 app = FastAPI()
-upload_directory = "qa_generator_uploads"
-output_directory = "qa_generator_outputs"
+upload_directory = "/app/qa_generator_uploads"
+output_directory = "/app/qa_generator_outputs"
+if not os.path.exists(upload_directory):
+    os.makedirs(upload_directory)
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
 
 
 @app.get("/")
-def health():
+def root():
     return {"status": "ok"}
+
+
+@app.get("/health/")
+def health():
+    return {"status": "pong"}
 
 
 @app.post("/generate/")
 async def generator(
-    file: UploadFile = File(...),
-    data_path: str = "",
-    number_of_questions: int = 10,
-    sample_size: int = 10,
-    products_group_size: int = 3,
-    group_columns: str = "brand,sub_category,category,gender",
-    model_name: str = "gpt-3.5-turbo",
-    prompt_key: str = "prompt_key_readme",
-    llm_type: str = ".txt",
-    generator_type: str = "text",
-    metadata_path: str = "",
-    crawl_depth: int = 2,
+    data_path: str = Form(default="", max_length=1000, min_length=0),
+    number_of_questions: int = Form(default=2, ge=1, le=1000),
+    sample_size: int = Form(default=2, ge=1, le=1000),
+    products_group_size: int = Form(default=2, ge=1, le=1000),
+    group_columns: str = Form(default="brand,sub_category,category,gender"),
+    model_name: str = Form(default="gpt-3.5-turbo"),
+    prompt_key: str = Form(default="prompt_key_readme"),
+    llm_type: str = Form(default=".txt"),
+    generator_type: str = Form(default="text"),
+    metadata: str = Form(default=""),
+    crawl_depth: int = Form(default=2, ge=1, le=10),
+    file: List[UploadFile] = File(...),
 ):
-    # Create the uploads directory if it doesn't exist
-    if not os.path.exists(upload_directory):
-        os.makedirs(upload_directory)
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
-
-    # Save the uploaded file
-    with open(os.path.join(upload_directory, file.filename), "wb") as f:
-        f.write(file.file.read())
-
-    if data_path == "":
-        data_path = os.path.join(upload_directory, file.filename)
-
+    if file[0] and hasattr(file[0], "filename"):
+        with open(os.path.join(upload_directory, file[0].filename), "wb") as f:
+            file_content = await file[0].read()
+            f.write(file_content)
+        if data_path == "":  # non empty if html links are provided
+            data_path = os.path.join(upload_directory, file[0].filename)
+    else:
+        return {"message": "No file provided"}
+    logger.info(f"Data path: {data_path}")
+    logger.info(f"Number of questions: {number_of_questions}")
+    logger.info(f"Sample size: {sample_size}")
     gen_id = uuid.uuid4().hex
-    output_file = os.path.join(output_directory, f"{gen_id}.txt")
-
-    await generator(
+    output_file = os.path.join(output_directory, f"{gen_id}.json")
+    logger.info(f"Output file: {output_file}")
+    await qa_generator(
         data_path,
         number_of_questions,
         sample_size,
@@ -67,7 +85,7 @@ async def generator(
         prompt_key,
         llm_type,
         generator_type,
-        metadata_path,
+        metadata,
         crawl_depth,
     )
     return JSONResponse(
@@ -78,13 +96,14 @@ async def generator(
     )
 
 
-@app.get("/download/")
+@app.get("/download/{gen_id}")
 async def download(gen_id: str):
     """
     Downloads a dataset with the given `gen_id` and returns a FileResponse object if the dataset exists.
     If the dataset does not exist, returns a dictionary with a "message" key and a corresponding error message.
     """
-    output_file = os.path.join(output_directory, f"{gen_id}.txt")
+    output_file = os.path.join(output_directory, f"{gen_id}.json")
+    logger.info(f"Output file: {output_file}")
     if os.path.exists(output_file):
         return FileResponse(
             output_file,
@@ -94,21 +113,25 @@ async def download(gen_id: str):
         return {"message": "Dataset not found"}
 
 
-@app.get("/evaluate/")
+@app.post("/evaluate/")
 async def evaluate(
-    gen_id: str = "",
-    llm_endpoint: str = "",
-    wandb_log: bool = False,
+    gen_id: str = Form(...),
+    llm_endpoint: str = Form(...),
+    log_wandb: bool = Form(default=False),
 ):
-    output_file = os.path.join(output_directory, f"{gen_id}.txt")
-    if os.path.exists(output_file):
-        # write code to rank the questions based on endpoint response for each question in the json file
-        qa_data = read_qa_data(output_file)
-        endpoint_configs = read_endpoint_configurations(llm_endpoint)
-        await evaluate_qa_data(qa_data, endpoint_configs, wandb_log)
+    if not gen_id:
+        raise HTTPException(status_code=400, detail="gen_id is required")
+
+    qa_file = os.path.join(output_directory, f"{gen_id}.json")
+    logger.info(f"Output file: {qa_file}")
+
+    if os.path.exists(qa_file) and os.path.getsize(qa_file) > 0:
+        endpoint_configs = [{"name": f"llm-f{gen_id}", "url": llm_endpoint}]
+        output_file = os.path.join(output_directory, f"ranked_{gen_id}.json")
+        await evaluate_qa_data(qa_file, endpoint_configs, log_wandb, output_file)
         return JSONResponse(
             content={
-                "message": "Ranker is complete, Use the /ranking endpoint to download evaluated ranked reports for each question",
+                "message": "Ranker is complete, Use the /ranking/id endpoint to download evaluated ranked reports for each question",
                 "gen_id": gen_id,
             }
         )
@@ -116,13 +139,13 @@ async def evaluate(
         return {"message": "Dataset with id {gen_id} not found"}
 
 
-@app.get("/ranking/")
+@app.get("/ranking/{gen_id}")
 async def ranked_reports(gen_id: str):
     """
     Downloads a dataset with the given `gen_id` and returns a FileResponse object if the dataset exists.
     If the dataset does not exist, returns a dictionary with a "message" key and a corresponding error message.
     """
-    output_file = os.path.join(output_directory, f"ranked_{gen_id}.txt")
+    output_file = os.path.join(output_directory, f"ranked_{gen_id}.json")
     if os.path.exists(output_file):
         return FileResponse(
             output_file,
