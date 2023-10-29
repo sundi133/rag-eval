@@ -17,7 +17,7 @@ logger.addHandler(ch)
 logger = logging.getLogger(__name__)
 
 
-async def generator(
+async def qa_generator(
     data_path: str,
     number_of_questions: int,
     sample_size: int,
@@ -51,7 +51,7 @@ async def generator(
     llm_openai_gpt4 = ChatOpenAI(
         temperature=0,
         model=model_name,
-        request_timeout=120,
+        request_timeout=30,
     )
 
     logger.info("Starting Question Generator")
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     )
     # Call the generator function with the specified arguments
     asyncio.run(
-        generator(
+        qa_generator(
             data_path,
             number_of_questions,
             sample_size,

@@ -26,12 +26,12 @@ Evaluating LLM applications on massive documents can be a daunting task, especia
 These endpoints allow you to handle generation, fetch, evaluation, ranking & reporting
 
 * POST
-/generate/
-/evaluate/{id}
+ -- /generate/
+ -- /evaluate/{id}
 
 * GET
-/download/{id}/
-/report/{id}/
+ -- /download/{id}/
+ -- /report/{id}/
 
 
 # Installation & Usage
@@ -67,9 +67,21 @@ These endpoints allow you to handle generation, fetch, evaluation, ranking & rep
 
 ```bash
 curl -X POST http://localhost:8000/generate/ \
--F "file=@example.txt" \
--F "description=my_file_to_ingest"
+  -F "file=@example.txt" \
+  -F "number_of_questions=3" \
+  -F "name=3"
 ```
+### Command Options Available
+
+- `--data_path`: The path to the input data file (e.g., CSV, TXT, PDF or HTML Links).
+- `--number_of_questions`: The number of questions to generate.
+- `--sample_size`: The sample size for selecting groups.
+- `--products_group_size`: The minimum number of products per group.
+- `--group_columns`: Columns to group by (e.g., "brand,sub_category,category,gender").
+- `--output_file`: The path to the output JSON file where question-answer pairs will be saved.
+- `--prompt_key`: The prompt key to be used 
+- `--llm_type`: The class to use from llmchain extension 
+- `--metadata`: The path to any metadata file
 
 ### Response Example
 

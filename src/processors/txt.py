@@ -63,51 +63,67 @@ class TXTProcessor(DataProcessor):
         qa_generator: LLMChain,
     ) -> None:
         for _index, group_row in randomized_samples.iterrows():
-            # conver each row to a pd dataframe
-            filtered_dataframes = []
-            row_df = pd.DataFrame([group_row])
-            filtered_dataframes.append(row_df)
-
-            # Combine the filtered DataFrames into a single DataFrame
-            combined_filtered_df = pd.concat(filtered_dataframes, ignore_index=True)
-
-            # Initialize a CSV buffer for writing
-            csv_buffer = io.StringIO()
-
-            # Write the DataFrame to the CSV buffer
-            combined_filtered_df.to_csv(csv_buffer, index=False, header=True)
-
-            # Get the CSV string from the buffer
-            records = csv_buffer.getvalue()
-
-            # Close the buffer (optional)
-            csv_buffer.close()
-
-            qa_pair = qa_generator.run(
-                products=records,
-                number_of_questions=number_of_questions,
+            logger.info(
+                {
+                    "message": "Generating question",
+                    "group_row": _index,
+                }
             )
+            try:
+                # conver each row to a pd dataframe
+                filtered_dataframes = []
+                row_df = pd.DataFrame([group_row])
+                filtered_dataframes.append(row_df)
 
-            # Log generated questions
-            # logger.debug(
-            #     {
-            #         "message": "Generated question & answer pair",
-            #         "questions": qa_pair,
-            #     }
-            # )
+                # Combine the filtered DataFrames into a single DataFrame
+                combined_filtered_df = pd.concat(filtered_dataframes, ignore_index=True)
 
-            # Split questions by newline and process each question
-            question_array = json.loads(qa_pair)
+                # Initialize a CSV buffer for writing
+                csv_buffer = io.StringIO()
 
-            for record in question_array:
-                # Log each generated question
+                # Write the DataFrame to the CSV buffer
+                combined_filtered_df.to_csv(csv_buffer, index=False, header=True)
+
+                # Get the CSV string from the buffer
+                records = csv_buffer.getvalue()
+
+                # Close the buffer (optional)
+                csv_buffer.close()
+
+                if len(records) < 20:
+                    continue
+
+                qa_pair = qa_generator.run(
+                    products=records,
+                    number_of_questions=number_of_questions,
+                )
+
+                # Split questions by newline and process each question
+                question_array = json.loads(qa_pair)
                 logger.info(
                     {
-                        "message": "Generated question",
-                        "question_answer": record,
+                        "message": "Generated question & answer pair length",
+                        "questions": len(question_array),
                     }
                 )
-                self.add_output_sample(record)
+                for record in question_array:
+                    # Log each generated question
+                    logger.info(
+                        {
+                            "message": "Generated question",
+                            "question_answer": record,
+                        }
+                    )
+                    self.add_output_sample(record)
+
+            except Exception as e:
+                logger.error(
+                    {
+                        "message": "Error generating question",
+                        "error": str(e),
+                    }
+                )
+                continue
         return self.qa_dict
 
     def add_output_sample(self, record: json) -> None:
@@ -119,5 +135,11 @@ class TXTProcessor(DataProcessor):
         )
 
     def write(self, file_path: str) -> None:
+        logger.info(
+            {
+                "message": "Writing generated questions to file",
+                "file_path": file_path,
+            }
+        )
         with open(file_path, "w") as output_file:
             json.dump(self.qa_array, output_file, indent=4)
