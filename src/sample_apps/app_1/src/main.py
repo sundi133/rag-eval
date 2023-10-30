@@ -4,8 +4,7 @@ import uvicorn
 import os
 
 from .data import Query
-from fastapi import FastAPI
-
+from fastapi import FastAPI, Form
 
 DATAPATH = os.environ.get("DATAPATH", "fixtures/data.txt")
 PORT = os.environ.get("PORT", 8001)
@@ -36,12 +35,18 @@ async def generate_response_with_retrieval_augmentation(query):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            {
+                "role": "system", 
+                "content": "You are a helpful assistant."
+            },
             {
                 "role": "user",
-                "content": "Generate a response to the following query based on the retrieved text:",
+                "content": f"Generate a response to the following query {query}  based on the retrieved text:",
             },
-            {"role": "assistant", "content": "\n".join(retrieved_text)},
+            {
+                "role": "assistant", 
+                "content": "\n".join(retrieved_text)
+            },
         ],
         temperature=0.1,
         max_tokens=2048,
@@ -75,15 +80,17 @@ def process_data(file_path):
 
 
 @app.post("/chat/")
-async def generate_response(query_data: Query):
-    query = query_data.query
-
+async def generate_response(
+    query: str = Form(...)
+):
+    print(query)
     response = await generate_response_with_retrieval_augmentation(query)
-
     return response
 
-
-process_data(DATAPATH)
+@app.post("/ping/")
+async def ping():
+    process_data(DATAPATH)
+    return {"status": "pong"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=PORT)

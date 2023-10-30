@@ -43,8 +43,8 @@ These endpoints allow you to handle generation, fetch, evaluation, ranking & rep
 ### 1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/sundi133/llm-datacraft.git
-   cd question-answer-generator
+   git clone https://github.com/sundi133/openeval.git
+   cd openeval
    ```
 
 ### 2. Install the required dependencies using Poetry:
@@ -54,9 +54,9 @@ These endpoints allow you to handle generation, fetch, evaluation, ranking & rep
    ```
  
 ### 3. Start service
-    ```bash 
-    docker compose up --build
-    ```
+```bash
+docker compose up --build
+```
 
 ### 4. Generate Dataset for LLM + RAG Evaluation
 
@@ -125,7 +125,7 @@ curl -OJ http://localhost:8000/download/f8e3670f5ff9440a84f93b00197ad697
 ```bash
 curl -X GET http://localhost:8000/evaluate/ \
 -F "gen_id=f8e3670f5ff9440a84f93b00197ad697" \
--F "llm_endpoint=http://localhost:8001/chat/" \
+-F "llm_endpoint=http://llm-rag-app-1:8001/chat/" \
 -F "wandb_log=True"
 ```
 
@@ -149,15 +149,72 @@ curl -X GET http://localhost:8000/evaluate/ \
 ### Request Example
 
 ```bash
-curl -OJ http://localhost:8000/report/f8e3670f5ff9440a84f93b00197ad697
+curl -OJ  http://localhost:8000/ranking/f8e3670f5ff9440a84f93b00197ad697  
 ```
 
 
-## Example QA Datasets that are generated
+## Sample ranking with evaluation scores
+```bash
+[  
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "Where can I find the Wikipedia page about John Doe?",
+        "expected_response": "You can find the Wikipedia page about John Doe by visiting the following link: https://en.wikipedia.org/wiki/John_Doe",
+        "endpoint_response": "\"You can find the Wikipedia page about John Doe by searching for his name on the Wikipedia website.\"",
+        "rouge_l_score": 0.6153846153846153,
+        "bleu_score": 0.44323796909955787,
+        "meteor_score": 0.6326797385620915
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What kind of information can I expect to find on the Wikipedia page about John Doe?",
+        "expected_response": "The Wikipedia page about John Doe contains details about his personal life, career, accomplishments, and any significant events or controversies related to him.",
+        "endpoint_response": "\"On the Wikipedia page about John Doe, you can expect to find a variety of information about him. This may include his personal background, such as his birthdate, place of birth, and family information. It may also provide details about his education, career, and notable achievements. Additionally, the page may cover his involvement in any significant events or contributions to a particular field. Furthermore, you can expect to find information about his public image, including any controversies or criticisms associated with him. The page may also include references and external links for further reading and verification of the information provided.\"",
+        "rouge_l_score": 0.2764227642276423,
+        "bleu_score": 0.08875250765948056,
+        "meteor_score": 0.3804238549081112
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What is the purpose of the readme file?",
+        "expected_response": "The readme file provides information about the content and instructions for using the test file.",
+        "endpoint_response": "\"The purpose of the readme file is to provide important information and instructions about a particular project or software. It typically includes details about the project's purpose, installation instructions, usage guidelines, and any additional resources or dependencies required. The readme file serves as a helpful guide for users and developers to understand and navigate the project effectively.\"",
+        "rouge_l_score": 0.273972602739726,
+        "bleu_score": 0.032836768734999404,
+        "meteor_score": 0.35769628099173556
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What is the content of the Wikipedia page about John Doe?",
+        "expected_response": "The Wikipedia page about John Doe provides information about his background, achievements, and notable contributions.",
+        "endpoint_response": "\"I'm sorry, but as an AI assistant, I don't have the ability to retrieve specific information from the internet in real-time. However, you can easily find the content of the Wikipedia page about John Doe by searching for \\\"John Doe Wikipedia\\\" on any search engine. This will direct you to the actual Wikipedia page where you can read all the information about John Doe.\"",
+        "rouge_l_score": 0.19512195121951217,
+        "bleu_score": 0.07027194436347371,
+        "meteor_score": 0.31721105527638194
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "Is there any specific format or structure for the test file?",
+        "expected_response": "The readme file does not mention any specific format or structure for the test file.",
+        "endpoint_response": "\"Yes, there is typically a specific format or structure for a test file. The format and structure may vary depending on the specific testing framework or tool being used. It is important to follow the guidelines provided by the testing framework or tool to ensure that the test file is correctly formatted and structured. This may include specifying the test cases, input data, expected results, and any necessary setup or teardown steps. It is recommended to refer to the documentation or guidelines of the testing framework or tool for more specific information on the required format and structure of the test file.\"",
+        "rouge_l_score": 0.15384615384615385,
+        "bleu_score": 0.053436696733189626,
+        "meteor_score": 0.3113279418659166
+    }
+]
+```
+
+
+## Sample QA Datasets that are generated
 
 In the provided command, we are generating 2 questions based on the `amazon_uk_shoes_cleaned.csv` data file. We are using a sample size of 3 and require a minimum of 3 products per group to generate questions. The questions will be grouped by the columns "brand," "sub_category," "category," and "gender," and the results will be saved to `qa_sample.json` in the `output` directory.
 
-**Example pair of QA dataset generated from the input file of type csv with a sample product catalog**
+**Sample pair of QA dataset generated from the input file of type csv with a sample product catalog**
 
 ```
 {
@@ -180,18 +237,9 @@ In the provided command, we are generating 2 questions based on the `amazon_uk_s
 "answer": "The outer sole of Laredo Men's Wanderer Boot is made of manmade material."
 }
 
-{
-"question": "What promotions are currently available for the Saucony Women Sports Shoes Jazz Original Vintage Blue?",
-"answer": "The Saucony Women Sports Shoes Jazz Original Vintage Blue is currently on sale with a 25% discount."
-}
-
-{
-"question": "What are the features of the Saucony Women's Jazz Original Trainers?",
-"answer": "The Saucony Women's Jazz Original Trainers have a leather outer material, rubber sole, lace-up closure, and a flat heel type."
-}
 ```
 
-**Example pair of QA dataset generated from the input of type readme online docs along with links**
+**Sample pair of QA dataset generated from the input of type readme online docs along with links**
 
 ```
 {
@@ -217,13 +265,6 @@ In the provided command, we are generating 2 questions based on the `amazon_uk_s
 "answer":"The documentation does not provide specific information on how Javelin handles load balancing.",
 "url":"https://docs.getjavelin.io/docs/javelin-core/loadbalancing#__docusaurus_skipToContent_fallback"
 }
-
-{
-"question":"What can Javelin do?",
-"answer":"Javelin can send requests to models and retrieve responses based on the configured policies and route configurations.",
-"url":"https://docs.getjavelin.io/docs/javelin-core/integration#llm-response"
-}
-
 
 ```
 

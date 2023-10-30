@@ -1,0 +1,62 @@
+[
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "Are there any additional resources or references mentioned in the readme file?",
+        "expected_response": "The readme file does not mention any additional resources or references.",
+        "endpoint_response": "\"Based on the retrieved text, it does not mention any additional resources or references in the readme file.\"",
+        "rouge_l_score": 0.6206896551724137,
+        "bleu_score": 0.38305978177479755,
+        "meteor_score": 0.7650100242692836
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "Where can I find the Wikipedia page about John Doe?",
+        "expected_response": "You can find the Wikipedia page about John Doe by visiting the following link: https://en.wikipedia.org/wiki/John_Doe",
+        "endpoint_response": "\"You can find the Wikipedia page about John Doe by searching for his name on the Wikipedia website.\"",
+        "rouge_l_score": 0.6153846153846153,
+        "bleu_score": 0.44323796909955787,
+        "meteor_score": 0.6326797385620915
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What kind of information can I expect to find on the Wikipedia page about John Doe?",
+        "expected_response": "The Wikipedia page about John Doe contains details about his personal life, career, accomplishments, and any significant events or controversies related to him.",
+        "endpoint_response": "\"On the Wikipedia page about John Doe, you can expect to find a variety of information about him. This may include his personal background, such as his birthdate, place of birth, and family information. It may also provide details about his education, career, and notable achievements. Additionally, the page may cover his involvement in any significant events or contributions to a particular field. Furthermore, you can expect to find information about his public image, including any controversies or criticisms associated with him. The page may also include references and external links for further reading and verification of the information provided.\"",
+        "rouge_l_score": 0.2764227642276423,
+        "bleu_score": 0.08875250765948056,
+        "meteor_score": 0.3804238549081112
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What is the purpose of the readme file?",
+        "expected_response": "The readme file provides information about the content and instructions for using the test file.",
+        "endpoint_response": "\"The purpose of the readme file is to provide important information and instructions about a particular project or software. It typically includes details about the project's purpose, installation instructions, usage guidelines, and any additional resources or dependencies required. The readme file serves as a helpful guide for users and developers to understand and navigate the project effectively.\"",
+        "rouge_l_score": 0.273972602739726,
+        "bleu_score": 0.032836768734999404,
+        "meteor_score": 0.35769628099173556
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What is the content of the Wikipedia page about John Doe?",
+        "expected_response": "The Wikipedia page about John Doe provides information about his background, achievements, and notable contributions.",
+        "endpoint_response": "\"I'm sorry, but as an AI assistant, I don't have the ability to retrieve specific information from the internet in real-time. However, you can easily find the content of the Wikipedia page about John Doe by searching for \\\"John Doe Wikipedia\\\" on any search engine. This will direct you to the actual Wikipedia page where you can read all the information about John Doe.\"",
+        "rouge_l_score": 0.19512195121951217,
+        "bleu_score": 0.07027194436347371,
+        "meteor_score": 0.31721105527638194
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "Is there any specific format or structure for the test file?",
+        "expected_response": "The readme file does not mention any specific format or structure for the test file.",
+        "endpoint_response": "\"Yes, there is typically a specific format or structure for a test file. The format and structure may vary depending on the specific testing framework or tool being used. It is important to follow the guidelines provided by the testing framework or tool to ensure that the test file is correctly formatted and structured. This may include specifying the test cases, input data, expected results, and any necessary setup or teardown steps. It is recommended to refer to the documentation or guidelines of the testing framework or tool for more specific information on the required format and structure of the test file.\"",
+        "rouge_l_score": 0.15384615384615385,
+        "bleu_score": 0.053436696733189626,
+        "meteor_score": 0.3113279418659166
+    }
+]

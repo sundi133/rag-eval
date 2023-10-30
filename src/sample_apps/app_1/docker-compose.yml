@@ -1,8 +1,15 @@
 version: '3'
 services:
   llm-rag-app-1:
+    container_name: llm-rag-app-1
     build: .
     ports:
       - "8001:8001"
     env_file:
       - .env
+    networks:
+      - llm-datacraft-net
+
+networks:
+  llm-datacraft-net:
+    driver: bridge

@@ -1,10 +1,33 @@
 version: '3'
 services:
-  web:
-    build: .
+  llm-datacraft-qa-generator:
+    build: 
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./qa_generator_outputs:/app/qa_generator_outputs
     ports:
       - "8000:8000"
     env_file:
       - .env
+    networks:
+      - llm-datacraft-net
+    command: poetry run uvicorn src.service:app --host 0.0.0.0 --port 8000
+
+  
+  llm-rag-app-1:
+    build: 
+      context: .
+      dockerfile: src/sample_apps/app_1/Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    networks:
+      - llm-datacraft-net
+    command: poetry run uvicorn src.sample_apps.app_1.src.main:app --host 0.0.0.0 --port 8001
+
+
+networks:
+  llm-datacraft-net:
+    driver: bridge
