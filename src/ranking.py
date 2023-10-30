@@ -4,6 +4,7 @@ import asyncio
 import wandb
 import logging
 import json
+import os
 
 from nltk.translate.bleu_score import sentence_bleu
 from nltk.translate.bleu_score import SmoothingFunction
@@ -56,7 +57,6 @@ async def evaluate_qa_data(
         logger.info(f"Answer: {answer}")
 
     question_ranking = []
-    ranked_endpoints = []
     scorer = rouge_scorer.RougeScorer(["rouge1", "rougeL"], use_stemmer=True)
 
     for entry in qa_data:
@@ -67,6 +67,7 @@ async def evaluate_qa_data(
         for endpoint_config in endpoint_configs:
             logger.info(f"Endpoint Name: {endpoint_config['name']}")
             logger.info(f"Endpoint URL: {endpoint_config['url']}")
+            logger.info(f"Question: {question}")
             candidate = await get_llm_answer(question, endpoint_config)
             logger.info(f"Answer: {candidate}")
             # Tokenize the sentences into lists of words
@@ -78,25 +79,25 @@ async def evaluate_qa_data(
                 [reference_answer_tokens],
                 candidate_tokens,
                 smoothing_function=SmoothingFunction().method4,
-            ).round(4)
+            )
 
             # Calculate ROUGE-L score
-            rouge_l_score_val = round(
-                scorer.score(reference_answer, candidate)["rougeL"].fmeasure, 4
-            )
+            rouge_l_score_val = scorer.score(reference_answer, candidate)["rougeL"].fmeasure
 
             # Calculate METEOR score
-            meteor_score_val = round(
-                single_meteor_score(reference_answer.split(" "), candidate.split(" ")),
-                4,
-            )
+            meteor_score_val = single_meteor_score(reference_answer.split(" "), candidate.split(" "))
+
+            logger.info(f"BLEU score: {bleu_score_val}")
+            logger.info(f"ROUGE-L score: {rouge_l_score_val}")
+            logger.info(f"METEOR score: {meteor_score_val}")
 
             question_ranking.append(
                 {
                     "endpoint_name": endpoint_config["name"],
                     "url": endpoint_config["url"],
                     "question": question,
-                    "answer": reference_answer,
+                    "expected_response": reference_answer,
+                    "endpoint_response": candidate,
                     "rouge_l_score": rouge_l_score_val,
                     "bleu_score": bleu_score_val,
                     "meteor_score": meteor_score_val,
@@ -108,45 +109,50 @@ async def evaluate_qa_data(
             question_ranking,
             key=lambda x: (-x["rouge_l_score"], -x["bleu_score"], -x["meteor_score"]),
         )
-        ranked_endpoints.append({"question": question, "ranking": question_ranking})
-
-    ranked_endpoints = sorted(
-        ranked_endpoints,
-        key=lambda x: (
-            x["ranking"][0]["rouge_l_score"],
-            x["ranking"][0]["bleu_score"],
-            x["ranking"][0]["meteor_score"],
-        ),
+        
+    question_ranking = sorted(
+        question_ranking,
+        key=lambda x: (-x["rouge_l_score"], -x["bleu_score"], -x["meteor_score"]),
     )
 
-    for ranking in ranked_endpoints:
+    for ranking in question_ranking:
         logger.info(f"Question: {ranking['question']}")
-        for i, endpoint in enumerate(ranking["ranking"]):
-            # log in wandb
-            if wandb_log:
-                wandb.log(
-                    {
-                        "question": ranking["question"],
-                        "endpoint_name": endpoint["endpoint_name"],
-                        "url": endpoint["url"],
-                        "rouge_l_score": endpoint["rouge_l_score"],
-                        "bleu_score": endpoint["bleu_score"],
-                        "meteor_score": endpoint["meteor_score"],
-                    }
-                )
-            logger.info(
+        # log in wandb
+        if wandb_log:
+            wandb.log(
                 {
                     "question": ranking["question"],
-                    "endpoint_name": endpoint["endpoint_name"],
-                    "url": endpoint["url"],
-                    "rouge_l_score": endpoint["rouge_l_score"],
-                    "bleu_score": endpoint["bleu_score"],
-                    "meteor_score": endpoint["meteor_score"],
+                    "expected_response": ranking["expected_response"],
+                    "endpoint_response": ranking["endpoint_response"],
+                    "endpoint_name": ranking["endpoint_name"],
+                    "url": ranking["url"],
+                    "rouge_l_score": ranking["rouge_l_score"],
+                    "bleu_score": ranking["bleu_score"],
+                    "meteor_score": ranking["meteor_score"],
                 }
             )
+        logger.info(
+            {
+                "question": ranking["question"],
+                "expected_response": ranking["expected_response"],
+                "endpoint_response": ranking["endpoint_response"],
+                "endpoint_name": ranking["endpoint_name"],
+                "url": ranking["url"],
+                "rouge_l_score": ranking["rouge_l_score"],
+                "bleu_score": ranking["bleu_score"],
+                "meteor_score": ranking["meteor_score"],
+            }
+        )
 
-    with open(output_file, "w") as output_file:
-        json.dump(ranked_endpoints, output_file, indent=4)
+    # rm file if exists
+    if os.path.exists(output_file):
+        os.remove(output_file)
+
+    with open(output_file, "w") as op:
+        json.dump(question_ranking, op, indent=4)
+    
+    if os.path.exists(output_file):
+        logger.info(f"Ranking is completed and saved to {output_file}")
 
     logger.info("Ranking is completed")
 

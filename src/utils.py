@@ -13,13 +13,10 @@ from .processors.basefile import DataProcessor
 from .llms import QuestionGenerator, NERGenerator
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
+from .logger import logger_setup
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch = logging.StreamHandler()
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+logger = logger_setup(__name__)
+
 
 llm_type_processor_mapping = {
     ".csv": CSVProcessor,
@@ -132,15 +129,18 @@ async def get_llm_answer(question: str, endpoint_config: str) -> str:
     """
 
     url = endpoint_config["url"]
-    headers = {"Content-Type": "application/json"}
     data = {"query": f"{question}"}
-    logging.info(f"URL: {url}")
-    logging.info(f"Headers: {headers}")
-    logging.info(f"Data: {data}")
-
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-
-    if response.status_code == 200:
-        return response
-    else:
+    logger.info(f"URL: {url}")
+    logger.info(f"Data: {data}")
+    
+    try:
+        response = requests.post(url, data=data)
+        if response.status_code == 200:
+            logger.info("Request successful.")
+            return response.text
+        else:
+            logger.info(f"Request failed with status code {response.status_code}.")
+            return ""
+    except Exception as e:
+        logger.error(f"Error getting answer from endpoint: {str(e)}")
         return ""
