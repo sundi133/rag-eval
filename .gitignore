@@ -1,3 +1,4 @@
+.env
 *.env
 **/.env
 src/processors/__pycache__
