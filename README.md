@@ -71,9 +71,11 @@ docker compose up --build
 
 ```bash
 curl -X POST http://localhost:8000/generate/ \
-  -F "file=@example.txt" \
-  -F "number_of_questions=3" \
-  -F "name=3"
+-F "file=@data.csv" \
+-F "number_of_questions=5" \
+-F "sample_size=5" \
+-F "prompt_key=prompt_key_csv" \
+-F "llm_type=.csv"
 ```
 ### Command Options Available
 
@@ -126,7 +128,8 @@ curl -OJ http://localhost:8000/download/f8e3670f5ff9440a84f93b00197ad697
 curl -X GET http://localhost:8000/evaluate/ \
 -F "gen_id=f8e3670f5ff9440a84f93b00197ad697" \
 -F "llm_endpoint=http://llm-rag-app-1:8001/chat/" \
--F "wandb_log=True"
+-F "wandb_log=True" \
+-F "sampling_factor=0.2" 
 ```
 
 ### Response Example
