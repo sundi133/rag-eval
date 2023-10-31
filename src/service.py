@@ -122,6 +122,7 @@ async def evaluate(
     gen_id: str = Form(...),
     llm_endpoint: str = Form(...),
     log_wandb: bool = Form(default=False),
+    sampling_factor: float = Form(default=1.0, ge=0.0, le=1.0),
 ):
     if not gen_id:
         raise HTTPException(status_code=400, detail="gen_id is required")
@@ -132,7 +133,9 @@ async def evaluate(
     if os.path.exists(qa_file) and os.path.getsize(qa_file) > 0:
         endpoint_configs = [{"name": f"llm-f{gen_id}", "url": llm_endpoint}]
         output_file = os.path.join(output_directory, f"ranked_{gen_id}.json")
-        await evaluate_qa_data(qa_file, endpoint_configs, log_wandb, output_file)
+        await evaluate_qa_data(
+            qa_file, endpoint_configs, log_wandb, output_file, sampling_factor
+        )
         return JSONResponse(
             content={
                 "message": "Ranker is complete, Use the /ranking/id endpoint to download evaluated ranked reports for each question",
