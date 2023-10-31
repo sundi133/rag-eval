@@ -7,7 +7,7 @@ WORKDIR /app
 # Install system dependencies, install pipenv, and then install project dependencies
 RUN apt-get update && apt-get install -y libpq-dev curl build-essential && \
     pip install --upgrade pip && \
-    pip install poetry
+    pip install poetry==1.6.1
 
 # Copy the current directory contents into the container at /app
 COPY . /app  

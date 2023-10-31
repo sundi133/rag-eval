@@ -132,7 +132,7 @@ async def get_llm_answer(question: str, endpoint_config: str) -> str:
     data = {"query": f"{question}"}
     logger.info(f"URL: {url}")
     logger.info(f"Data: {data}")
-    
+
     try:
         response = requests.post(url, data=data)
         if response.status_code == 200:

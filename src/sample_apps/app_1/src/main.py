@@ -35,18 +35,12 @@ async def generate_response_with_retrieval_augmentation(query):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {
-                "role": "system", 
-                "content": "You are a helpful assistant."
-            },
+            {"role": "system", "content": "You are a helpful assistant."},
             {
                 "role": "user",
                 "content": f"Generate a response to the following query {query}  based on the retrieved text:",
             },
-            {
-                "role": "assistant", 
-                "content": "\n".join(retrieved_text)
-            },
+            {"role": "assistant", "content": "\n".join(retrieved_text)},
         ],
         temperature=0.1,
         max_tokens=2048,
@@ -80,17 +74,17 @@ def process_data(file_path):
 
 
 @app.post("/chat/")
-async def generate_response(
-    query: str = Form(...)
-):
+async def generate_response(query: str = Form(...)):
     print(query)
     response = await generate_response_with_retrieval_augmentation(query)
     return response
+
 
 @app.post("/ping/")
 async def ping():
     process_data(DATAPATH)
     return {"status": "pong"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=PORT)

@@ -50,14 +50,14 @@ async def generator(
     data_path: str = Form(default="", max_length=1000, min_length=0),
     number_of_questions: int = Form(default=2, ge=1, le=1000),
     sample_size: int = Form(default=2, ge=1, le=1000),
-    products_group_size: int = Form(default=2, ge=1, le=1000),
-    group_columns: str = Form(default="brand,sub_category,category,gender"),
+    products_group_size: int = Form(default=1, ge=1, le=1000),
+    group_columns: str = Form(default=""),  # ex - brand,category,gender
     model_name: str = Form(default="gpt-3.5-turbo"),
     prompt_key: str = Form(default="prompt_key_readme"),
     llm_type: str = Form(default=".txt"),
     generator_type: str = Form(default="text"),
     metadata: str = Form(default=""),
-    crawl_depth: int = Form(default=2, ge=1, le=10),
+    crawl_depth: int = Form(default=1, ge=1, le=10),
     file: List[UploadFile] = File(...),
 ):
     if file[0] and hasattr(file[0], "filename"):
@@ -74,12 +74,16 @@ async def generator(
     gen_id = uuid.uuid4().hex
     output_file = os.path.join(output_directory, f"{gen_id}.json")
     logger.info(f"Output file: {output_file}")
+    grouped_columns = []
+    if group_columns:
+        for column in group_columns.split(","):
+            grouped_columns.append(column)
     await qa_generator(
         data_path,
         number_of_questions,
         sample_size,
         products_group_size,
-        group_columns,
+        grouped_columns,
         output_file,
         model_name,
         prompt_key,

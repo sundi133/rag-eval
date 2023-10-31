@@ -23,19 +23,25 @@ class CSVProcessor(DataProcessor):
         self.data = self.parse()
         self.qa_dict = {}
         self.qa_array = []
+        self.schema = None
 
     def parse(self) -> pd.DataFrame:
-        return pd.read_csv(self.data_path, index_col=False)
+        df = pd.read_csv(self.data_path, index_col=False)
+        self.schema = list(df.columns)
+        df.fillna("", inplace=True)
+        return df
 
     def get_randomized_samples(
         self,
-        data: pd.DataFrame,
+        df: pd.DataFrame,
         sample_size: int,
         products_group_size: int,
         group_columns: List[str],
     ) -> pd.DataFrame:
-        df = data
-
+        if len(group_columns) == 0:
+            if sample_size > df.shape[0]:
+                sample_size = df.shape[0]
+            return df.sample(n=sample_size, random_state=42)
         # Group the group_columns
         grouped = df.groupby(group_columns)
 
@@ -55,6 +61,8 @@ class CSVProcessor(DataProcessor):
         group_counts_filter = group_counts[group_counts["count"] >= products_group_size]
 
         # Randomly select 'sample_size' groups
+        if sample_size > group_counts_filter.shape[0]:
+            sample_size = group_counts_filter.shape[0]
         randomized_grouping = group_counts_filter.sample(n=sample_size, random_state=42)
         return randomized_grouping
 
@@ -68,10 +76,27 @@ class CSVProcessor(DataProcessor):
         number_of_questions: int,
         qa_generator: LLMChain,
     ) -> None:
+        logger.info(
+            {
+                "message": "Generating question & answer pairs",
+                "randomized_samples": randomized_samples.shape,
+            }
+        )
         for _index, group_row in randomized_samples.iterrows():
             filtered_dataframes = []
             group_filters = []
-
+            logger.info(
+                {
+                    "message": "Generating question",
+                    "_index": _index,
+                    "group_columns": group_columns,
+                    "group_row": group_row.shape,
+                    "df": df.shape,
+                    "df_columns": df.columns,
+                }
+            )
+            logger.info("****")
+            logger.info(group_row.head())
             # Create a filter for the current group
             for column in group_columns:
                 # Create a filter condition for the current column and group_row
@@ -81,10 +106,15 @@ class CSVProcessor(DataProcessor):
                 group_filters.append(condition)
 
             # Combine all the filter conditions using the "&" operator
-            group_filter = pd.DataFrame(group_filters).all(axis=0)
+            if group_filters:
+                group_filter = pd.DataFrame(group_filters).all(axis=0)
+            else:
+                # Handle the case where there are no conditions in group_filters
+                group_filter = pd.Series(True, index=df.index)
 
-            # Filter the DataFrame based on the group criteria
-            filtered_dataframes.append(df[group_filter])
+            filtered_df = df[group_filter]
+
+            filtered_dataframes.append(filtered_df)
 
             # Combine the filtered DataFrames into a single DataFrame
             combined_filtered_df = pd.concat(filtered_dataframes, ignore_index=True)
@@ -104,6 +134,7 @@ class CSVProcessor(DataProcessor):
             qa_pair = qa_generator.run(
                 products=records,
                 number_of_questions=number_of_questions,
+                schema=self.schema,
             )
 
             # Log generated questions

@@ -163,7 +163,7 @@ if __name__ == "__main__":
     crawl_depth = args.crawl_depth
     grouped_columns = []
     if args.group_columns:
-        for column in args.group_columns[0].split(","):
+        for column in args.group_columns.split(","):
             grouped_columns.append(column)
 
     logger.info(
