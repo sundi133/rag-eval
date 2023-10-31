@@ -82,10 +82,14 @@ async def evaluate_qa_data(
             )
 
             # Calculate ROUGE-L score
-            rouge_l_score_val = scorer.score(reference_answer, candidate)["rougeL"].fmeasure
+            rouge_l_score_val = scorer.score(reference_answer, candidate)[
+                "rougeL"
+            ].fmeasure
 
             # Calculate METEOR score
-            meteor_score_val = single_meteor_score(reference_answer.split(" "), candidate.split(" "))
+            meteor_score_val = single_meteor_score(
+                reference_answer.split(" "), candidate.split(" ")
+            )
 
             logger.info(f"BLEU score: {bleu_score_val}")
             logger.info(f"ROUGE-L score: {rouge_l_score_val}")
@@ -109,7 +113,7 @@ async def evaluate_qa_data(
             question_ranking,
             key=lambda x: (-x["rouge_l_score"], -x["bleu_score"], -x["meteor_score"]),
         )
-        
+
     question_ranking = sorted(
         question_ranking,
         key=lambda x: (-x["rouge_l_score"], -x["bleu_score"], -x["meteor_score"]),
@@ -150,7 +154,7 @@ async def evaluate_qa_data(
 
     with open(output_file, "w") as op:
         json.dump(question_ranking, op, indent=4)
-    
+
     if os.path.exists(output_file):
         logger.info(f"Ranking is completed and saved to {output_file}")
 

@@ -2,7 +2,13 @@ QuestionGeneratorPromptTemplate = {
     "prompt_key_csv": """
     
         Follow the instructions below:
-        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about products without knowing about these products in advance. The customer will ask about products available, promotions available, about categories of products etc based on the products available in the below list:
+        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about products without knowing about these products in advance. 
+        The schema of the csv file is as follows:
+        ===
+        {schema}
+        ===
+
+        The customer will ask about products available, promotions available, about categories of products etc based on the products available in the below list:
         ===
         {products}
         ===
@@ -34,8 +40,12 @@ QuestionGeneratorPromptTemplate = {
     
         Follow the instructions below:
         Generate {number_of_questions} general chat complex multi level questions and answer pairs for a 
-        customer who is inquiring about products without knowing about these products in advance. The multive level qa pairs
-        should be upto max depth 3. The customer will ask about products available, promotions available, 
+        customer who is inquiring about products without knowing about these products in advance. 
+        The schema of the csv file is as follows:
+        ===
+        {schema}
+        ===
+        The multive level qa pairs should be upto max depth 3. The customer will ask about products available, promotions available, 
         about categories of products etc based on the products available in the below list:
         ===
         {products}
