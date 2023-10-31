@@ -1,5 +1,5 @@
-.env
-#*.env
-#**/.env
+# .env
+# *.env
+# **/.env
 src/processors/__pycache__
 src/__pycache__/
