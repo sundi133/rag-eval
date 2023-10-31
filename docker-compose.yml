@@ -11,7 +11,7 @@ services:
     env_file:
       - .env
     networks:
-      - llm-datacraft-net
+      - llm-datacraft-net  # only use in local for bridge network
     command: poetry run uvicorn src.service:app --host 0.0.0.0 --port 8000
 
   
@@ -24,7 +24,7 @@ services:
     env_file:
       - .env
     networks:
-      - llm-datacraft-net
+      - llm-datacraft-net # only use in local for bridge network
     command: poetry run uvicorn src.sample_apps.app_1.src.main:app --host 0.0.0.0 --port 8001
 
 
