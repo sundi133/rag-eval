@@ -1,0 +1,28 @@
+
+# Exclude version control system files and directories
+.git
+.svn
+
+# Exclude build and temporary files
+*.swp
+*.bak
+*.pyc
+.DS_Store
+node_modules
+
+# Exclude specific files or directories
+logs/
+temp/
+credentials.json
+secrets/
+
+# Exclude documentation and test files
+docs/
+test/
+qa_generator_outputs/
+
+# Exclude development or editor-specific files
+.vscode/
+.idea/
+*.sublime-project
+
