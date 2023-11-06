@@ -1,4 +1,4 @@
-## Question-Answer Generator for Blogs, API/SDK Docs, Readme, Product Catalogs and more for LLM Applications
+## Data ELT Extraction, Question-Answer Generator for Blogs, API/SDK Docs, Readme, Product Catalogs and more unstructured data sources for various LLM Applications
 
 [![Python Version](https://img.shields.io/badge/python-3.9-blue.svg)](https://python.org)
 
@@ -6,8 +6,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-This project is a tool for generating question-answer pairs based on provided data. It allows you to generate questions related to product information by specifying various parameters such as the data file path, the number of questions to generate, and more.
-
+This project serves as a versatile utility designed to extract structured data from unstructured sources and subsequently create question-answer pairs from the supplied data. Its primary objective is to facilitate a range of downstream tasks, including fine-tuning, evaluation, and ranking of Language Model (LM) and Retrieval-Augmented Generation (RAG) applications. The tool not only empowers users to extract structured data but also provides the means to generate question-answer pair datasets, which can be employed for the rigorous assessment of applications in terms of their accuracy, dependability, and consistency.
 
 | Trying to evaluate an LLM on massive documents without automated eval dataset. | Realizing the importance of eval dataset generation for accurate llm app evaluations. |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
