@@ -89,11 +89,11 @@ class NERProcessor(DataProcessor):
                 # get index of entity in record
                 topic_keyword = random.choice(self.topics)
                 record = record["sentence"]
-                entity_index = record.find(entity_name) + len(topic_keyword) + 1
-                entity_length = len(entity_name)
                 random_value = random.choice(self.entities_json["values"])
                 record = record.replace(f"{entity_name}", f"{topic_keyword} {random_value}")
-
+                entity_index = record.find(f"{random_value}") 
+                entity_length = len(f"{random_value}")
+                
                 data = {
                     "text": record,
                     "entities": [
