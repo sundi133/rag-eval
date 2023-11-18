@@ -68,6 +68,9 @@ async def generator(
             data_path = os.path.join(upload_directory, file[0].filename)
     else:
         return {"message": "No file provided"}
+    if llm_type == ".ner":
+        generator_type = "ner"
+        metadata = data_path
     logger.info(f"Data path: {data_path}")
     logger.info(f"Number of questions: {number_of_questions}")
     logger.info(f"Sample size: {sample_size}")

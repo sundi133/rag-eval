@@ -62,7 +62,7 @@ async def qa_generator(
 
     data_processor = create_processor(data_path, llm_type)
 
-    if llm_type == "ner":
+    if llm_type == ".ner":
         data_processor.set_entity(metadata_path)
     if llm_type == ".html":
         data_processor.set_depth(crawl_depth)
