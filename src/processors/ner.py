@@ -23,36 +23,26 @@ class NERProcessor(DataProcessor):
         self.qa_dict = {}
         self.qa_dict["training_data"] = []
         self.entities_json = {}
+        self.qa_array = []
+        self.entity_name = ""
+        self.topics = []
+
 
     def set_entity(self, entities_file) -> None:
         with open(entities_file, "r") as json_file:
             self.entities_json = json.load(json_file)
         self.entity_name = self.entities_json["name"]
+        self.topics = self.entities_json["keywords"].split(",")
+        self.topics = list(map(lambda x: x.strip(), self.topics))
+
 
     def parse(self) -> pd.DataFrame:
-        # Open the input file containing sentences
-        with open(self.data_path, "r") as input_file:
-            sentences = input_file.readlines()
-
-        # Extract the key-value pairs
-        key_values = self.entities_json["key_values"]
-
+        key_values = self.entities_json["values"]
+        name = self.entities_json["name"]
         modified_df = []
-        for chosen_key in list(key_values.keys()):
-            for sentence in sentences:
-                replacements = key_values.get(chosen_key, [])
-                if replacements:
-                    replacement_value = random.choice(replacements)
-                else:
-                    continue
-                if chosen_key in sentence:
-                    modified_sentence = sentence.replace(
-                        f"{{{chosen_key}}}", replacement_value
-                    )
-
-                modified_df.append(modified_sentence)
-        outdf = pd.DataFrame(modified_df, columns=["sentence"])
-        return outdf
+        modified_df.append("sentence")
+        out_df = pd.DataFrame(modified_df, columns=["sentence"])
+        return out_df
 
     def get_randomized_samples(
         self,
@@ -61,6 +51,8 @@ class NERProcessor(DataProcessor):
         products_group_size: int,
         group_columns: List[str],
     ) -> pd.DataFrame:
+        if sample_size > data.shape[0]:
+            sample_size = data.shape[0]
         return data.sample(n=sample_size, random_state=42)
 
     def generate_qa_pairs(
@@ -74,49 +66,59 @@ class NERProcessor(DataProcessor):
         qa_generator: LLMChain,
     ) -> None:
         # Initialize a CSV buffer for writing
-        csv_buffer = io.StringIO()
+        batch_size = 25
+        for  index in range(0, (int) (sample_size/batch_size)):
+            qa_pair = qa_generator.run(
+                sample_size=batch_size,
+                entity_name=self.entity_name,
+            )
 
-        # Write the DataFrame to the CSV buffer
-        randomized_samples.to_csv(csv_buffer, index=False, header=True)
-
-        # Get the CSV string from the buffer
-        records = csv_buffer.getvalue()
-
-        # Close the buffer (optional)
-        csv_buffer.close()
-
-        qa_pair = qa_generator.run(
-            sentences=records,
-            entity_name=self.entity_name,
-        )
-
-        # Log generated questions
-        logger.info(
-            {
-                "message": "Generated NER training dataset",
-                "data": qa_pair,
-            }
-        )
-        # Split questions by newline and process each question
-        question_array = json.loads(qa_pair)
-
-        for record in question_array:
-            # Log each generated question
+            # Log generated questions
             logger.info(
                 {
-                    "message": "Generated question",
-                    "question_answer": record,
+                    "message": "Generated NER training dataset",
+                    "data": qa_pair,
                 }
             )
-            self.add_output_sample(record)
+            # Split questions by newline and process each question
+            question_array = json.loads(qa_pair)
+            entity_name = self.entities_json["name"]
+
+            for record in question_array["sentences"]:
+                # Log each generated question
+                # get index of entity in record
+                topic_keyword = random.choice(self.topics)
+                record = record["sentence"]
+                entity_index = record.find(entity_name) + len(topic_keyword) + 1
+                entity_length = len(entity_name)
+                random_value = random.choice(self.entities_json["values"])
+                record = record.replace(f"{entity_name}", f"{topic_keyword} {random_value}")
+
+                data = {
+                    "text": record,
+                    "entities": [
+                        {
+                            "start": entity_index,
+                            "end": entity_index + entity_length,
+                            "label": entity_name,
+                            "value": random_value,
+                        }
+                    ]
+                }
+
+                logger.info(
+                    {
+                        "message": "Generated ner training dataset",
+                        "question_answer": data,
+                    }
+                )
+                self.add_output_sample(data)
 
         return self.qa_dict
 
     def add_output_sample(self, record: json) -> None:
-        training_data = self.qa_dict["training_data"]
-        training_data.append(record)
-        self.qa_dict["training_data"] = training_data
+        self.qa_array.append(record)
 
     def write(self, file_path: str) -> None:
         with open(file_path, "w") as output_file:
-            json.dump(self.qa_dict, output_file)
+            json.dump(self.qa_array, output_file, indent=4)

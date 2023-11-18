@@ -33,6 +33,6 @@ class NERGenerator(LLMChain):
         """Get the response parser."""
         prompt = PromptTemplate(
             template=QuestionGeneratorPromptTemplate.get(prompt_key),
-            input_variables=["sentences", "entity_name"],
+            input_variables=["sample_size", "entity_name"],
         )
         return cls(prompt=prompt, llm=llm, verbose=verbose)

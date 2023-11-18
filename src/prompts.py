@@ -76,8 +76,23 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
+    "prompt_key_ner_sentences": """
+        Generate some sentences with the entity name {entity_name} in each sentence.
+        The sentences must have '{entity_name}' in the sentences.
+        The sentences should be real which are used in chat conversations like customer support or personal conversations. 
+        Generate the {sample_size} sentences in the following JSON format:
+        {{
+            "sentences": [
+                {{ "sentence" : "sentence 1"}},
+                {{ "sentence" : "sentence 2"}},
+                ...
+            ]
+        }}
+    """,
+
     "prompt_key_ner": """
         You are a dataset generator that is used to train a named entity recognition model
+        The start and end indices of the entities should be provided in the training data
         There are a few sentences for which you have to generate training data in a specific JSON format like below:
 
         [
@@ -128,7 +143,8 @@ QuestionGeneratorPromptTemplate = {
         Instructions:
         1. make sure the sentences are relevant to the entity name
         2. make sure the sentences are not repeated
-        3. make sure the sentences the output is in the above format of json
+        3, make sure the start and end indices are correct
+        4. make sure the sentences the output is in the above format of json
 
         [ Output format must be stringified json as mentioned above ]
 
