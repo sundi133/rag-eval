@@ -4,6 +4,7 @@ import json
 import requests
 import io
 import logging
+import numpy as np
 
 from langchain.chains import LLMChain
 from urllib.parse import urljoin
@@ -31,6 +32,7 @@ class HTMLProcessor(DataProcessor):
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
         }
+        self.batch_size = 25
 
     def set_depth(self, depth: int) -> None:
         self.depth = depth
@@ -78,10 +80,24 @@ class HTMLProcessor(DataProcessor):
         except Exception as e:
             print(f"Error crawling {url}: {str(e)}")
 
+    def split_text(self, text, max_words=2000):
+        words = text.split()
+        num_chunks = len(words) // max_words
+        chunks = np.array_split(words, num_chunks + 1)
+        return [" ".join(chunk) for chunk in chunks]
+
     def parse(self) -> pd.DataFrame:
         crawling_depth = self.depth
         self.crawl_url(self.data_path, self.data_path, crawling_depth)
-        return pd.DataFrame(self.data, columns=["url", "title", "text"])
+        # group by url and concatenate the text and title
+        df = pd.DataFrame(self.data, columns=["url", "title", "text"])
+        grouped_df = df.groupby(["url", "title"])["text"].apply(" ".join).reset_index()
+        # Apply the split_text function to each row in the grouped DataFrame
+        grouped_df["text"] = grouped_df["text"].apply(
+            lambda text: self.split_text(text)
+        )
+        flattened_df = grouped_df.explode("text").reset_index(drop=True)
+        return flattened_df
 
     def get_randomized_samples(
         self,
@@ -125,32 +141,48 @@ class HTMLProcessor(DataProcessor):
             # Close the buffer (optional)
             csv_buffer.close()
 
-            qa_pair = qa_generator.run(
-                products=records,
-                number_of_questions=number_of_questions,
+            logger.info(
+                {
+                    "message": "Generating question",
+                    "group_row": _index,
+                    "records": records,
+                }
             )
 
-            # Log generated questions
-            # logger.debug(
-            #     {
-            #         "message": "Generated question & answer pair",
-            #         "questions": qa_pair,
-            #     }
-            # )
+            if number_of_questions > 25:
+                number_of_questions = self.batch_size
 
-            # Split questions by newline and process each question
-            question_array = json.loads(qa_pair)
+            qa_pair = self.completions_with_backoff(
+                qa_generator, records=records, number_of_questions=number_of_questions
+            )
 
-            for record in question_array:
-                record["url"] = group_row["url"]
-                # Log each generated question
+            logger.info(
+                {
+                    "message": "Generated question",
+                    "qa_pair": qa_pair,
+                }
+            )
+            try:
+                # Split questions by newline and process each question
+                question_array = json.loads(qa_pair)
+                for record in question_array:
+                    record["url"] = group_row["url"]
+                    # Log each generated question
+                    logger.info(
+                        {
+                            "message": "Generated question",
+                            "question_answer": record,
+                        }
+                    )
+                    self.add_output_sample(record)
+            except Exception as e:
                 logger.info(
                     {
-                        "message": "Generated question",
-                        "question_answer": record,
+                        "log_type": "error",
+                        "message": "Error generating question",
+                        "exception": str(e),
                     }
                 )
-                self.add_output_sample(record)
         return self.qa_dict
 
     def add_output_sample(self, record: json) -> None:
@@ -160,6 +192,16 @@ class HTMLProcessor(DataProcessor):
                 "answer": record["answer"],
                 "url": record["url"],
             }
+        )
+
+    @staticmethod
+    @DataProcessor.retry_with_exponential_backoff
+    def completions_with_backoff(
+        qa_generator: LLMChain, records: str, number_of_questions: int
+    ):
+        return qa_generator.run(
+            products=records,
+            number_of_questions=number_of_questions,
         )
 
     def write(self, file_path: str) -> None:

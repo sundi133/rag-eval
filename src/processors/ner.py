@@ -26,7 +26,7 @@ class NERProcessor(DataProcessor):
         self.qa_array = []
         self.entity_name = ""
         self.topics = []
-
+        self.batch_size = 25
 
     def set_entity(self, entities_file) -> None:
         with open(entities_file, "r") as json_file:
@@ -34,7 +34,6 @@ class NERProcessor(DataProcessor):
         self.entity_name = self.entities_json["name"]
         self.topics = self.entities_json["keywords"].split(",")
         self.topics = list(map(lambda x: x.strip(), self.topics))
-
 
     def parse(self) -> pd.DataFrame:
         key_values = self.entities_json["values"]
@@ -66,10 +65,9 @@ class NERProcessor(DataProcessor):
         qa_generator: LLMChain,
     ) -> None:
         # Initialize a CSV buffer for writing
-        batch_size = 25
-        for  index in range(0, (int) (sample_size/batch_size)):
+        for index in range(0, (int)(sample_size / self.batch_size)):
             qa_pair = qa_generator.run(
-                sample_size=batch_size,
+                sample_size=self.batch_size,
                 entity_name=self.entity_name,
             )
 
@@ -90,10 +88,12 @@ class NERProcessor(DataProcessor):
                 topic_keyword = random.choice(self.topics)
                 record = record["sentence"]
                 random_value = random.choice(self.entities_json["values"])
-                record = record.replace(f"{entity_name}", f"{topic_keyword} {random_value}")
-                entity_index = record.find(f"{random_value}") 
+                record = record.replace(
+                    f"{entity_name}", f"{topic_keyword} {random_value}"
+                )
+                entity_index = record.find(f"{random_value}")
                 entity_length = len(f"{random_value}")
-                
+
                 data = {
                     "text": record,
                     "entities": [
@@ -103,7 +103,7 @@ class NERProcessor(DataProcessor):
                             "label": entity_name,
                             "value": random_value,
                         }
-                    ]
+                    ],
                 }
 
                 logger.info(
