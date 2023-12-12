@@ -89,7 +89,6 @@ QuestionGeneratorPromptTemplate = {
             ]
         }}
     """,
-
     "prompt_key_ner": """
         You are a dataset generator that is used to train a named entity recognition model
         The start and end indices of the entities should be provided in the training data
@@ -162,7 +161,7 @@ QuestionGeneratorPromptTemplate = {
         Instructions:
         1. make sure the questions are relevant to the content provided and available in the documentation provided
         2. make sure the questions asked vary from each other
-        3. make sure the questions are not repeated and answers are detailed within 25 to 40 words
+        3. make sure the questions are not repeated and answers are detailed within 25 to 140 words
         4. make sure the questions are crisp and short and attention grabbing
         5. make sure the answers are relevant to the questions
         6. Do not generate fake questions and answers

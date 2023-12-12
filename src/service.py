@@ -4,7 +4,7 @@ import asyncio
 import logging
 
 from typing import List
-from .main import qa_generator
+from .generator import qa_generator
 from .utils import (
     read_qa_data,
     read_endpoint_configurations,
@@ -58,16 +58,17 @@ async def generator(
     generator_type: str = Form(default="text"),
     metadata: str = Form(default=""),
     crawl_depth: int = Form(default=1, ge=1, le=10),
-    file: List[UploadFile] = File(...),
+    file: List[UploadFile] = File([]),
 ):
-    if file[0] and hasattr(file[0], "filename"):
+    if file and file[0] and hasattr(file[0], "filename"):
         with open(os.path.join(upload_directory, file[0].filename), "wb") as f:
             file_content = await file[0].read()
             f.write(file_content)
         if data_path == "":  # non empty if html links are provided
             data_path = os.path.join(upload_directory, file[0].filename)
     else:
-        return {"message": "No file provided"}
+        if data_path == "":
+            return {"message": "No file or resource link provided as data source"}
     if llm_type == ".ner":
         generator_type = "ner"
         metadata = data_path
