@@ -24,6 +24,7 @@ class TXTProcessor(DataProcessor):
         self.qa_dict = {}
         self.qa_array = []
         self.chunk_size = 1000  # Define the chunk_size attribute here
+        self.batch_size = 25
 
     def parse(self) -> pd.DataFrame:
         with open(self.data_path, "r") as f:
@@ -93,6 +94,8 @@ class TXTProcessor(DataProcessor):
                 if len(records) < 20:
                     continue
 
+                if number_of_questions > 25:
+                    number_of_questions = self.batch_size
                 qa_pair = qa_generator.run(
                     products=records,
                     number_of_questions=number_of_questions,
