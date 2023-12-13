@@ -24,6 +24,7 @@ class CSVProcessor(DataProcessor):
         self.qa_dict = {}
         self.qa_array = []
         self.schema = None
+        self.batch_size = 25
 
     def parse(self) -> pd.DataFrame:
         df = pd.read_csv(self.data_path, index_col=False)
@@ -130,6 +131,9 @@ class CSVProcessor(DataProcessor):
 
             # Close the buffer (optional)
             csv_buffer.close()
+
+            if number_of_questions > 25:
+                number_of_questions = self.batch_size
 
             qa_pair = qa_generator.run(
                 products=records,
