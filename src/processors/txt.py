@@ -23,23 +23,31 @@ class TXTProcessor(DataProcessor):
         self.file_extension = os.path.splitext(data_path)[-1].lower()
         self.qa_dict = {}
         self.qa_array = []
-        self.chunk_size = 1000  # Define the chunk_size attribute here
+        self.chunk_size = 5000  # Define the chunk_size attribute here
         self.batch_size = 25
 
     def parse(self) -> pd.DataFrame:
         with open(self.data_path, "r") as f:
-            content = f.readlines()
-        content = [x.strip() for x in content]
-        print(content)
-        chunks = [
-            content[x : x + self.chunk_size]
-            for x in range(0, len(content), self.chunk_size)
-        ]
-        data = []
-        for chunk in chunks:
-            data.extend((chunk))
-        df = pd.DataFrame(data, columns=["chunk"])
-        print(df.columns)
+            content = f.read()
+        chunks = [content[x : x + 5000] for x in range(0, len(content), 5000)]
+        data = [x.strip() for x in chunks]
+
+        df = pd.DataFrame({"chunk": data})
+        df["chunk"] = df["chunk"].apply(lambda x: x.strip())
+        df = df[df["chunk"].notna() & (df["chunk"] != "")].reset_index(drop=True)
+
+        logger.info(
+            {
+                "message": "chunk[0] Parsed data",
+                "chunks[0]": chunks[0],
+            }
+        )
+        logger.info(
+            {
+                "message": "Parsed data",
+                "data": df,
+            }
+        )
         return df
 
     def get_randomized_samples(
@@ -67,7 +75,9 @@ class TXTProcessor(DataProcessor):
             logger.info(
                 {
                     "message": "Generating question",
-                    "group_row": _index,
+                    "_index": _index,
+                    "group_row": group_row["chunk"],
+                    "length": len(group_row["chunk"]),
                 }
             )
             try:
@@ -83,7 +93,7 @@ class TXTProcessor(DataProcessor):
                 csv_buffer = io.StringIO()
 
                 # Write the DataFrame to the CSV buffer
-                combined_filtered_df.to_csv(csv_buffer, index=False, header=True)
+                combined_filtered_df.to_csv(csv_buffer, index=False, header=False)
 
                 # Get the CSV string from the buffer
                 records = csv_buffer.getvalue()
@@ -91,10 +101,12 @@ class TXTProcessor(DataProcessor):
                 # Close the buffer (optional)
                 csv_buffer.close()
 
-                if len(records) < 20:
+                if len(records) < 100:
                     continue
 
-                if number_of_questions > 25:
+                if (
+                    number_of_questions > 25
+                ):  # too many questions might cause token limit error
                     number_of_questions = self.batch_size
                 qa_pair = qa_generator.run(
                     products=records,
@@ -115,9 +127,10 @@ class TXTProcessor(DataProcessor):
                         {
                             "message": "Generated question",
                             "question_answer": record,
+                            "reference": records,
                         }
                     )
-                    self.add_output_sample(record)
+                    self.add_output_sample(record, chunk=records)
 
             except Exception as e:
                 logger.error(
@@ -129,11 +142,11 @@ class TXTProcessor(DataProcessor):
                 continue
         return self.qa_dict
 
-    def add_output_sample(self, record: json) -> None:
+    def add_output_sample(self, record: json, chunk: str) -> None:
         self.qa_array.append(
             {
-                "question": record["question"],
-                "answer": record["answer"],
+                "question_answer": record,
+                "reference": chunk,
             }
         )
 

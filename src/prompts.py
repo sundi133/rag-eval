@@ -36,7 +36,7 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
-    "stateful_qa_prompt_key_csv": """
+    "prompt_key_csv_stateful_contextual_multilevel": """
     
         Follow the instructions below:
         Generate {number_of_questions} general chat complex multi level questions and answer pairs for a 
@@ -181,7 +181,7 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
-    "stateful_multi_level_qa_prompt_key_api_documentation": """
+    "prompt_key_api_documentation_stateful_contextual_multilevel": """
     
         Follow the instructions below:
         Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring who is inquiring about the information provided in a API documentations. 
@@ -245,7 +245,7 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
-    "stateful_multi_level_qa_prompt_key_blogpost": """
+    "prompt_key_blogpost_stateful_contextual_multilevel": """
     
         Follow the instructions below:
         Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about the information provided in a blog post. The customer might make purchases decisions based on the quality of the information provided in the generated pairs. Generate the pairs based on information provided as follows:
@@ -308,31 +308,45 @@ QuestionGeneratorPromptTemplate = {
         ]
 
     """,
-    "stateful_multi_level_qa_prompt_key_readme": """
+    "prompt_key_readme_stateful_contextual_multilevel": """
     
-        Follow the instructions below:
-        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about the information provided in a readme file. The customer might make ask any questions to make informed decision making based on the quality of the information provided in the readme file. Generate the pairs based on information provided as follows:
+        Instructions:
+        Imagine a customer looking at the documentation described in the provided content. 
+        Their goal is to learn and inquire to make an informed decision about the product.
+        Generate {number_of_questions} customer chat questions and answer pairs. 
+        Include at least 2 follow-up questions per initial question that build upon previous answers using pronouns like "it," "this," or "those.", ensuring all responses are factually accurate and based on the information in the readme file. 
+        Aim for crisp, realistic, and useful questions that help the customer make an informed decision.
+        
+        The content is as follows:
         ===
         {products}
         ===
+        
+        Take your time and think carefully about the questions you ask and the answers you provide.
 
-        Instructions:
-        1. make sure the generate questions are relevant to the content provided
-        2. make sure the questions asked vary from each other
-        3. make sure the questions are not repeated and answers are detailed within 25 to 140 words
-        4. make sure the questions are crisp and short and attention grabbing
-        5. make sure the answers are relevant to the questions
-        6. Do not generate fake questions and answers
-
-        [ Generate each question and the relevant answer based on the documentation available in json format with following format:
+        [ Generate each question and the relevant answer with contextual follow up questions, answers upto a depth of level 3 based on the documentation available in json format with following format:
             [
                 {{
                     "question": "question 1",
-                    "answer": "answer 1"
+                    "answer": "answer 1",
+                    "follow_up_question_1": "follow up question contextually relevant to question 1 and answer 1",
+                    "follow_up_answer_1": "follow up answer to follow up question 1"",
+                    "follow_up_question_2": "follow up question contextually relevant to follow_up_question_1 and follow_up_answer_1",
+                    "follow_up_answer_2": "follow up answer to follow up question 2"",
+                    ...
+                    "follow_up_question": "follow up question N",
+                    "follow_up_answer": "follow up answer N"
                 }},
                 {{
                     "question": "question 2",
-                    "answer": "answer 2"
+                    "answer": "answer 2",
+                    "follow_up_question_1": "follow up question contextually relevant to question 2 and answer 2",
+                    "follow_up_answer_1": "follow up answer to follow up question 1"",
+                    "follow_up_question_2": "follow up question contextually relevant to follow_up_question_1 and follow_up_answer_1",
+                    "follow_up_answer_2": "follow up answer to follow up question 2"",
+                    ...
+                    "follow_up_question": "follow up question N",
+                    "follow_up_answer": "follow up answer N"
                 }},
                 ...
             ]
