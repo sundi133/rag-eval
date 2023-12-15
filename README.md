@@ -124,7 +124,7 @@ curl -OJ http://localhost:8000/download/f8e3670f5ff9440a84f93b00197ad697
 ### Request Example
 
 ```bash
-curl -X GET http://localhost:8000/evaluate/ \
+curl -X POST http://localhost:8000/evaluate/ \
 -F "gen_id=f8e3670f5ff9440a84f93b00197ad697" \
 -F "llm_endpoint=http://llm-rag-app-1:8001/chat/" \
 -F "wandb_log=True" \
