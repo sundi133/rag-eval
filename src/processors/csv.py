@@ -25,6 +25,7 @@ class CSVProcessor(DataProcessor):
         self.qa_array = []
         self.schema = None
         self.batch_size = 25
+        self.chunk_size = 2000
 
     def parse(self) -> pd.DataFrame:
         df = pd.read_csv(self.data_path, index_col=False)
@@ -169,8 +170,8 @@ class CSVProcessor(DataProcessor):
                 }
             )
 
-            if len(records) > 2000:
-                records = records[0:2000]
+            if len(records) > self.chunk_size:
+                records = records[0 : self.chunk_size]
 
             qa_pair = qa_generator.run(
                 products=records,
