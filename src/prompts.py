@@ -311,41 +311,57 @@ QuestionGeneratorPromptTemplate = {
     "prompt_key_readme_stateful_contextual_multilevel": """
     
         Instructions:
-        Imagine a customer looking at the documentation described in the provided content. 
-        Their goal is to learn and inquire to make an informed decision about the product.
-        Generate {number_of_questions} customer chat questions and answer pairs. 
-        Include at least 2 follow-up questions per initial question that build upon previous answers using pronouns like "it," "this," or "those.", ensuring all responses are factually accurate and based on the information in the readme file. 
-        Aim for crisp, realistic, and useful questions that help the customer make an informed decision.
-        
-        The content is as follows:
+        Imagine you are a chat data simulator simulating customer chats based on a comprehensive document of any provided content. 
+        Generate {number_of_questions} customer chat questions and answer pairs creating a thoughtful conversational flow that naturally progresses from one question to the next.
+        Include at least 3 follow-up questions per initial question.
+        Incorporate a series of follow-up questions that seamlessly build upon the previous answers provided and create a natural conversational flow using pronouns like it, its, this, that, these, those, them as applicable to foster continuity and depth in the conversation. 
+        Ensure that each follow-up question leverages the information from the preceding answers to delve deeper into the topic and elicit nuanced insights 
+        Ensuring all responses are factually accurate and based on the information in content provided. 
+        Think step by step carefully and creatively about how to use the information provided to generate a natural conversation that flows well and is engaging for the customer.
+
+        Here is an example of a chat messages with contextual answers and follow-up questions, use these as a reference to generate your own questions and answers for the content provided:
+        ===
+        Question 1: What exactly is the difference between finance and economics? I keep seeing them mentioned together, but I'm not sure how they're distinct.
+
+        Answer: You're right, they are closely related fields, but there are some key differences. Finance focuses specifically on the management and flow of money, capital assets, and financial instruments. It's concerned with things like investments, loans, and banking activities. Economics, on the other hand, has a broader scope. It deals with the production, distribution, and consumption of goods and services in an entire economy. So, while finance looks at individual financial activities, economics takes a more holistic view of how these activities interact and influence the whole system.
+
+        Follow-up question 1: That makes sense. So, is it fair to say that finance is like the engine that drives the economic machine?
+
+        Follow-up answer 1: That's a great analogy! Finance plays a crucial role in providing the resources and mechanisms needed for economic activity to flourish. Without efficient financial systems, businesses wouldn't have access to capital for growth, individuals wouldn't be able to invest or manage their savings effectively, and governments wouldn't have the means to fund public projects.
+
+        Follow-up question 2: Are there any specific areas of finance that are particularly important for the overall health of an economy?
+
+        Follow-up answer 2: Absolutely! Financial stability, which involves managing risks and ensuring the smooth functioning of financial institutions, is critical for economic stability. Additionally, efficient capital markets, where investments are channeled towards productive activities, are essential for driving economic growth. And let's not forget the role of financial regulation in maintaining a fair and transparent financial system, which fosters trust and encourages economic activity.
+
+        === end of example ===
+
+        The provided content is as follows:
         ===
         {products}
-        ===
-        
-        Take your time and think carefully about the questions you ask and the answers you provide.
+        === end of content ===
 
         [ Generate each question and the relevant answer with contextual follow up questions, answers upto a depth of level 3 based on the documentation available in json format with following format:
             [
                 {{
                     "question": "question 1",
                     "answer": "answer 1",
-                    "follow_up_question_1": "follow up question contextually relevant to question 1 and answer 1",
-                    "follow_up_answer_1": "follow up answer to follow up question 1"",
-                    "follow_up_question_2": "follow up question contextually relevant to follow_up_question_1 and follow_up_answer_1",
-                    "follow_up_answer_2": "follow up answer to follow up question 2"",
+                    "follow_up_question_1": "follow up question contextually relevant to answer using pronouns like it, its, this, that, these, those, them as applicable",
+                    "follow_up_answer_1": "follow up answer to follow up question 1",
+                    "follow_up_question_2": "follow up question contextually relevant to follow_up_answer_1 using pronouns it, its, this, that, these, those, them as applicable",
+                    "follow_up_answer_2": "follow up answer to follow up question 2",
                     ...
-                    "follow_up_question": "follow up question N",
+                    "follow_up_question": "follow up question contextually relevant to follow_up_answer_N-1",
                     "follow_up_answer": "follow up answer N"
                 }},
                 {{
                     "question": "question 2",
                     "answer": "answer 2",
-                    "follow_up_question_1": "follow up question contextually relevant to question 2 and answer 2",
-                    "follow_up_answer_1": "follow up answer to follow up question 1"",
-                    "follow_up_question_2": "follow up question contextually relevant to follow_up_question_1 and follow_up_answer_1",
-                    "follow_up_answer_2": "follow up answer to follow up question 2"",
+                    "follow_up_question_1": "follow up question contextually relevant to answer using pronouns like it, its, this, that, these, those, them as applicable",
+                    "follow_up_answer_1": "follow up answer to follow up question 1",
+                    "follow_up_question_2": "follow up question contextually relevant to follow_up_answer_1 using pronouns like it, its, this, that, these, those, them as applicable",
+                    "follow_up_answer_2": "follow up answer to follow up question 2",
                     ...
-                    "follow_up_question": "follow up question N",
+                    "follow_up_question": "follow up question contextually relevant to follow_up_answer_N-1",
                     "follow_up_answer": "follow up answer N"
                 }},
                 ...

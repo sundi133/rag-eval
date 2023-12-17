@@ -38,12 +38,6 @@ class TXTProcessor(DataProcessor):
 
         logger.info(
             {
-                "message": "chunk[0] Parsed data",
-                "chunks[0]": chunks[0],
-            }
-        )
-        logger.info(
-            {
                 "message": "Parsed data",
                 "data": df,
             }
@@ -72,35 +66,8 @@ class TXTProcessor(DataProcessor):
         qa_generator: LLMChain,
     ) -> None:
         for _index, group_row in randomized_samples.iterrows():
-            logger.info(
-                {
-                    "message": "Generating question",
-                    "_index": _index,
-                    "group_row": group_row["chunk"],
-                    "length": len(group_row["chunk"]),
-                }
-            )
             try:
-                # conver each row to a pd dataframe
-                filtered_dataframes = []
-                row_df = pd.DataFrame([group_row])
-                filtered_dataframes.append(row_df)
-
-                # Combine the filtered DataFrames into a single DataFrame
-                combined_filtered_df = pd.concat(filtered_dataframes, ignore_index=True)
-
-                # Initialize a CSV buffer for writing
-                csv_buffer = io.StringIO()
-
-                # Write the DataFrame to the CSV buffer
-                combined_filtered_df.to_csv(csv_buffer, index=False, header=False)
-
-                # Get the CSV string from the buffer
-                records = csv_buffer.getvalue()
-
-                # Close the buffer (optional)
-                csv_buffer.close()
-
+                records = group_row["chunk"]
                 if len(records) < 100:
                     continue
 
@@ -108,12 +75,12 @@ class TXTProcessor(DataProcessor):
                     number_of_questions > 25
                 ):  # too many questions might cause token limit error
                     number_of_questions = self.batch_size
+
                 qa_pair = qa_generator.run(
                     products=records,
                     number_of_questions=number_of_questions,
                 )
 
-                # Split questions by newline and process each question
                 question_array = json.loads(qa_pair)
                 logger.info(
                     {
@@ -122,7 +89,6 @@ class TXTProcessor(DataProcessor):
                     }
                 )
                 for record in question_array:
-                    # Log each generated question
                     logger.info(
                         {
                             "message": "Generated question",
