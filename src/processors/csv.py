@@ -39,6 +39,15 @@ class CSVProcessor(DataProcessor):
         products_group_size: int,
         group_columns: List[str],
     ) -> pd.DataFrame:
+        logger.info(
+            {
+                "message": "Getting randomized samples",
+                "df": df.shape,
+                "sample_size": sample_size,
+                "products_group_size": products_group_size,
+                "group_columns": group_columns,
+            }
+        )
         if len(group_columns) == 0:
             if sample_size > df.shape[0]:
                 sample_size = df.shape[0]
@@ -57,10 +66,23 @@ class CSVProcessor(DataProcessor):
         group_counts = (
             filtered_df.groupby(group_columns).size().reset_index(name="count")
         )
-
+        logger.info(
+            {
+                "message": "Filtered groups",
+                "group_counts": group_counts.head(),
+                "group_counts_shape": group_counts.shape,
+            }
+        )
         # Filter groups with at least 'products_group_size' products
         group_counts_filter = group_counts[group_counts["count"] >= products_group_size]
 
+        logger.info(
+            {
+                "message": "Filtered groups",
+                "group_counts_filter": group_counts_filter.shape,
+                "group_counts_filter_head": group_counts_filter.head(),
+            }
+        )
         # Randomly select 'sample_size' groups
         if sample_size > group_counts_filter.shape[0]:
             sample_size = group_counts_filter.shape[0]
@@ -135,6 +157,21 @@ class CSVProcessor(DataProcessor):
             if number_of_questions > 25:
                 number_of_questions = self.batch_size
 
+            if len(records) < 20:
+                continue
+
+            logger.info(
+                {
+                    "message": "Generated question",
+                    "group_row": _index,
+                    "records": records,
+                    "records length": len(records),
+                }
+            )
+
+            if len(records) > 2000:
+                records = records[0:2000]
+
             qa_pair = qa_generator.run(
                 products=records,
                 number_of_questions=number_of_questions,
@@ -158,19 +195,26 @@ class CSVProcessor(DataProcessor):
                     {
                         "message": "Generated question",
                         "question_answer": record,
+                        "reference": records,
                     }
                 )
-                self.add_output_sample(record)
+                self.add_output_sample(record, chunk=records)
         return self.qa_dict
 
-    def add_output_sample(self, record: json) -> None:
+    def add_output_sample(self, record: json, chunk: str) -> None:
         self.qa_array.append(
             {
-                "question": record["question"],
-                "answer": record["answer"],
+                "question_answer": record,
+                "reference": chunk,
             }
         )
 
     def write(self, file_path: str) -> None:
+        logger.info(
+            {
+                "message": "Writing generated questions to file",
+                "file_path": file_path,
+            }
+        )
         with open(file_path, "w") as output_file:
             json.dump(self.qa_array, output_file, indent=4)

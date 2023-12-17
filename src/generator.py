@@ -48,19 +48,16 @@ async def qa_generator(
         metadata_path (str): Path to the metadata file
         crawl_depth (int): Depth to crawl for HTML files
     """
-    llm_openai_gpt4 = ChatOpenAI(
+    llm_openai_gpt = ChatOpenAI(
         temperature=0.1,
         model=model_name,
         request_timeout=120,
-        top_p=1,
-        frequency_penalty=0.0,
-        presence_penalty=0.0,
     )
 
     logger.info("Starting Question Generator")
 
     qa_generator = create_processor_llm(
-        generator_type, llm_openai_gpt4, prompt_key, verbose=True
+        generator_type, llm_openai_gpt, prompt_key, verbose=True
     )
 
     data_processor = create_processor(data_path, llm_type)
