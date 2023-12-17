@@ -52,6 +52,9 @@ async def qa_generator(
         temperature=0.1,
         model=model_name,
         request_timeout=120,
+        top_p=1,
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
     )
 
     logger.info("Starting Question Generator")
