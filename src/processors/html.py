@@ -6,6 +6,7 @@ import io
 import logging
 import numpy as np
 import re
+import tldextract
 
 from langchain.chains import LLMChain
 from urllib.parse import urljoin
@@ -61,8 +62,18 @@ class HTMLProcessor(DataProcessor):
             print(f"Error extracting content from {url}: {str(e)}")
             return []
 
+    def get_base_domain(self, url):
+        extracted_info = tldextract.extract(url)
+        base_domain = f"{extracted_info.domain}.{extracted_info.suffix}"
+        return base_domain
+
     def crawl_url(self, starting_url, url, depth):
-        if depth == 0:  # or not url.startswith(starting_url)
+        if (
+            depth == 0
+            or self.get_base_domain(starting_url) != self.get_base_domain(url)
+            or not url.startswith("http")
+            or url in self.visited
+        ):
             return
 
         try:
@@ -82,8 +93,15 @@ class HTMLProcessor(DataProcessor):
                             "link": link.get("href"),
                         }
                     )
-                    next_url = urljoin(url, link.get("href"))
-                    self.crawl_url(starting_url, next_url, depth - 1)
+                    if link.get("href").startswith("http"):
+                        logger.info(
+                            {
+                                "message": "Next crawl link",
+                                "link": link.get("href"),
+                            }
+                        )
+                        next_url = urljoin(url, link.get("href"))
+                        self.crawl_url(starting_url, next_url, depth - 1)
 
         except Exception as e:
             print(f"Error crawling {url}: {str(e)}")
@@ -209,6 +227,7 @@ class HTMLProcessor(DataProcessor):
                     {
                         "message": "Generated question",
                         "qa_pair": qa_pair,
+                        "reference": text_chunk,
                     }
                 )
                 try:
@@ -223,7 +242,7 @@ class HTMLProcessor(DataProcessor):
                                 "question_answer": record,
                             }
                         )
-                        self.add_output_sample(record)
+                        self.add_output_sample(record, chunk=text_chunk)
                 except Exception as e:
                     logger.info(
                         {
@@ -234,14 +253,23 @@ class HTMLProcessor(DataProcessor):
                     )
         return self.qa_dict
 
-    def add_output_sample(self, record: json) -> None:
+    def add_output_sample(self, record: json, chunk: str) -> None:
         self.qa_array.append(
             {
-                "question": record["question"],
-                "answer": record["answer"],
-                "url": record["url"],
+                "question_answer": record,
+                "reference": chunk,
             }
         )
+
+    def write(self, file_path: str) -> None:
+        logger.info(
+            {
+                "message": "Writing generated questions to file",
+                "file_path": file_path,
+            }
+        )
+        with open(file_path, "w") as output_file:
+            json.dump(self.qa_array, output_file, indent=4)
 
     @staticmethod
     @DataProcessor.retry_with_exponential_backoff
@@ -252,8 +280,3 @@ class HTMLProcessor(DataProcessor):
             products=records,
             number_of_questions=number_of_questions,
         )
-
-    def write(self, file_path: str) -> None:
-        sorted_data = sorted(self.qa_array, key=lambda x: x["url"])
-        with open(file_path, "w") as output_file:
-            json.dump(sorted_data, output_file, indent=4)
