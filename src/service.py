@@ -90,19 +90,21 @@ async def generator(
     if group_columns:
         for column in group_columns.split(","):
             grouped_columns.append(column)
-    await qa_generator(
-        data_path,
-        number_of_questions,
-        sample_size,
-        products_group_size,
-        grouped_columns,
-        output_file,
-        model_name,
-        prompt_key,
-        llm_type,
-        generator_type,
-        metadata,
-        crawl_depth,
+    asyncio.create_task(
+        qa_generator(
+            data_path,
+            number_of_questions,
+            sample_size,
+            products_group_size,
+            grouped_columns,
+            output_file,
+            model_name,
+            prompt_key,
+            llm_type,
+            generator_type,
+            metadata,
+            crawl_depth,
+        )
     )
     return JSONResponse(
         content={
