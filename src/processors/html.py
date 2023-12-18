@@ -35,6 +35,7 @@ class HTMLProcessor(DataProcessor):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
         }
         self.batch_size = 25
+        self.chunk_size = 2000
 
     def set_depth(self, depth: int) -> None:
         self.depth = depth
@@ -148,7 +149,7 @@ class HTMLProcessor(DataProcessor):
         )
         return df
 
-    def get_randomized_samples(
+    def randomize_samples(
         self,
         data: pd.DataFrame,
         sample_size: int,
@@ -203,7 +204,7 @@ class HTMLProcessor(DataProcessor):
             # Close the buffer (optional)
             csv_buffer.close()
 
-            text_chunks = self.chunk_text(records, chunk_size=2000)
+            text_chunks = self.chunk_text(records, chunk_size=self.chunk_size)
 
             for text_chunk in text_chunks:
                 logger.info(
@@ -214,7 +215,7 @@ class HTMLProcessor(DataProcessor):
                     }
                 )
 
-                if number_of_questions > 25:
+                if number_of_questions > self.batch_size:
                     number_of_questions = self.batch_size
 
                 qa_pair = self.completions_with_backoff(

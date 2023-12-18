@@ -6,13 +6,13 @@ from langchain.prompts import PromptTemplate
 from .prompts import QuestionGeneratorPromptTemplate
 
 
-class QuestionGenerator(LLMChain):
+class DatagenQA(LLMChain):
     """Chain to generate questions based on the products available"""
 
     @classmethod
     def from_llm(cls, llm: BaseLLM, prompt_key: str, verbose: bool = True) -> LLMChain:
         """Get the response parser."""
-        if prompt_key == "prompt_key_csv" or prompt_key == "stateful_qa_prompt_key_csv":
+        if "_csv" in prompt_key:
             prompt = PromptTemplate(
                 template=QuestionGeneratorPromptTemplate.get(prompt_key),
                 input_variables=["products", "number_of_questions", "schema"],
@@ -25,7 +25,35 @@ class QuestionGenerator(LLMChain):
         return cls(prompt=prompt, llm=llm, verbose=verbose)
 
 
-class NERGenerator(LLMChain):
+class DatagenMultiChunkQA(LLMChain):
+    """Chain to generate questions based on the products available"""
+
+    @classmethod
+    def from_llm(cls, llm: BaseLLM, prompt_key: str, verbose: bool = True) -> LLMChain:
+        """Get the response parser."""
+        if "_csv" in prompt_key:
+            prompt = PromptTemplate(
+                template=QuestionGeneratorPromptTemplate.get(prompt_key),
+                input_variables=[
+                    "chunk_reference_first",
+                    "chunk_reference_second",
+                    "number_of_questions",
+                    "schema",
+                ],
+            )
+        else:
+            prompt = PromptTemplate(
+                template=QuestionGeneratorPromptTemplate.get(prompt_key),
+                input_variables=[
+                    "chunk_reference_first",
+                    "chunk_reference_second",
+                    "number_of_questions",
+                ],
+            )
+        return cls(prompt=prompt, llm=llm, verbose=verbose)
+
+
+class DatagenNER(LLMChain):
     """Chain to generate questions based on the products available"""
 
     @classmethod

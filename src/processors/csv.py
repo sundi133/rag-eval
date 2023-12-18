@@ -33,7 +33,7 @@ class CSVProcessor(DataProcessor):
         df.fillna("", inplace=True)
         return df
 
-    def get_randomized_samples(
+    def randomize_samples(
         self,
         df: pd.DataFrame,
         sample_size: int,
@@ -173,11 +173,52 @@ class CSVProcessor(DataProcessor):
             if len(records) > self.chunk_size:
                 records = records[0 : self.chunk_size]
 
-            qa_pair = qa_generator.run(
-                products=records,
-                number_of_questions=number_of_questions,
-                schema=self.schema,
+            logger.info(
+                {
+                    "message": "check qa_generator",
+                    "qa_generator": qa_generator.prompt.input_variables,
+                }
             )
+            if (
+                "chunk_reference_first" in qa_generator.prompt.input_variables
+                and "chunk_reference_second" in qa_generator.prompt.input_variables
+            ):
+                # Define window boundaries based on current index
+                window_indices = [
+                    _index + i
+                    for i in range(
+                        -self.chunk_reference_max_distance,
+                        self.chunk_reference_max_distance,
+                    )
+                    if 0 <= _index + i < len(randomized_samples) and i != 0
+                ]
+                desired_index = window_indices[-1]
+                row_content = randomized_samples.iloc[desired_index]
+
+                # Check if "chunk" column exists, otherwise access the entire row
+                if "chunk" in row_content:
+                    chunk_reference_second = row_content["chunk"]
+                else:
+                    chunk_reference_second = (
+                        row_content  # Use the entire row as chunk content
+                    )
+
+                qa_pair = qa_generator.run(
+                    chunk_reference_first=records,
+                    chunk_reference_second=chunk_reference_second,
+                    number_of_questions=number_of_questions,
+                )
+                records = (
+                    records
+                    + "\n\n"
+                    + "Distant reference chunk: "
+                    + chunk_reference_second
+                )
+            else:
+                qa_pair = qa_generator.run(
+                    products=records,
+                    number_of_questions=number_of_questions,
+                )
 
             # Log generated questions
             logger.info(
