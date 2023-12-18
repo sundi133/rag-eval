@@ -19,7 +19,7 @@ class DataProcessor(ABC):
         pass
 
     @abstractmethod
-    def get_randomized_samples(
+    def randomize_samples(
         self,
         data: pd.DataFrame,
         sample_size: int,

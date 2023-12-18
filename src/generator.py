@@ -69,7 +69,7 @@ async def qa_generator(
 
     df = data_processor.parse()
 
-    randomized_samples = data_processor.get_randomized_samples(
+    randomized_samples = data_processor.randomize_samples(
         df, sample_size, products_group_size, group_columns
     )
 

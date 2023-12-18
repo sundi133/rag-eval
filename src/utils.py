@@ -10,7 +10,7 @@ from .processors.pgsql import PGSQLProcessor
 from .processors.ner import NERProcessor
 from .processors.html import HTMLProcessor
 from .processors.basefile import DataProcessor
-from .llms import QuestionGenerator, NERGenerator
+from .llms import DatagenQA, DatagenNER, DatagenMultiChunkQA
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from .logger import logger_setup
@@ -27,8 +27,9 @@ llm_type_processor_mapping = {
 }
 
 llm_type_generator_mapping = {
-    "text": QuestionGenerator,
-    "ner": NERGenerator,
+    "text": DatagenQA,
+    "text_multi_chunk": DatagenMultiChunkQA,
+    "ner": DatagenNER,
 }
 
 
