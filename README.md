@@ -1,4 +1,21 @@
-## Data ELT Extraction, Question-Answer Generator for Blogs, API/SDK Docs, Readme, Product Catalogs and more unstructured data sources for various LLM Applications
+## Datagen & RagEval for various LLM (Large Language Model) with the RAG (Retrieval-Augmented Generation) Apps on private data
+- Blogs
+- API & Docs
+- Readme/PDF 
+- Product Catalogs
+- any unstructured data sources 
+
+## Types of QA Dataset Generation
+#
+#### Follow-up Continuous Questions Generator
+This generator crafts AI-powered questions that build upon existing conversation content. By measuring the effectiveness of follow-ups, it unlocks deeper insights and drives natural dialogue flow.
+
+#### Turn-Key New Questions 
+Generate new questions that seamlessly shift the conversation to unexplored areas. This flexibility allows you to assess your app's ability to handle context changes and provide relevant information in diverse situations.
+
+#### Questions Spread Across Multiple Chunks
+This option creates thematically linked questions across large data chunks (>4k). By requiring holistic analysis of multiple segments, it pushes your AI's comprehension and reveals hidden connections within your content.
+
 
 [![Python Version](https://img.shields.io/badge/python-3.9-blue.svg)](https://python.org)
 
@@ -6,15 +23,12 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-This project serves as a versatile utility designed to extract structured data from unstructured sources and subsequently create question-answer pairs from the supplied data. Its primary objective is to facilitate a range of downstream tasks, including fine-tuning, evaluation, and ranking of Language Model (LM) and Retrieval-Augmented Generation (RAG) applications. The tool not only empowers users to extract structured data but also provides the means to generate question-answer pair datasets, which can be employed for the rigorous assessment of applications in terms of their accuracy, dependability, and consistency.
+This repo is a tool designed to generate question-answer datasets for evaluating LLM + RAG based apps, particularly focusing on scenarios involving various types of questions. The dataset is constructed to test the capabilities of the LLM + RAG approach in handling different question contexts. The current version supports the generation of three types of questions: follow-up continuous questions, turn-key new questions, and questions spread across multiple chunks.
 
 | Trying to evaluate an LLM on massive documents without automated eval dataset. | Realizing the importance of eval dataset generation for accurate llm app evaluations. |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | ![Confused Person](data/images/confused_person.png)                    | ![Confident Person](data/images/confident_person.png)             |
 
-## Why Dataset Generation Matters
-
-Evaluating LLM applications on massive documents can be a daunting task, especially when you don't have the right evaluation dataset. The quality and relevance of your dataset can significantly impact the accuracy of your LLM app evaluations for production deploy. Manual dataset creation & versioning can be time-consuming and error-prone, leading to inaccurate results.
 
 ## Prerequisites
 - Python (>=3.9)
@@ -22,22 +36,26 @@ Evaluating LLM applications on massive documents can be a daunting task, especia
 - Docker (>=4.25.0)
 
 ## API EndPoints
-These endpoints allow you to handle generation, fetch, evaluation, ranking & reporting
+These endpoints allow you to handle 
+- generation
+- download
+- evaluation on your llm endpoint
+- ranking & reporting
 
-#### POST
+#### POST methods
 ```bash
 * /generate/
 * /evaluate/{id}
 ```
 
-#### GET
+#### GET methods
 ```bash
 * /download/{id}/
 * /report/{id}/
 ```
 
 
-## Installation & Usage
+## Usage
 
 ### 1. Clone this repository to your local machine:
 
@@ -151,68 +169,11 @@ curl -X POST http://localhost:8000/evaluate/ \
 ### Request Example
 
 ```bash
-curl -OJ  http://localhost:8000/ranking/f8e3670f5ff9440a84f93b00197ad697  
+curl -OJ  http://localhost:8000/ranking/ffc64a1150bb4d07ba2e355a32a3f398  
 ```
 
 
-## Sample ranking with evaluation scores
-```bash
-[  
-    {
-        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
-        "url": "http://llm-rag-app-1:8001/chat/",
-        "question": "Where can I find the Wikipedia page about John Doe?",
-        "expected_response": "You can find the Wikipedia page about John Doe by visiting the following link: https://en.wikipedia.org/wiki/John_Doe",
-        "endpoint_response": "\"You can find the Wikipedia page about John Doe by searching for his name on the Wikipedia website.\"",
-        "rouge_l_score": 0.6153846153846153,
-        "bleu_score": 0.44323796909955787,
-        "meteor_score": 0.6326797385620915
-    },
-    {
-        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
-        "url": "http://llm-rag-app-1:8001/chat/",
-        "question": "What kind of information can I expect to find on the Wikipedia page about John Doe?",
-        "expected_response": "The Wikipedia page about John Doe contains details about his personal life, career, accomplishments, and any significant events or controversies related to him.",
-        "endpoint_response": "\"On the Wikipedia page about John Doe, you can expect to find a variety of information about him. This may include his personal background, such as his birthdate, place of birth, and family information. It may also provide details about his education, career, and notable achievements. Additionally, the page may cover his involvement in any significant events or contributions to a particular field. Furthermore, you can expect to find information about his public image, including any controversies or criticisms associated with him. The page may also include references and external links for further reading and verification of the information provided.\"",
-        "rouge_l_score": 0.2764227642276423,
-        "bleu_score": 0.08875250765948056,
-        "meteor_score": 0.3804238549081112
-    },
-    {
-        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
-        "url": "http://llm-rag-app-1:8001/chat/",
-        "question": "What is the purpose of the readme file?",
-        "expected_response": "The readme file provides information about the content and instructions for using the test file.",
-        "endpoint_response": "\"The purpose of the readme file is to provide important information and instructions about a particular project or software. It typically includes details about the project's purpose, installation instructions, usage guidelines, and any additional resources or dependencies required. The readme file serves as a helpful guide for users and developers to understand and navigate the project effectively.\"",
-        "rouge_l_score": 0.273972602739726,
-        "bleu_score": 0.032836768734999404,
-        "meteor_score": 0.35769628099173556
-    },
-    {
-        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
-        "url": "http://llm-rag-app-1:8001/chat/",
-        "question": "What is the content of the Wikipedia page about John Doe?",
-        "expected_response": "The Wikipedia page about John Doe provides information about his background, achievements, and notable contributions.",
-        "endpoint_response": "\"I'm sorry, but as an AI assistant, I don't have the ability to retrieve specific information from the internet in real-time. However, you can easily find the content of the Wikipedia page about John Doe by searching for \\\"John Doe Wikipedia\\\" on any search engine. This will direct you to the actual Wikipedia page where you can read all the information about John Doe.\"",
-        "rouge_l_score": 0.19512195121951217,
-        "bleu_score": 0.07027194436347371,
-        "meteor_score": 0.31721105527638194
-    },
-    {
-        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
-        "url": "http://llm-rag-app-1:8001/chat/",
-        "question": "Is there any specific format or structure for the test file?",
-        "expected_response": "The readme file does not mention any specific format or structure for the test file.",
-        "endpoint_response": "\"Yes, there is typically a specific format or structure for a test file. The format and structure may vary depending on the specific testing framework or tool being used. It is important to follow the guidelines provided by the testing framework or tool to ensure that the test file is correctly formatted and structured. This may include specifying the test cases, input data, expected results, and any necessary setup or teardown steps. It is recommended to refer to the documentation or guidelines of the testing framework or tool for more specific information on the required format and structure of the test file.\"",
-        "rouge_l_score": 0.15384615384615385,
-        "bleu_score": 0.053436696733189626,
-        "meteor_score": 0.3113279418659166
-    }
-]
-```
-
-
-## Sample QA Datasets that are generated
+## Example datasets generated
 
 In the provided command, we are generating 2 questions based on the `amazon_uk_shoes_cleaned.csv` data file. We are using a sample size of 3 and require a minimum of 3 products per group to generate questions. The questions will be grouped by the columns "brand," "sub_category," "category," and "gender," and the results will be saved to `qa_sample.json` in the `output` directory.
 
@@ -268,6 +229,63 @@ In the provided command, we are generating 2 questions based on the `amazon_uk_s
 "url":"https://docs.getjavelin.io/docs/javelin-core/loadbalancing#__docusaurus_skipToContent_fallback"
 }
 
+```
+
+
+## Examples of evaluation report
+```bash
+[  
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "Where can I find the Wikipedia page about John Doe?",
+        "expected_response": "You can find the Wikipedia page about John Doe by visiting the following link: https://en.wikipedia.org/wiki/John_Doe",
+        "endpoint_response": "\"You can find the Wikipedia page about John Doe by searching for his name on the Wikipedia website.\"",
+        "rouge_l_score": 0.6153846153846153,
+        "bleu_score": 0.44323796909955787,
+        "meteor_score": 0.6326797385620915
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What kind of information can I expect to find on the Wikipedia page about John Doe?",
+        "expected_response": "The Wikipedia page about John Doe contains details about his personal life, career, accomplishments, and any significant events or controversies related to him.",
+        "endpoint_response": "\"On the Wikipedia page about John Doe, you can expect to find a variety of information about him. This may include his personal background, such as his birthdate, place of birth, and family information. It may also provide details about his education, career, and notable achievements. Additionally, the page may cover his involvement in any significant events or contributions to a particular field. Furthermore, you can expect to find information about his public image, including any controversies or criticisms associated with him. The page may also include references and external links for further reading and verification of the information provided.\"",
+        "rouge_l_score": 0.2764227642276423,
+        "bleu_score": 0.08875250765948056,
+        "meteor_score": 0.3804238549081112
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What is the purpose of the readme file?",
+        "expected_response": "The readme file provides information about the content and instructions for using the test file.",
+        "endpoint_response": "\"The purpose of the readme file is to provide important information and instructions about a particular project or software. It typically includes details about the project's purpose, installation instructions, usage guidelines, and any additional resources or dependencies required. The readme file serves as a helpful guide for users and developers to understand and navigate the project effectively.\"",
+        "rouge_l_score": 0.273972602739726,
+        "bleu_score": 0.032836768734999404,
+        "meteor_score": 0.35769628099173556
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "What is the content of the Wikipedia page about John Doe?",
+        "expected_response": "The Wikipedia page about John Doe provides information about his background, achievements, and notable contributions.",
+        "endpoint_response": "\"I'm sorry, but as an AI assistant, I don't have the ability to retrieve specific information from the internet in real-time. However, you can easily find the content of the Wikipedia page about John Doe by searching for \\\"John Doe Wikipedia\\\" on any search engine. This will direct you to the actual Wikipedia page where you can read all the information about John Doe.\"",
+        "rouge_l_score": 0.19512195121951217,
+        "bleu_score": 0.07027194436347371,
+        "meteor_score": 0.31721105527638194
+    },
+    {
+        "endpoint_name": "llm-fb7c6163791d24cb082c6407163185b04",
+        "url": "http://llm-rag-app-1:8001/chat/",
+        "question": "Is there any specific format or structure for the test file?",
+        "expected_response": "The readme file does not mention any specific format or structure for the test file.",
+        "endpoint_response": "\"Yes, there is typically a specific format or structure for a test file. The format and structure may vary depending on the specific testing framework or tool being used. It is important to follow the guidelines provided by the testing framework or tool to ensure that the test file is correctly formatted and structured. This may include specifying the test cases, input data, expected results, and any necessary setup or teardown steps. It is recommended to refer to the documentation or guidelines of the testing framework or tool for more specific information on the required format and structure of the test file.\"",
+        "rouge_l_score": 0.15384615384615385,
+        "bleu_score": 0.053436696733189626,
+        "meteor_score": 0.3113279418659166
+    }
+]
 ```
 
 ## Linter
