@@ -3,9 +3,12 @@
 - API & Docs
 - Readme/PDF 
 - Product Catalogs
-- any unstructured data sources 
+- Any Unstructured Data Dources 
 
 ## Types of QA Dataset Generation
+
+#### Simple QA Generation
+This generates context-independent self-contained question-answer datasets.
 
 #### Follow-up Continuous Questions Generator
 This generator crafts AI-powered questions that build upon existing conversation content. By measuring the effectiveness of follow-ups, it unlocks deeper insights and drives natural dialogue flow.
