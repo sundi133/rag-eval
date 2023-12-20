@@ -6,7 +6,7 @@
 - any unstructured data sources 
 
 ## Types of QA Dataset Generation
-#
+
 #### Follow-up Continuous Questions Generator
 This generator crafts AI-powered questions that build upon existing conversation content. By measuring the effectiveness of follow-ups, it unlocks deeper insights and drives natural dialogue flow.
 
@@ -22,8 +22,6 @@ This option creates thematically linked questions across large data chunks (>4k)
 [![codecov](https://codecov.io/gh/yourusername/question-answer-generator/branch/main/graph/badge.svg?token=yourcodecovtoken)](https://codecov.io/gh/yourusername/question-answer-generator)
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-
-This repo is a tool designed to generate question-answer datasets for evaluating LLM + RAG based apps, particularly focusing on scenarios involving various types of questions. The dataset is constructed to test the capabilities of the LLM + RAG approach in handling different question contexts. The current version supports the generation of three types of questions: follow-up continuous questions, turn-key new questions, and questions spread across multiple chunks.
 
 | Trying to evaluate an LLM on massive documents without automated eval dataset. | Realizing the importance of eval dataset generation for accurate llm app evaluations. |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
