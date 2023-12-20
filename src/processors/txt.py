@@ -25,14 +25,16 @@ class TXTProcessor(DataProcessor):
         self.file_extension = os.path.splitext(data_path)[-1].lower()
         self.qa_dict = {}
         self.qa_array = []
-        self.chunk_size = 5000  # Define the chunk_size attribute here
         self.batch_size = 25
-        self.chunk_reference_max_distance = 4
+        self.chunk_size = 2000
 
     def parse(self) -> pd.DataFrame:
         with open(self.data_path, "r") as f:
             content = f.read()
-        chunks = [content[x : x + 5000] for x in range(0, len(content), 5000)]
+        chunks = [
+            content[x : x + self.chunk_size]
+            for x in range(0, len(content), self.chunk_size)
+        ]
         data = [x.strip() for x in chunks]
 
         df = pd.DataFrame({"chunk": data})
@@ -76,7 +78,7 @@ class TXTProcessor(DataProcessor):
                     continue
 
                 if (
-                    number_of_questions > 25
+                    number_of_questions > self.batch_size
                 ):  # too many questions might cause token limit error
                     number_of_questions = self.batch_size
 
@@ -97,18 +99,13 @@ class TXTProcessor(DataProcessor):
                             -self.chunk_reference_max_distance,
                             self.chunk_reference_max_distance,
                         )
-                        if 0 <= _index + i < len(randomized_samples) and i != 0
+                        if 0 <= _index + i < randomized_samples.shape[0] and i != 0
                     ]
                     desired_index = window_indices[-1]
                     row_content = randomized_samples.iloc[desired_index]
 
                     # Check if "chunk" column exists, otherwise access the entire row
-                    if "chunk" in row_content:
-                        chunk_reference_second = row_content["chunk"]
-                    else:
-                        chunk_reference_second = (
-                            row_content  # Use the entire row as chunk content
-                        )
+                    chunk_reference_second = row_content["chunk"]
 
                     qa_pair = qa_generator.run(
                         chunk_reference_first=records,

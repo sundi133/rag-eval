@@ -4,7 +4,7 @@ import asyncio
 
 from langchain.chat_models import ChatOpenAI
 from typing import List
-from .utils import create_processor, create_processor_llm
+from .utils import select_processor, select_llm
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -56,11 +56,9 @@ async def qa_generator(
 
     logger.info("Starting Question Generator")
 
-    qa_generator = create_processor_llm(
-        generator_type, llm_openai_gpt, prompt_key, verbose=True
-    )
+    qa_generator = select_llm(generator_type, llm_openai_gpt, prompt_key, verbose=True)
 
-    data_processor = create_processor(data_path, llm_type)
+    data_processor = select_processor(data_path, llm_type)
 
     if llm_type == ".ner":
         data_processor.set_entity(metadata_path)
