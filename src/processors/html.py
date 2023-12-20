@@ -281,12 +281,13 @@ class HTMLProcessor(DataProcessor):
                         records=text_chunk,
                         number_of_questions=number_of_questions,
                     )
+                    records = text_chunk
 
                 logger.info(
                     {
                         "message": "Generated question",
                         "qa_pair": qa_pair,
-                        "reference": text_chunk,
+                        "reference": records,
                     }
                 )
                 try:
@@ -299,9 +300,10 @@ class HTMLProcessor(DataProcessor):
                             {
                                 "message": "Generated question",
                                 "question_answer": record,
+                                "reference": records,
                             }
                         )
-                        self.add_output_sample(record, chunk=text_chunk)
+                    self.add_output_sample(record, chunk=records)
                 except Exception as e:
                     logger.info(
                         {
