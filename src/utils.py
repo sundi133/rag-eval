@@ -33,7 +33,7 @@ llm_type_generator_mapping = {
 }
 
 
-def create_processor(file_path: str, llm_type: str) -> DataProcessor:
+def select_processor(file_path: str, llm_type: str) -> DataProcessor:
     # Get the file extension
     file_extension = file_path.lower().split(".")[-1]
 
@@ -50,7 +50,7 @@ def create_processor(file_path: str, llm_type: str) -> DataProcessor:
         raise ValueError(f"Unsupported file extension: {file_extension}")
 
 
-def create_processor_llm(
+def select_llm(
     generator_type: str, model_name: ChatOpenAI, prompt_key: str, verbose: bool
 ) -> LLMChain:
     generator_class = llm_type_generator_mapping.get(generator_type)

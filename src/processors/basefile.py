@@ -13,6 +13,9 @@ class DataProcessor(ABC):
         self.data_path = data_path
         self.file_extension = os.path.splitext(data_path)[-1].lower()
         self.qa_dict = {}
+        self.chunk_size = 2000  # Define the chunk_size attribute here
+        self.batch_size = 25
+        self.chunk_reference_max_distance = 4
 
     @abstractmethod
     def parse(self) -> None:

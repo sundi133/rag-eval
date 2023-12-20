@@ -36,6 +36,7 @@ class HTMLProcessor(DataProcessor):
         }
         self.batch_size = 25
         self.chunk_size = 2000
+        self.chunk_reference_max_distance = 4
 
     def set_depth(self, depth: int) -> None:
         self.depth = depth
@@ -140,7 +141,7 @@ class HTMLProcessor(DataProcessor):
                 "df": df.shape,
             }
         )
-        df = self.process_df(df)
+        df = self.process_df(df).reset_index(drop=True)
         logger.info(
             {
                 "message": "Deduped data",
@@ -158,7 +159,7 @@ class HTMLProcessor(DataProcessor):
     ) -> pd.DataFrame:
         if sample_size > data.shape[0]:
             sample_size = data.shape[0]
-        return data.sample(n=sample_size, random_state=42)
+        return data.sample(n=sample_size, random_state=42).reset_index(drop=True)
 
     def chunk_text(self, text, chunk_size=1000):
         words = re.findall(r"\S+", text)
@@ -212,17 +213,74 @@ class HTMLProcessor(DataProcessor):
                         "message": "Generating question",
                         "group_row": _index,
                         "text_chunk": text_chunk,
+                        "chunk_reference_max_distance": self.chunk_reference_max_distance,
                     }
                 )
 
                 if number_of_questions > self.batch_size:
                     number_of_questions = self.batch_size
 
-                qa_pair = self.completions_with_backoff(
-                    qa_generator,
-                    records=text_chunk,
-                    number_of_questions=number_of_questions,
-                )
+                # qa_pair = self.completions_with_backoff(
+                #     qa_generator,
+                #     records=text_chunk,
+                #     number_of_questions=number_of_questions,
+                # )
+
+                if (
+                    "chunk_reference_first" in qa_generator.prompt.input_variables
+                    and "chunk_reference_second" in qa_generator.prompt.input_variables
+                ):
+                    # Define window boundaries based on current index
+                    window_indices = [
+                        _index + i
+                        for i in range(
+                            -self.chunk_reference_max_distance,
+                            self.chunk_reference_max_distance,
+                        )
+                        if 0 <= _index + i < randomized_samples.shape[0] and i != 0
+                    ]
+                    if len(window_indices) == 0:
+                        continue
+                    logger.info(
+                        {
+                            "message": "window_indices",
+                            "window_indices": window_indices,
+                        }
+                    )
+
+                    desired_index = window_indices[-1]
+                    row_content = randomized_samples.iloc[desired_index]
+                    row_df = pd.DataFrame([row_content])
+
+                    # Convert DataFrame to a CSV-formatted string in memory
+                    csv_string_io = io.StringIO()
+                    row_df.to_csv(csv_string_io, index=False)
+                    row_data = csv_string_io.getvalue()
+
+                    chunk_references_second = self.chunk_text(
+                        row_data, chunk_size=self.chunk_size
+                    )
+                    chunk_reference_second = chunk_references_second[
+                        np.random.randint(0, len(chunk_references_second))
+                    ]
+
+                    qa_pair = qa_generator.run(
+                        chunk_reference_first=text_chunk,
+                        chunk_reference_second=chunk_reference_second,
+                        number_of_questions=number_of_questions,
+                    )
+                    records = (
+                        text_chunk
+                        + "\n\n"
+                        + "Distant reference chunk: "
+                        + chunk_reference_second
+                    )
+                else:
+                    qa_pair = self.completions_with_backoff(
+                        qa_generator,
+                        records=text_chunk,
+                        number_of_questions=number_of_questions,
+                    )
 
                 logger.info(
                     {

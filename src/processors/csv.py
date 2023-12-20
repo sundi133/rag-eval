@@ -190,18 +190,17 @@ class CSVProcessor(DataProcessor):
                         -self.chunk_reference_max_distance,
                         self.chunk_reference_max_distance,
                     )
-                    if 0 <= _index + i < len(randomized_samples) and i != 0
+                    if 0 <= _index + i < randomized_samples.shape[0] and i != 0
                 ]
                 desired_index = window_indices[-1]
                 row_content = randomized_samples.iloc[desired_index]
 
-                # Check if "chunk" column exists, otherwise access the entire row
-                if "chunk" in row_content:
-                    chunk_reference_second = row_content["chunk"]
-                else:
-                    chunk_reference_second = (
-                        row_content  # Use the entire row as chunk content
-                    )
+                row_df = pd.DataFrame([row_content])
+
+                # Convert DataFrame to a CSV-formatted string in memory
+                csv_string_io = io.StringIO()
+                row_df.to_csv(csv_string_io, index=False)
+                chunk_reference_second = csv_string_io.getvalue()
 
                 qa_pair = qa_generator.run(
                     chunk_reference_first=records,

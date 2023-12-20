@@ -376,6 +376,70 @@ QuestionGeneratorPromptTemplate = {
 
 
     """,
+    "prompt_key_blogpost_stateful_contextual_multilevel_multichunk": """
+     Instructions:
+        Imagine you are a chat data simulator simulating customer chats based on a comprehensive set of products of any provided content on blog post documents.
+        Ensuring all responses are factually accurate and based on the information in content provided in the chunks.
+        Generate {number_of_questions} customer chat questions and answer pairs creating a thoughtful conversational flow that naturally progresses from one question to the next.
+        
+        Chat Simulation Overview:
+        
+        Initial Question: Generate the first customer question prompted by the information in either chunk.
+        Response: Provide a thoughtful and informative answer based on the chosen chunk's content.
+        Follow-up 1: Ask a probing question building upon the customer's interest sparked by the previous answer. Leverage pronouns and connect to specific details from the response.
+        Follow-up 2: Based on the customer's response to the first follow-up, ask another question that delves deeper into the topic or explores a connected theme from the other chunk.
+        Follow-up 3: Continue the conversational flow by asking a final question that either seeks further clarification, explores potential implications, or offers a personalized recommendation based on the gathered information.
+        Ensuring each new question arises naturally from the previous conversation and incorporates information from both chunks to create a sense of interlinking exploration.
+        
+        Always Remember:
+        Adjust the prompts and questions based on the specific content and themes of your data chunks.
+        Use your creativity to craft engaging and relevant follow-up questions that naturally draw the conversation forward.
+        Ensure factual accuracy and maintain consistency in the customer's voice and interests throughout the chat simulation.
+        Think step by step carefully and creatively about how to use the information provided to generate a natural conversation that flows well and is engaging for the customer.
+        
+        Context of chunk 1 is as follows:
+
+        ### start of chunk 1 ###
+        {chunk_reference_first}
+        Chunk 1: [Summarize the key points and themes of the first chunk of data]
+        ### end of chunk 1 ###
+
+        Context of chunk 2 is as follows:
+
+        ### start of chunk 2 ###
+        {chunk_reference_second}
+        Chunk 2: [Summarize the key points and themes of the second chunk of data]
+        ### end of chunk 2 ###        
+
+        
+        [ The output should be in a json format with following format:
+            [
+                {{
+                    "question": "question 1",
+                    "answer": "answer 1",
+                    "follow_up_question_1": "follow up question contextually relevant to answer using pronouns like it, its, this, that, these, those, them as applicable",
+                    "follow_up_answer_1": "follow up answer to follow up question 1",
+                    "follow_up_question_2": "follow up question contextually relevant to follow_up_answer_1 using pronouns it, its, this, that, these, those, them as applicable",
+                    "follow_up_answer_2": "follow up answer to follow up question 2",
+                    ...
+                    "follow_up_question": "follow up question contextually relevant to follow_up_answer_N-1",
+                    "follow_up_answer": "follow up answer N"
+                }},
+                {{
+                    "question": "question 2",
+                    "answer": "answer 2",
+                    "follow_up_question_1": "follow up question contextually relevant to answer using pronouns like it, its, this, that, these, those, them as applicable",
+                    "follow_up_answer_1": "follow up answer to follow up question 1",
+                    "follow_up_question_2": "follow up question contextually relevant to follow_up_answer_1 using pronouns like it, its, this, that, these, those, them as applicable",
+                    "follow_up_answer_2": "follow up answer to follow up question 2",
+                    ...
+                    "follow_up_question": "follow up question contextually relevant to follow_up_answer_N-1",
+                    "follow_up_answer": "follow up answer N"
+                }},
+                ...
+            ]
+        ]
+    """,
     "prompt_key_readme": """
     
         Follow the instructions below:
