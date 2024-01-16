@@ -17,7 +17,7 @@ RUN poetry install && \
     mkdir -p /app/qa_generator_uploads
 
 # Expose the port that the application will run on
-EXPOSE 8000
+EXPOSE 8000 8001
 
 # Define the command to run your application
-CMD ["poetry", "run", "uvicorn", "src.service:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "src.service:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

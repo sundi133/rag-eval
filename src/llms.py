@@ -15,12 +15,22 @@ class DatagenQA(LLMChain):
         if "_csv" in prompt_key:
             prompt = PromptTemplate(
                 template=QuestionGeneratorPromptTemplate.get(prompt_key),
-                input_variables=["products", "number_of_questions", "schema"],
+                input_variables=[
+                    "products",
+                    "number_of_questions",
+                    "persona",
+                    
+                ],
             )
         else:
             prompt = PromptTemplate(
                 template=QuestionGeneratorPromptTemplate.get(prompt_key),
-                input_variables=["products", "number_of_questions"],
+                input_variables=[
+                    "products",
+                    "number_of_questions",
+                    "persona",
+                    
+                ],
             )
         return cls(prompt=prompt, llm=llm, verbose=verbose)
 
@@ -39,6 +49,8 @@ class DatagenMultiChunkQA(LLMChain):
                     "chunk_reference_second",
                     "number_of_questions",
                     "schema",
+                    "persona",
+                    
                 ],
             )
         else:
@@ -48,6 +60,8 @@ class DatagenMultiChunkQA(LLMChain):
                     "chunk_reference_first",
                     "chunk_reference_second",
                     "number_of_questions",
+                    "persona",
+                    
                 ],
             )
         return cls(prompt=prompt, llm=llm, verbose=verbose)

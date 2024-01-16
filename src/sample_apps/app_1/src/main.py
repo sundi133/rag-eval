@@ -5,9 +5,11 @@ import os
 
 from .data import Query
 from fastapi import FastAPI, Form
+from fastapi import FastAPI, File, Form, UploadFile
 
 DATAPATH = os.environ.get("DATAPATH", "fixtures/data.txt")
 PORT = os.environ.get("PORT", 8001)
+upload_directory = "/tmp"
 
 app = FastAPI()
 chroma = chromadb.Client()
@@ -81,7 +83,12 @@ async def generate_response(query: str = Form(...)):
 
 
 @app.post("/ping/")
-async def ping():
+async def ping(file: UploadFile = File(...)):
+    # Process the uploaded file
+    with open(os.path.join(upload_directory, file.filename), "wb") as f:
+        file_content = await file.read()
+        f.write(file_content)
+    DATAPATH = os.path.join(upload_directory, file.filename)
     process_data(DATAPATH)
     return {"status": "pong"}
 

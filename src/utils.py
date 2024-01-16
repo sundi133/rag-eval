@@ -9,11 +9,13 @@ from .processors.txt import TXTProcessor
 from .processors.pgsql import PGSQLProcessor
 from .processors.ner import NERProcessor
 from .processors.html import HTMLProcessor
+from .processors.json import JSONProcessor
 from .processors.basefile import DataProcessor
 from .llms import DatagenQA, DatagenNER, DatagenMultiChunkQA
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from .logger import logger_setup
+from typing import List
 
 logger = logger_setup(__name__)
 
@@ -24,6 +26,7 @@ llm_type_processor_mapping = {
     ".pdf": PDFProcessor,
     ".ner": NERProcessor,
     ".html": HTMLProcessor,
+    ".json": JSONProcessor,
 }
 
 llm_type_generator_mapping = {
@@ -33,9 +36,11 @@ llm_type_generator_mapping = {
 }
 
 
-def select_processor(file_path: str, llm_type: str) -> DataProcessor:
+def select_processor(
+    file_path: List[str], llm_type: str, dataset_id: str
+) -> DataProcessor:
     # Get the file extension
-    file_extension = file_path.lower().split(".")[-1]
+    file_extension = file_path[0].lower().split(".")[-1]
 
     # Look up the class based on the file extension
     if llm_type in llm_type_processor_mapping.keys():
@@ -45,7 +50,7 @@ def select_processor(file_path: str, llm_type: str) -> DataProcessor:
 
     if processor_class:
         # Create an instance of the chosen class
-        return processor_class(file_path)
+        return processor_class(file_path, dataset_id=dataset_id)
     else:
         raise ValueError(f"Unsupported file extension: {file_extension}")
 

@@ -1,23 +1,15 @@
 import nltk
 import argparse
 import asyncio
-import wandb
 import logging
 import json
 import os
 import random
 
-from nltk.translate.bleu_score import sentence_bleu
-from nltk.translate.bleu_score import SmoothingFunction
-from nltk.translate.meteor_score import single_meteor_score
 from rouge_score import rouge_scorer
 
 from typing import List
 from .utils import read_endpoint_configurations, read_qa_data, get_llm_answer
-
-# Make sure NLTK data is downloaded (required for METEOR and ROUGE)
-nltk.download("wordnet")
-nltk.download("punkt")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -30,7 +22,6 @@ logger.addHandler(ch)
 async def evaluate_qa_data(
     qa_data_path: str,
     endpoint_configs: dict(),
-    wandb_log: bool = False,
     output_file: str = "ranking.json",
     sampling_factor: float = 1.0,
 ) -> None:
@@ -40,7 +31,6 @@ async def evaluate_qa_data(
     Args:
         qa_data_path (str): The path to the JSON file containing the QA data.
         qa_endpoints (str): The path to the JSON file containing the endpoint configurations.
-        wandb_log (bool): Whether to log the results to Weights & Biases.
 
     Returns:
         None
@@ -72,26 +62,11 @@ async def evaluate_qa_data(
         logger.info(f"Answer: {reference_answer}")
         for endpoint_config in endpoint_configs:
             candidate = await get_llm_answer(question, endpoint_config)
-            # Tokenize the sentences into lists of words
-            reference_answer_tokens = nltk.word_tokenize(reference_answer.lower())
-            candidate_tokens = nltk.word_tokenize(candidate.lower())
-
-            # Calculate BLEU score
-            bleu_score_val = sentence_bleu(
-                [reference_answer_tokens],
-                candidate_tokens,
-                smoothing_function=SmoothingFunction().method4,
-            )
 
             # Calculate ROUGE-L score
             rouge_l_score_val = scorer.score(reference_answer, candidate)[
                 "rougeL"
             ].fmeasure
-
-            # Calculate METEOR score
-            meteor_score_val = single_meteor_score(
-                reference_answer.split(" "), candidate.split(" ")
-            )
 
             logger.info(
                 {
@@ -101,8 +76,6 @@ async def evaluate_qa_data(
                     "expected_response": reference_answer,
                     "endpoint_response": candidate,
                     "rouge_l_score": rouge_l_score_val,
-                    "bleu_score": bleu_score_val,
-                    "meteor_score": meteor_score_val,
                 }
             )
             question_ranking.append(
@@ -113,8 +86,6 @@ async def evaluate_qa_data(
                     "expected_response": reference_answer,
                     "endpoint_response": candidate,
                     "rouge_l_score": rouge_l_score_val,
-                    "bleu_score": bleu_score_val,
-                    "meteor_score": meteor_score_val,
                 }
             )
 
@@ -131,20 +102,6 @@ async def evaluate_qa_data(
 
     for ranking in question_ranking:
         logger.info(f"Question: {ranking['question']}")
-        # log in wandb
-        if wandb_log:
-            wandb.log(
-                {
-                    "question": ranking["question"],
-                    "expected_response": ranking["expected_response"],
-                    "endpoint_response": ranking["endpoint_response"],
-                    "endpoint_name": ranking["endpoint_name"],
-                    "url": ranking["url"],
-                    "rouge_l_score": ranking["rouge_l_score"],
-                    "bleu_score": ranking["bleu_score"],
-                    "meteor_score": ranking["meteor_score"],
-                }
-            )
         logger.info(
             {
                 "question": ranking["question"],
@@ -153,8 +110,6 @@ async def evaluate_qa_data(
                 "endpoint_name": ranking["endpoint_name"],
                 "url": ranking["url"],
                 "rouge_l_score": ranking["rouge_l_score"],
-                "bleu_score": ranking["bleu_score"],
-                "meteor_score": ranking["meteor_score"],
             }
         )
 
@@ -169,30 +124,3 @@ async def evaluate_qa_data(
         logger.info(f"Ranking is completed and saved to {output_file}")
 
     logger.info("Ranking is completed")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Ranking the endpoints for each question"
-    )
-
-    parser.add_argument("--qa_data_path", type=str, help="Path to the input data file")
-
-    parser.add_argument("--qa_endpoints", type=str, help="LLM Endpoints")
-
-    parser.add_argument(
-        "--wandb_log", type=bool, default=False, help="wandb logging enabled"
-    )
-
-    args = parser.parse_args()
-
-    # Read and process endpoint configurations
-    endpoint_configs = read_endpoint_configurations(args.qa_endpoints)
-
-    asyncio.run(
-        evaluate_qa_data(
-            qa_data_path=args.qa_data_path,
-            qa_endpoints=endpoint_configs,
-            wandb_log=args.wandb_log,
-        )
-    )
