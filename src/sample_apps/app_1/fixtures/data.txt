@@ -1,21 +1,145 @@
-TXT test file
-Purpose: Provide example of this file type
-Document file type: TXT
-Version: 1.0
-Remark:
+Finance is the study and discipline of money, currency and capital assets. It is related to, but not synonymous with economics, which is the study of production, distribution, and consumption of goods and services; the discipline of financial economics bridges the two. Financial activities take place in financial systems at various scopes; thus, the field can be roughly divided into personal, corporate, and public finance.[a]
 
-Example content:
-The names "John Doe" for males, "Jane Doe" or "Jane Roe" for females, or "Jonnie Doe" and "Janie Doe" for children, or just "Doe" non-gender-specifically are used as placeholder names for a party whose true identity is unknown or must be withheld in a legal action, case, or discussion. The names are also used to refer to acorpse or hospital patient whose identity is unknown. This practice is widely used in the United States and Canada, but is rarely used in other English-speaking countries including the United Kingdom itself, from where the use of "John Doe" in a legal context originates. The names Joe Bloggs or John Smith are used in the UK instead, as well as in Australia and New Zealand.
+In a financial system, assets are bought, sold, or traded as financial instruments, such as currencies, loans, bonds, shares, stocks, options, futures, etc. Assets can also be banked, invested, and insured to maximize value and minimize loss. In practice, risks are always present in any financial action and entities.
 
-John Doe is sometimes used to refer to a typical male in other contexts as well, in a similar manner to John Q. Public, known in Great Britain as Joe Public, John Smith or Joe Bloggs. For example, the first name listed on a form is often John Doe, along with a fictional address or other fictional information to provide an example of how to fill in the form. The name is also used frequently in popular culture, for example in the Frank Capra film Meet John Doe. John Doe was also the name of a 2002 American television series.
+A broad range of subfields within finance exists due to its wide scope. Asset, money, risk and investment management aim to maximize value and minimize volatility. Financial analysis is the viability, stability, and profitability assessment of an action or entity. In some cases, theories in finance can be tested using the scientific method, covered by experimental finance.
 
-Similarly, a child or baby whose identity is unknown may be referred to as Baby Doe. A notorious murder case in Kansas City, Missouri, referred to the baby victim as Precious Doe. Other unidentified female murder victims are Cali Doe and Princess Doe. Additional persons may be called James Doe, Judy Doe, etc. However, to avoid possible confusion, if two anonymous or unknown parties are cited in a specific case or action, the surnames Doe and Roe may be used simultaneously; for example, "John Doe v. Jane Roe". If several anonymous parties are referenced, they may simply be labelled John Doe #1, John Doe #2, etc. (the U.S. Operation Delego cited 21 (numbered) "John Doe"s) or labelled with other variants of Doe / Roe / Poe / etc. Other early alternatives such as John Stiles and Richard Miles are now rarely used, and Mary Major has been used in some American federal cases.
+Some fields are multidisciplinary, such as mathematical finance, financial law, financial economics, financial engineering and financial technology. These fields are the foundation of business and accounting.
+
+The early history of finance parallels the early history of money, which is prehistoric. Ancient and medieval civilizations incorporated basic functions of finance, such as banking, trading and accounting, into their economies. In the late 19th century, the global financial system was formed.
+
+In the middle of the 20th century, finance emerged as a distinct academic discipline, separate from economics.[1] (The first academic journal, The Journal of Finance, began publication in 1946.) The earliest doctoral programs in finance were established in the 1960s and 1970s.[2] Finance is today also widely studied through career-focused undergraduate and master's level programs.[3][4]
+
+The financial system
+
+Bond issued by The Baltimore and Ohio Railroad. Bonds are a form of borrowing used by corporations to finance their operations.
+
+Share certificate dated 1913 issued by the Radium Hill Company
+
+NYSE's stock exchange traders floor c 1960, before the introduction of electronic readouts and computer screens
+
+Chicago Board of Trade Corn Futures market, 1993
+
+Oil traders, Houston, 2009
+Main article: Financial system
+See also: Financial services, financial market, and Circular flow of income
+As outlined, the financial system consists of the flows of capital that take place between individuals and households (personal finance), governments (public finance), and businesses (corporate finance). "Finance" thus studies the process of channeling money from savers and investors to entities that need it. [b] Savers and investors have money available which could earn interest or dividends if put to productive use. Individuals, companies and governments must obtain money from some external source, such as loans or credit, when they lack sufficient funds to run their operations.
+
+In general, an entity whose income exceeds its expenditure can lend or invest the excess, intending to earn a fair return. Correspondingly, an entity where income is less than expenditure can raise capital usually in one of two ways: (i) by borrowing in the form of a loan (private individuals), or by selling government or corporate bonds; (ii) by a corporation selling equity, also called stock or shares (which may take various forms: preferred stock or common stock). The owners of both bonds and stock may be institutional investors – financial institutions such as investment banks and pension funds – or private individuals, called private investors or retail investors; see Financial market participants.
+
+The lending is often indirect, through a financial intermediary such as a bank, or via the purchase of notes or bonds (corporate bonds, government bonds, or mutual bonds) in the bond market. The lender receives interest, the borrower pays a higher interest than the lender receives, and the financial intermediary earns the difference for arranging the loan.[6][7][8] A bank aggregates the activities of many borrowers and lenders. A bank accepts deposits from lenders, on which it pays interest. The bank then lends these deposits to borrowers. Banks allow borrowers and lenders, of different sizes, to coordinate their activity.
+
+Investing typically entails the purchase of stock, either individual securities or via a mutual fund, for example. Stocks are usually sold by corporations to investors so as to raise required capital in the form of "equity financing", as distinct from the debt financing described above. The financial intermediaries here are the investment banks. The investment banks find the initial investors and facilitate the listing of the securities, typically shares and bonds. Additionally, they facilitate the securities exchanges, which allow their trade thereafter, as well as the various service providers which manage the performance or risk of these investments. These latter include mutual funds, pension funds, wealth managers, and stock brokers, typically servicing retail investors (private individuals).
+
+Inter-institutional trade and investment, and fund-management at this scale, is referred to as "wholesale finance". Institutions here extend the products offered, with related trading, to include bespoke options, swaps, and structured products, as well as specialized financing; this "financial engineering" is inherently mathematical, and these institutions are then the major employers of "quants" (see below). In these institutions, risk management, regulatory capital, and compliance play major roles.
+
+Areas of finance
+As outlined, finance comprises, broadly, the three areas of personal finance, corporate finance, and public finance. These, in turn, overlap and employ various activities and sub-disciplines – chiefly investments, risk management, and quantitative finance.
+
+Personal finance
+
+Wealth management consultation – here the financial advisor counsels the client on an appropriate investment strategy
+Main article: Personal finance
+Further information: Financial planner and Investment advisory
+Personal finance is defined as "the mindful planning of monetary spending and saving, while also considering the possibility of future risk".[9] Personal finance may involve paying for education, financing durable goods such as real estate and cars, buying insurance, investing, and saving for retirement.[10] Personal finance may also involve paying for a loan or other debt obligations. The main areas of personal finance are considered to be income, spending, saving, investing, and protection.[11] The following steps, as outlined by the Financial Planning Standards Board,[12] suggest that an individual will understand a potentially secure personal finance plan after:
+
+Purchasing insurance to ensure protection against unforeseen personal events;
+Understanding the effects of tax policies, subsidies, or penalties on the management of personal finances;
+Understanding the effects of credit on individual financial standing;
+Developing a savings plan or financing for large purchases (auto, education, home);
+Planning a secure financial future in an environment of economic instability;
+Pursuing a checking or a savings account;
+Preparing for retirement or other long term expenses.[13]
+Corporate finance
+Main articles: Corporate finance and Financial management
+Further information: Strategic financial management
+Corporate finance deals with the actions that managers take to increase the value of the firm to the shareholders, the sources of funding and the capital structure of corporations, and the tools and analysis used to allocate financial resources. While corporate finance is in principle different from managerial finance, which studies the financial management of all firms rather than corporations alone, the concepts are applicable to the financial problems of all firms,[14] and this area is then often referred to as "business finance".
+
+Typically, then, "corporate finance" relates to the long term objective of maximizing the value of the entity's assets, its stock, and its return to shareholders, while also balancing risk and profitability. This entails [15] three primary areas:
+
+Capital budgeting: selecting which projects to invest in – here, accurately determining value is crucial, as judgements about asset values can be "make or break" [16]
+Dividend policy: the use of "excess" funds – are these to be reinvested in the business or returned to shareholders
+Capital structure: deciding on the mix of funding to be used – here attempting to find the optimal capital mix re debt-commitments vs cost of capital
+The latter creates the link with investment banking and securities trading, as above, in that the capital raised will generically comprise debt, i.e. corporate bonds, and equity, often listed shares. Re risk management within corporates, see below.
+
+Financial managers – i.e. as distinct from corporate financiers – focus more on the short term elements of profitability, cash flow, and "working capital management" (inventory, credit and debtors), ensuring that the firm can safely and profitably carry out its financial and operational objectives; i.e. that it: (1) can service both maturing short-term debt repayments, and scheduled long-term debt payments, and (2) has sufficient cash flow for ongoing and upcoming operational expenses. See Financial management and Financial planning and analysis.
+
+Public finance
+
+President George W. Bush, speaking on the Federal Budget in 2007, here requesting additional funds from Congress
+
+CBO: 2022 US Federal Budget Infographic
+Main article: Public finance
+Public finance describes finance as related to sovereign states, sub-national entities, and related public entities or agencies. It generally encompasses a long-term strategic perspective regarding investment decisions that affect public entities.[17] These long-term strategic periods typically encompass five or more years.[18] Public finance is primarily concerned with:[19]
+
+Identification of required expenditures of a public sector entity;
+Source(s) of that entity's revenue;
+The budgeting process;
+Sovereign debt issuance, or municipal bonds for public works projects.
+Central banks, such as the Federal Reserve System banks in the United States and the Bank of England in the United Kingdom, are strong players in public finance. They act as lenders of last resort as well as strong influences on monetary and credit conditions in the economy.[20]
+
+Development finance, which is related, concerns investment in economic development projects provided by a (quasi) governmental institution on a non-commercial basis; these projects would otherwise not be able to get financing. See Public utility § Finance. A public–private partnership is primarily used for infrastructure projects: a private sector corporate provides the financing up-front, and then draws profits from taxpayers or users.
+
+Investment management
+
+Share prices listed in a Korean Newspaper
+
+"The excitement before the bubble burst" – viewing prices via ticker tape, shortly before the Wall Street Crash of 1929
+
+Modern price-ticker. This infrastructure underpins contemporary exchanges, evidencing prices and related ticker symbols. The ticker symbol is represented by a unique set of characters used to identify the subject of the financial transaction.
+Main article: Investment management
+See also: Active management and Passive management
+Investment management [21][22][14] is the professional asset management of various securities – typically shares and bonds, but also other assets, such as real estate, commodities and alternative investments – in order to meet specified investment goals for the benefit of investors.
+
+As above, investors may be institutions, such as insurance companies, pension funds, corporations, charities, educational establishments, or private investors, either directly via investment contracts or, more commonly, via collective investment schemes like mutual funds, exchange-traded funds, or REITs.
+
+At the heart of investment management[14] is asset allocation – diversifying the exposure among these asset classes, and among individual securities within each asset class – as appropriate to the client's investment policy, in turn, a function of risk profile, investment goals, and investment horizon (see Investor profile). Here:
+
+Portfolio optimization is the process of selecting the best portfolio given the client's objectives and constraints.
+Fundamental analysis is the approach typically applied in valuing and evaluating the individual securities.
+Technical analysis is about forecasting future asset prices with past data[23]
+Overlaid is the portfolio manager's investment style – broadly, active vs passive, value vs growth, and small cap vs. large cap – and investment strategy.
+
+In a well-diversified portfolio, achieved investment performance will, in general, largely be a function of the asset mix selected, while the individual securities are less impactful. The specific approach or philosophy will also be significant, depending on the extent to which it is complementary with the market cycle.
+
+A quantitative fund is managed using computer-based mathematical techniques (increasingly, machine learning) instead of human judgment. The actual trading also, is typically automated via sophisticated algorithms.
+
+Risk management
+
+Crowds gathering outside the New York Stock Exchange after the Wall Street Crash of 1929
+
+Customers queuing outside a Northern Rock branch in the United Kingdom to withdraw their savings during the financial crisis of 2007–2008
+Main article: Financial risk management
+Risk management, in general, is the study of how to control risks and balance the possibility of gains; it is the process of measuring risk and then developing and implementing strategies to manage that risk. Financial risk management [24][25] is the practice of protecting corporate value against financial risks, often by "hedging" exposure to these using financial instruments. The focus is particularly on credit and market risk, and in banks, through regulatory capital, includes operational risk.
+
+Credit risk[26] is the risk of default on a debt that may arise from a borrower failing to make required payments;
+Market risk relates to losses arising from movements in market variables such as prices and exchange rates;
+Operational risk relates to failures in internal processes, people, and systems, or to external events.
+Financial risk management is related to corporate finance[14] in two ways. Firstly, firm exposure to market risk is a direct result of previous capital investments and funding decisions; while credit risk arises from the business's credit policy and is often addressed through credit insurance and provisioning. Secondly, both disciplines share the goal of enhancing or at least preserving, the firm's economic value, and in this context[27] overlaps also enterprise risk management, typically the domain of strategic management. Here, businesses devote much time and effort to forecasting, analytics and performance monitoring. See also "ALM" and treasury management.
+
+For banks and other wholesale institutions,[28] risk management focuses on managing, and as necessary hedging, the various positions held by the institution – both trading positions and long term exposures – and on calculating and monitoring the resultant economic capital, and regulatory capital under Basel III. The calculations here are mathematically sophisticated, and within the domain of quantitative finance as below. Credit risk is inherent in the business of banking, but additionally, these institutions are exposed to counterparty credit risk. Banks typically employ Middle office "Risk Groups" here, whereas front office risk teams provide risk "services" / "solutions" to customers.
+
+Additional to diversification – the fundamental risk mitigant here – investment managers will apply various risk management techniques to their portfolios as appropriate:[14] these may relate to the portfolio as a whole or to individual stocks; bond portfolios are typically managed via cash flow matching or immunization. Re derivative portfolios (and positions), "the Greeks" is a vital risk management tool – it measures sensitivity to a small change in a given underlying parameter so that the portfolio can be rebalanced accordingly by including additional derivatives with offsetting characteristics.
+
+Quantitative finance
+Dōjima Rice Exchange, the world's first futures exchange, established in Osaka in 1697.
+Dōjima Rice Exchange, the world's first futures exchange, established in Osaka in 1697
+Main article: Quantitative analysis (finance)
+Quantitative finance – also referred to as "mathematical finance" – includes those finance activities where a sophisticated mathematical model is required,[29] and thus overlaps several of the above.
+
+As a specialized practice area, quantitative finance comprises primarily three sub-disciplines; the underlying theory and techniques are discussed in the next section:
+
+Quantitative finance is often synonymous with financial engineering. This area generally underpins a bank's customer-driven derivatives business – delivering bespoke OTC-contracts and "exotics", and designing the various structured products and solutions mentioned – and encompasses modeling and programming in support of the initial trade, and its subsequent hedging and management.
+Quantitative finance also significantly overlaps financial risk management in banking, as mentioned, both as regards this hedging, and as regards economic capital as well as compliance with regulations and the Basel capital / liquidity requirements.
+"Quants" are also responsible for building and deploying the investment strategies at the quantitative funds mentioned; they are also involved in quantitative investing more generally, in areas such as trading strategy formulation, and in automated trading, high-frequency trading, algorithmic trading, and program trading.
+DCF valuation formula widely applied in business and finance, since articulated in 1938. Here, to get the value of the firm, its forecasted free cash flows are discounted to the present using the weighted average cost of capital for the discount factor. For share valuation investors use the related dividend discount model.
+
+Financial theory is studied and developed within the disciplines of management, (financial) economics, accountancy and applied mathematics. Abstractly,[14][30] finance is concerned with the investment and deployment of assets and liabilities over "space and time"; i.e., it is about performing valuation and asset allocation today, based on the risk and uncertainty of future outcomes while appropriately incorporating the time value of money. Determining the present value of these future values, "discounting", must be at the risk-appropriate discount rate, in turn, a major focus of finance-theory.[31] As financial theory has roots in many disciplines, including mathematics, statistics, economics, physics, and psychology, it can be considered a mix of an art and science,[32] and there are ongoing related efforts to organize a list of unsolved problems in finance.
+
+Managerial finance
+
+Decision trees, a more sophisticated valuation-approach, sometimes applied to corporate finance "project" valuations (and a standard [33] in business school curricula); various scenarios are considered, and their discounted cash flows are probability weighted.
+Main article: Managerial finance
+Managerial finance [34] is the branch of management that concerns itself with the managerial application of finance techniques and theory, emphasizing the financial aspects of managerial decisions; [35] the assessment is per the managerial perspectives of planning, directing, and controlling. The techniques addressed and developed relate in the main to managerial accounting and corporate finance: the former allow management to better understand, and hence act on, financial information relating to profitability and performance; the latter, as above, are about optimizing the overall financial structure, including its impact on working capital. The implementation of these techniques – i.e. financial management – is outlined above. Academics working in this area are typically based in business school finance departments, in accounting, or in management science.
 
 
-
-File created by https://www.online-convert.com
-More example files: https://www.online-convert.com/file-type
-Text of Example content: Wikipedia (https://en.wikipedia.org/wiki/John_Doe)
-License: Attribution-ShareAlike 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
-
-Feel free to use and share the file according to the license above.
