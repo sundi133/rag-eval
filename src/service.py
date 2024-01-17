@@ -162,8 +162,8 @@ def health():
 async def generator(
     background_tasks: BackgroundTasks,
     name: str = Form(default=""),
-    userId: str = Form(default="-1"),
-    orgId: str = Form(default="-1"),
+    userId: str = Form(default=""),
+    orgId: str = Form(default=""),
     dataset_type: str = Form(default=""),
     chunk_size: int = Form(default=2000, ge=1, le=8000),
     persona: str = Form(default=""),
@@ -195,7 +195,7 @@ async def generator(
     validUser, user, org = get_user_info(userId, token)
     if not validUser:
         return {"message": "Unauthorized"}
-    
+    logger.info(f"Valid user: {validUser} {org} {orgId} {token}")
     orgId = orgId if orgId != "" and orgId is not None else org
     userId = userId if userId != "" and userId is not None else user
 
@@ -242,6 +242,7 @@ async def generator(
     logger.info(f"Dataset type: {dataset_type}")
     logger.info(f"Chunk size: {chunk_size}")
     logger.info(f"qa_type: {qa_type}")
+    logger.info(f"user & org: {userId} {orgId}")
 
     gen_id = uuid.uuid4().hex
     output_file = os.path.join(output_directory, f"{gen_id}.json")
@@ -380,10 +381,12 @@ async def get_dataset(
     token: str = Query("", max_length=1000, min_length=0),
     db: Session = Depends(get_db),
 ):
-    validUser, userId, orgId = get_user_info(userId, token)
-    if not validUser:
-        return {"message": "Unauthorized"}
-    query = select(Dataset).filter(Dataset.id == dataset_id, Dataset.orgid == org_id if org_id != "" else orgId)
+    if org_id is None:
+        validUser, userId, orgId = get_user_info(None, token)
+        if not validUser:
+            return {"message": "Unauthorized"}
+        org_id = org_id if org_id != "" and org_id is not None else orgId
+    query = select(Dataset).filter(Dataset.id == dataset_id, Dataset.orgid == org_id)
     results = db.execute(query).scalars().first()
     return results
 
@@ -523,18 +526,20 @@ async def get_qa_data(
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
 ):
-    validUser, userId, orgId = get_user_info(userId, token)
-    if not validUser:
-        return {"message": "Unauthorized"}
+    if org_id is "" or org_id is None:
+        validUser, userId, orgId = get_user_info(None, token)
+        if not validUser:
+            return {"message": "Unauthorized"}
+        org_id = org_id if org_id != "" and org_id is not None else orgId
+        logger.info(f"Valid user: {validUser} {orgId} {org_id}")
     query = (
         select(QAData)
-        .filter(QAData.dataset_id == dataset_id, QAData.orgid == org_id if org_id != "" else orgId)
+        .filter(QAData.dataset_id == dataset_id, QAData.orgid == org_id)
         .offset(skip)
         .limit(limit)
     )
     results = db.execute(query).scalars().all()
     return results
-
 
 
 @app.post("/api/qa-data-evaulate")
@@ -590,7 +595,9 @@ async def add_simulation(
     percentage_of_questions: int = Form(default=1, ge=1, le=100),
     order_of_questions: str = Form(default="random"),
 ):
-    if get_user_info(user_id) == False:
+    validUser, userId, orgId = get_user_info(userId, None)
+
+    if validUser == False:
         return {"message": "Unauthorized"}
     try:
         # Create a new Dataset instance
@@ -666,9 +673,11 @@ async def trigger_simulation(
     simulation_id: str = Form(default="", max_length=1000, min_length=0),
     db_session: Session = Depends(get_db),
 ):
-    if get_user_info(user_id) == False:
-        return {"message": "Unauthorized"}
+    validUser, userId, orgId = get_user_info(userId, None)
 
+    if validUser == False:
+        return {"message": "Unauthorized"}
+    
     query = select(SimulationProfile).filter(
         SimulationProfile.id == int(simulation_id), SimulationProfile.orgid == org_id
     )
@@ -736,8 +745,11 @@ async def get_endpoint_list(
     limit: int = Query(100, ge=1),
     db: Session = Depends(get_db),
 ):
-    if get_user_info(user_id) == False:
+    validUser, userId, orgId = get_user_info(userId, None)
+
+    if validUser == False:
         return {"message": "Unauthorized"}
+    
     query = (
         select(SimulationProfile)
         .filter(SimulationProfile.orgid == org_id)
@@ -768,9 +780,11 @@ async def get_evaluation_list(
     org_id: str = Query("", max_length=1000, min_length=0),
     db: Session = Depends(get_db),
 ):
-    if get_user_info(user_id) == False:
-        return {"message": "Unauthorized"}
+    validUser, userId, orgId = get_user_info(userId, None)
 
+    if validUser == False:
+        return {"message": "Unauthorized"}
+    
     query = (
         select(
             [
@@ -814,9 +828,11 @@ async def get_evaluation_id(
     evaluation_id: str = Query("", max_length=1000, min_length=0),
     db: Session = Depends(get_db),
 ):
-    if get_user_info(user_id) == False:
-        return {"message": "Unauthorized"}
+    validUser, userId, orgId = get_user_info(userId, None)
 
+    if validUser == False:
+        return {"message": "Unauthorized"}
+    
     query = (
         select(
             [
@@ -864,9 +880,11 @@ async def evaluation(
     simulation_run_id: int = Query(0, ge=0),
     db: Session = Depends(get_db),
 ):
-    if get_user_info(user_id) == False:
-        return {"message": "Unauthorized"}
+    validUser, userId, orgId = get_user_info(userId, None)
 
+    if validUser == False:
+        return {"message": "Unauthorized"}
+    
     query = (
         select(
             [
@@ -900,7 +918,9 @@ async def get_tokens(
     org_id: str = Query("", max_length=1000, min_length=0),
     db: Session = Depends(get_db),
 ):
-    if get_user_info(user_id) == False:
+    validUser, userId, orgId = get_user_info(userId, None)
+
+    if validUser == False:
         return {"message": "Unauthorized"}
     
     query = select(ApiToken).filter(
@@ -916,8 +936,11 @@ async def add_token(
     user_id: str = Form(default=""),
     org_id: str = Form(default=""),
 ):
-    if get_user_info(user_id) == False:
+    validUser, userId, orgId = get_user_info(userId, None)
+
+    if validUser == False:
         return {"message": "Unauthorized"}
+    
     try:
         # Create a new Dataset instance
         token = ApiToken(
