@@ -55,7 +55,9 @@ class DataProcessor(ABC):
     def setSimProfile(self, profile: dict) -> None:
         self.sim_profile = profile
         self.chunk_size = profile["chunk_size"] if "chunk_size" in profile else 2000
-        self.max_crawl_links = profile["max_crawl_links"] if "max_crawl_links" in profile else None
+        self.max_crawl_links = (
+            profile["max_crawl_links"] if "max_crawl_links" in profile else None
+        )
 
     @abstractmethod
     def parse(self) -> None:
@@ -72,14 +74,14 @@ class DataProcessor(ABC):
         combined_content = self.clean_text_to_ascii(text)
 
         # Split by paragraphs
-        paragraphs = combined_content.split('\n\n')
+        paragraphs = combined_content.split("\n\n")
 
         # Further split each paragraph by newline, then by space
         split_content = []
         for paragraph in paragraphs:
-            lines = paragraph.split('\n')
+            lines = paragraph.split("\n")
             for line in lines:
-                words = line.split(' ')
+                words = line.split(" ")
                 split_content.extend(words)
 
         # Create chunks of the desired size
@@ -87,10 +89,10 @@ class DataProcessor(ABC):
         current_chunk = ""
         for word in split_content:
             if len(current_chunk) + len(word) <= self.chunk_size:
-                current_chunk += word + ' '
+                current_chunk += word + " "
             else:
                 chunks.append(current_chunk.strip())
-                current_chunk = word + ' '
+                current_chunk = word + " "
 
         # Add the last chunk if it's not empty
         if current_chunk:
@@ -98,7 +100,7 @@ class DataProcessor(ABC):
 
         # Clean up the chunks
         return [x.strip() for x in chunks]
-        
+
     @abstractmethod
     def randomize_samples(
         self,
@@ -158,13 +160,13 @@ class DataProcessor(ABC):
         pass
 
     @abstractmethod
-    def write_to_db(self, dataset_id:str, status:str, message:str) -> None:
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
         result = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
         if result:
             result.status = status
             result.error_msg = message
             db.session.commit()
-    
+
     @staticmethod
     def retry_with_exponential_backoff(
         func: Callable,

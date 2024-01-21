@@ -634,7 +634,8 @@ QuestionGeneratorPromptTemplate = {
     "prompt_key_txt_simple": """
     
         Follow the instructions below:
-        Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about the information provided in a readme file. The customer might make ask any questions to make informed decision making based on the quality of the information provided in the readme file. Generate the pairs based on information provided as follows:
+        **Generate {number_of_questions} general chat questions and answer pairs for a customer who is inquiring about the information provided in a file. 
+        **Generate the pairs based on information provided as follows:
         ===
         {products}
         ===
@@ -834,5 +835,38 @@ QuestionGeneratorPromptTemplate = {
             "relevance_score": relevance_score
         }}
     ]
+    """,
+    "evaluation_prompt": """
+    Instruction: Evaluate and rank the provided answers in terms of their relevance and accuracy in addressing the following question. Consider both the 'relevant_chunk' and 'retrieved_chunk' as sources of information. Assign a relevancy score from 1 to 5 to each answer, where 5 indicates high relevance and accuracy, and 1 indicates low relevance or inaccuracy. If both answers are equally relevant and accurate, assign them the same score. If you find that neither of the answers is relevant or accurate based on the provided chunks, or if the question cannot be answered from the given context, assign a score of 1 to both answers and state "Insufficient Information" as your reasoning. Do not make any changes to the sentences from the given context. Ensure your assessment is based solely on how well each answer addresses the question with respect to the information in the 'relevant_chunk' and 'retrieved_chunk'.
+
+    *** Question: 
+    ### Start of question
+        {question}
+    ### End of question
+
+    *** Verified Answer: 
+    ### Start of verified answer
+        {verified_answer}
+    ### End of verified answer
+
+    *** App Generated Answer: 
+    ### Start of app generated answer
+        {app_generated_answer}
+    ### End of app generated answer
+
+    Evaluation Measure:
+
+    *** Provide a answer relevancy score of how relevant the App Generated Answer to the Verified Answer.
+    *** The score should be a float between 0 and 1 with 1 being the highest relevant
+    *** Provide a reasoning for the relevance score
+
+    The output should be in JSON
+    {{
+        "score": "your score"
+        "reason": "reason of your response"
+    }}
+    
+    [Output here]
+
     """,
 }

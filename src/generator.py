@@ -2,7 +2,7 @@ import logging
 import argparse
 import asyncio
 import time
-import os 
+import os
 
 from langchain.chat_models import ChatOpenAI
 from typing import List, Optional
@@ -78,13 +78,17 @@ def qa_generator_task(
             temperature=0.75,
             model=model_name,
             request_timeout=120,
-            max_tokens=2400,
-            openai_api_key=openai_api_key if openai_api_key else os.environ.get("OPENAI_API_KEY"),
+            max_tokens=1600,
+            openai_api_key=openai_api_key
+            if openai_api_key
+            else os.environ.get("OPENAI_API_KEY"),
         )
 
         logger.info("Starting Question Generator")
 
-        qa_generator = select_llm(generator_type, llm_openai_gpt, prompt_key, verbose=True)
+        qa_generator = select_llm(
+            generator_type, llm_openai_gpt, prompt_key, verbose=True
+        )
 
         data_processor = select_processor(data_path, llm_type, dataset_id=gen_id)
 
@@ -147,7 +151,9 @@ def qa_generator_task(
         else:
             data_processor.write(output_file)
             logger.info("Completed Question Generator")
-            data_processor.write_to_db(dataset_id = gen_id, status = "completed", message = "None")
+            data_processor.write_to_db(
+                dataset_id=gen_id, status="completed", message="None"
+            )
     except Exception as e:
         logger.error(
             {
@@ -155,5 +161,5 @@ def qa_generator_task(
                 "error": str(e),
             }
         )
-        data_processor.write_to_db(dataset_id = gen_id, status = "error", message = str(e))
+        data_processor.write_to_db(dataset_id=gen_id, status="error", message=str(e))
         raise e

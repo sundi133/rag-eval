@@ -1,6 +1,7 @@
 import json
 import requests
 import logging
+import uuid
 
 from .processors.basefile import DataProcessor
 from .processors.csv import CSVProcessor
@@ -11,11 +12,21 @@ from .processors.ner import NERProcessor
 from .processors.html import HTMLProcessor
 from .processors.json import JSONProcessor
 from .processors.basefile import DataProcessor
-from .llms import DatagenQA, DatagenNER, DatagenMultiChunkQA
+from .llms import Datagen, DatagenNER, DatagenMultiChunkQA
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from .logger import logger_setup
 from typing import List
+from fastapi_sqlalchemy import DBSessionMiddleware, db
+from .models import (
+    Dataset,
+    LLMEndpoint,
+    QAData,
+    Assessments,
+    EvaluationProfiles,
+    EvaluationRuns,
+)
+
 
 logger = logger_setup(__name__)
 
@@ -30,7 +41,7 @@ llm_type_processor_mapping = {
 }
 
 llm_type_generator_mapping = {
-    "text": DatagenQA,
+    "text": Datagen,
     "text_multi_chunk": DatagenMultiChunkQA,
     "ner": DatagenNER,
 }
@@ -150,3 +161,102 @@ async def get_llm_answer(question: str, endpoint_config: str) -> str:
     except Exception as e:
         logger.error(f"Error getting answer from endpoint: {str(e)}")
         return ""
+
+
+def generate_random_hex_user_id() -> str:
+    """
+    Generate a random user ID.
+    """
+    return f"user_id_{uuid.uuid4().hex.upper()[0:12]}"
+
+def save_simulation_results(
+    simulation_id: int,
+    simulation_run_id: int,
+    user_id: str,
+    org_id: int,
+    endpoint_url_id: int = None,
+    dataset_id: int = None,
+    qa_data_id: int = None,
+    response: str = None,
+    score: float = None,
+    score_reason: str = None,
+    evaluation_id: str = None,
+) -> None:
+    """
+    Save the results of a simulation.
+    """
+    
+    if endpoint_url_id is None:
+        evaluation = Assessments(
+            evaluation_profile_id=simulation_id,
+            run_id=simulation_run_id,
+            simulation_userid=user_id,
+            orgid=org_id,
+            dataset_id=dataset_id,
+            qa_data_id=qa_data_id,
+            endpoint_response=response,
+            score=score,
+            score_reason=score_reason,
+            evaluation_id=evaluation_id,
+        )
+    else:
+        evaluation = Assessments(
+            evaluation_profile_id=simulation_id,
+            run_id=simulation_run_id,
+            simulation_userid=user_id,
+            orgid=org_id,
+            llm_endpoint_id=endpoint_url_id,
+            dataset_id=dataset_id,
+            qa_data_id=qa_data_id,
+            endpoint_response=response,
+            score=score,
+            score_reason=score_reason,
+            evaluation_id=evaluation_id,
+        )
+    db.session.add(evaluation)
+    db.session.commit()
+
+
+def update_simulation_status(simulation_id, simulation_run_id, org_id, status):
+    try:
+        # Start a transaction
+        db.session.begin()
+
+        # Query and update SimulationProfile
+        simulation_profile = (
+            db.session.query(EvaluationProfiles)
+            .filter(
+                EvaluationProfiles.id == int(simulation_id),
+                EvaluationProfiles.orgid == org_id,
+            )
+            .first()
+        )
+
+        if simulation_profile:
+            simulation_profile.status = status
+        else:
+            raise ValueError("SimulationProfile not found")
+
+        # Query and update SimulationRuns
+        simulation_run = (
+            db.session.query(EvaluationRuns)
+            .filter(
+                EvaluationRuns.id == simulation_run_id, EvaluationRuns.orgid == org_id
+            )
+            .first()
+        )
+
+        if simulation_run:
+            simulation_run.run_status = status
+        else:
+            raise ValueError("SimulationRuns not found")
+
+        # Commit the transaction
+        db.session.commit()
+    except Exception as e:
+        # Rollback the transaction in case of error
+        db.session.rollback()
+        raise e
+    finally:
+        # Close the session
+        db.session.close()

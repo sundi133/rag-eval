@@ -6,6 +6,7 @@ from datetime import datetime
 
 Base = declarative_base()
 
+
 class ApiToken(Base):
     __tablename__ = "api_tokens"
 
@@ -15,7 +16,8 @@ class ApiToken(Base):
     name = Column(String)
     token = Column(String)
     ts = Column(DateTime, default=datetime.utcnow)
-    
+
+
 class Dataset(Base):
     __tablename__ = "datasets"
 
@@ -51,8 +53,8 @@ class Dataset(Base):
 
     # Define relationships
     qa_data = relationship("QAData", back_populates="dataset")
-    evaluations = relationship("Evaluation", back_populates="dataset")
-    simulation_profiles = relationship("SimulationProfile", back_populates="dataset")
+    assessments = relationship("Assessments", back_populates="dataset")
+    evaluation_profiles = relationship("EvaluationProfiles", back_populates="dataset")
 
 
 class QAData(Base):
@@ -68,7 +70,7 @@ class QAData(Base):
 
     # Define relationships
     dataset = relationship("Dataset", back_populates="qa_data")
-    evaluations = relationship("Evaluation", back_populates="qa_data")
+    assessments = relationship("Assessments", back_populates="qa_data")
 
 
 class LLMEndpoint(Base):
@@ -88,68 +90,75 @@ class LLMEndpoint(Base):
     http_method = Column(String)
     requests_per_minute = Column(Integer)
 
-    evaluations = relationship("Evaluation", back_populates="llm_endpoint")
-    simulation_profiles = relationship(
-        "SimulationProfile", back_populates="llm_endpoint"
+    assessments = relationship("Assessments", back_populates="llm_endpoint")
+    evaluation_profiles = relationship(
+        "EvaluationProfiles", back_populates="llm_endpoint"
     )
 
 
-
-class SimulationProfile(Base):
-    __tablename__ = "simulation_profiles"
+class EvaluationProfiles(Base):
+    __tablename__ = "evaluation_profiles"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     userid = Column(String)
     orgid = Column(String)
-    endpoint_url_id = Column(Integer, ForeignKey("llm_endpoints.id"))
+    endpoint_url_id = Column(Integer, ForeignKey("llm_endpoints.id"), nullable=True)
     dataset_id = Column(Integer, ForeignKey("datasets.id"))
-    num_users = Column(Integer)
-    percentage_of_questions = Column(Integer)
-    order_of_questions = Column(String)
+    num_users = Column(Integer, nullable=True)
+    percentage_of_questions = Column(Integer, nullable=True)
+    order_of_questions = Column(String, nullable=True)
     ts = Column(DateTime, default=datetime.utcnow)
     simulation_id = Column(String)
     status = Column(String)
 
     # Define relationships
-    dataset = relationship("Dataset", back_populates="simulation_profiles")
-    llm_endpoint = relationship("LLMEndpoint", back_populates="simulation_profiles")
-    evaluations = relationship("Evaluation", back_populates="simulation_profile")
-    simulation_runs = relationship("SimulationRuns", back_populates="simulation_profile")
+    dataset = relationship("Dataset", back_populates="evaluation_profiles")
+    llm_endpoint = relationship("LLMEndpoint", back_populates="evaluation_profiles")
+    assessments = relationship("Assessments", back_populates="evaluation_profiles")
+    evaluation_runs = relationship(
+        "EvaluationRuns", back_populates="evaluation_profiles"
+    )
 
-class SimulationRuns(Base):
-    __tablename__ = "simulation_runs"
+
+class EvaluationRuns(Base):
+    __tablename__ = "evaluation_runs"
 
     id = Column(Integer, primary_key=True, index=True)
     orgid = Column(String)
-    simulation_id = Column(Integer, ForeignKey("simulation_profiles.id"))
+    evaluation_profile_id = Column(Integer, ForeignKey("evaluation_profiles.id"))
     ts = Column(DateTime, default=datetime.utcnow)
     score = Column(Float)
     run_status = Column(String)
+    evaluation_id = Column(String, nullable=True)
 
     # Define relationships
-    simulation_profile = relationship("SimulationProfile", back_populates="simulation_runs")
-    evaluation = relationship("Evaluation", back_populates="simulation_run")
+    evaluation_profiles = relationship(
+        "EvaluationProfiles", back_populates="evaluation_runs"
+    )
+    assessments = relationship("Assessments", back_populates="evaluation_runs")
 
-class Evaluation(Base):
-    __tablename__ = "evaluations"
+
+class Assessments(Base):
+    __tablename__ = "assessments"
 
     id = Column(Integer, primary_key=True, index=True)
     simulation_userid = Column(String)
     orgid = Column(String)
     dataset_id = Column(Integer, ForeignKey("datasets.id"))
-    llm_endpoint_id = Column(Integer, ForeignKey("llm_endpoints.id"))
+    llm_endpoint_id = Column(Integer, ForeignKey("llm_endpoints.id"), nullable=True)
     qa_data_id = Column(Integer, ForeignKey("qa_data.id"))
-    simulation_id = Column(Integer, ForeignKey("simulation_profiles.id"))
-    simulation_run_id = Column(Integer, ForeignKey("simulation_runs.id"))
+    evaluation_profile_id = Column(Integer, ForeignKey("evaluation_profiles.id"))
+    run_id = Column(Integer, ForeignKey("evaluation_runs.id"))
     ts = Column(DateTime, default=datetime.utcnow)
     score = Column(Float)
+    score_reason = Column(String, nullable=True)
     endpoint_response = Column(String)
     evaluation_id = Column(String)
 
     # Define relationships
-    dataset = relationship("Dataset", back_populates="evaluations")
-    llm_endpoint = relationship("LLMEndpoint", back_populates="evaluations")
-    qa_data = relationship("QAData", back_populates="evaluations")
-    simulation_profile = relationship("SimulationProfile", back_populates="evaluations")
-    simulation_run = relationship("SimulationRuns", back_populates="evaluation")
+    dataset = relationship("Dataset", back_populates="assessments")
+    llm_endpoint = relationship("LLMEndpoint", back_populates="assessments")
+    qa_data = relationship("QAData", back_populates="assessments")
+    evaluation_profiles = relationship("EvaluationProfiles", back_populates="assessments")
+    evaluation_runs = relationship("EvaluationRuns", back_populates="assessments")

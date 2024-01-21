@@ -8,13 +8,11 @@ import requests
 
 from dotenv import load_dotenv
 from typing import List, Optional
-
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi import status
 from sqlalchemy import select, desc, join, and_
-
 from fastapi import (
     FastAPI,
     File,
@@ -39,28 +37,30 @@ from databases import Database
 from datetime import datetime
 
 from .models import (
-    Base, 
+    Base,
     Dataset,
-    QAData, 
-    LLMEndpoint, 
-    SimulationProfile, 
-    Evaluation,
-    SimulationRuns,
-    ApiToken
-    )
+    QAData,
+    LLMEndpoint,
+    EvaluationProfiles,
+    Assessments,
+    EvaluationRuns,
+    ApiToken,
+)
 from .responses import (
     DatasetResponse,
     QADataResponse,
     LLMEndpointResponse,
-    EvaluationResponse,
+    AssessmentResponse,
     EvaluationChatResponse,
-    SimulationProfileResponse,
-    EvaluationResponseWithSimulationRunId,
-    ApiTokenResponse
+    EvaluationProfileResponse,
+    AssessmentResponseWithRunId,
+    ApiTokenResponse,
+    EvaluationRunResponse,
 )
 from .ranking import evaluate_qa_data
 from .generator import qa_generator_task
 from .simulation import simulation_task
+from .evaluation import evaluation_task
 from .utils import (
     read_qa_data,
     read_endpoint_configurations,
@@ -115,14 +115,13 @@ def get_db():
         db.close()
 
 
-def get_user_info(user_id: str, token:str = None) -> (bool, str, str):
-    
+def get_user_info(user_id: str, token: str = None) -> (bool, str, str):
     if token is not None and token != "":
         # Query the database for the token
-        query = select(ApiToken).filter(
-            ApiToken.token == token
-        ).order_by(desc(ApiToken.ts))
-        #db = Depends(get_db)
+        query = (
+            select(ApiToken).filter(ApiToken.token == token).order_by(desc(ApiToken.ts))
+        )
+        # db = Depends(get_db)
         token_row = db.session.execute(query).scalars().first()
 
         # Check if token is found and valid
@@ -134,10 +133,10 @@ def get_user_info(user_id: str, token:str = None) -> (bool, str, str):
         orgId = token_row.orgid
 
         return (True, userId, orgId)
-    
+
     if user_id is None or user_id == "":
         return (False, None, None)
-    
+
     bearer_token = os.environ["CLERK_SECRET_KEY"]
     authorization = f"Bearer {bearer_token}"
     headers = {"Authorization": authorization}
@@ -145,7 +144,6 @@ def get_user_info(user_id: str, token:str = None) -> (bool, str, str):
     response = requests.get(url, headers=headers)
 
     return (response.status_code == 200, user_id, None)
-
 
 
 @app.get("/api")
@@ -193,9 +191,9 @@ async def generator(
     token: str = Form(default=""),
 ):
     validUser, user, org = get_user_info(userId, token)
+    logger.info(f"Valid user: {validUser} {org} {orgId} {token}")
     if not validUser:
         return {"message": "Unauthorized"}
-    logger.info(f"Valid user: {validUser} {org} {orgId} {token}")
     orgId = orgId if orgId != "" and orgId is not None else org
     userId = userId if userId != "" and userId is not None else user
 
@@ -226,7 +224,7 @@ async def generator(
     )
     if openai_api_key is None:
         return {"message": "No OpenAI API key provided"}
-    
+
     logger.info(f"Data path: {data_path}")
     logger.info(f"Data paths: {data_paths}")
     logger.info(f"Number of questions: {number_of_questions}")
@@ -288,7 +286,7 @@ async def generator(
 
         # Commit the changes to the database
         db.session.commit()
-        
+
         background_tasks.add_task(
             qa_generator_task,
             data_paths,
@@ -474,7 +472,7 @@ async def generator(
     if get_user_info(userId) == False:
         return {"message": "Unauthorized"}
     try:
-        # Create a new Dataset instance
+        # Create a new LLMEndpoint instance
         endpoint = LLMEndpoint(
             name=name,
             endpoint_url=endpoint_url,
@@ -526,7 +524,7 @@ async def get_qa_data(
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
 ):
-    if org_id is "" or org_id is None:
+    if org_id == "" or org_id is None:
         validUser, userId, orgId = get_user_info(None, token)
         if not validUser:
             return {"message": "Unauthorized"}
@@ -542,76 +540,53 @@ async def get_qa_data(
     return results
 
 
-@app.post("/api/qa-data-evaulate")
-async def qa_data_evaulate(
-    dataset_id: int = Form(default=0, ge=1, le=10000),
-    org_id: str = Form(default="", max_length=1000, min_length=0),
-    token: str = Form(default="", max_length=1000, min_length=0),
-    question: str = Form(default="", max_length=1000, min_length=0),
-    ground_truth_response: str = Form(default="", max_length=1000, min_length=0),
-    actual_response: str = Form(default="", max_length=1000, min_length=0),
-    reference_chunk: str = Form(default="", max_length=1000, min_length=0),
-    evaluation_id: str = Form(default="", max_length=1000, min_length=0),
-    evaluation_metric: str = Form(default="", max_length=1000, min_length=0),
-    model_name: str = Form(default="", max_length=1000, min_length=0),
-    prompt_key: str = Form(default="", max_length=1000, min_length=0),
-    db: Session = Depends(get_db),
-):
-    validUser, userId, orgId = get_user_info(userId, token)
-    if not validUser:
-        return {"message": "Unauthorized"}
-    try:
-        
-                
-        # Add the instance to the session and flush to generate the ID
-        return JSONResponse(
-            content={
-                "message": "Evaluation added successfully",
-                "evaluation_id": evaluation_id,
-            }
-        )
-    except SQLAlchemyError as e:
-        # Handle the exception (e.g., log the error, rollback the session)
-        db.session.rollback()
-        logger.info({"error": f"Error during evaluation insertion: {e}"})
-        return JSONResponse(
-            content={
-                "message": "Oops! Something went wrong. Please try again.",
-                "evaluation_id": -1,
-            }
-        )
-
-
-
 @app.post("/api/simulation/add")
 async def add_simulation(
     background_tasks: BackgroundTasks,
     user_id: str = Form(default=""),
     org_id: str = Form(default=""),
+    token: str = Form(default=""),
+    start_simulation: bool = Form(default=True),
     name: str = Form(default=""),
     endpoint_url_id: int = Form(default=""),
     dataset_id: int = Form(default=""),
     num_users: int = Form(default=1, ge=1, le=100),
-    percentage_of_questions: int = Form(default=1, ge=1, le=100),
-    order_of_questions: str = Form(default="random"),
+    percentage_of_questions: int = Form(default=0, ge=1, le=100),
+    order_of_questions: str = Form(default=""),
 ):
-    validUser, userId, orgId = get_user_info(userId, None)
+    validUser, userId, orgId = get_user_info(user_id, token)
+
+    user_id = user_id if user_id != "" and user_id is not None else userId
+    org_id = org_id if org_id != "" and org_id is not None else orgId
 
     if validUser == False:
         return {"message": "Unauthorized"}
     try:
-        # Create a new Dataset instance
-        simulation = SimulationProfile(
-            name=name,
-            userid=user_id,
-            orgid=org_id,
-            endpoint_url_id=endpoint_url_id,
-            dataset_id=dataset_id,
-            num_users=num_users,
-            percentage_of_questions=percentage_of_questions,
-            order_of_questions=order_of_questions,
-            simulation_id=f"user_id_{uuid.uuid4().hex.upper()[0:12]}",
-        )
+        if endpoint_url_id == "":
+            # Create a new Dataset instance
+            simulation = EvaluationProfiles(
+                name=name,
+                userid=user_id,
+                orgid=org_id,
+                dataset_id=dataset_id,
+                num_users=num_users,
+                percentage_of_questions=percentage_of_questions,
+                order_of_questions=order_of_questions,
+                simulation_id=f"{uuid.uuid4().hex.upper()[0:12]}",
+            )
+        else:
+            # Create a new Dataset instance
+            simulation = EvaluationProfiles(
+                name=name,
+                userid=user_id,
+                orgid=org_id,
+                endpoint_url_id=endpoint_url_id,
+                dataset_id=dataset_id,
+                num_users=num_users,
+                percentage_of_questions=percentage_of_questions,
+                order_of_questions=order_of_questions,
+                simulation_id=f"{uuid.uuid4().hex.upper()[0:12]}",
+            )
 
         # Add the instance to the session and flush to generate the ID
         db.session.add(simulation)
@@ -620,37 +595,40 @@ async def add_simulation(
         # Now you can access the ID
         simulation_id = simulation.id
 
-     
-        simulation_run = SimulationRuns(
-            orgid=org_id,
-            simulation_id=simulation_id,
-            ts=datetime.utcnow(),
-            score=0.0,
-        )
-        db.session.add(simulation_run)
-        db.session.flush()
-
-        simulation_run_id = simulation_run.id
-
         # Commit the changes to the database
         db.session.commit()
 
-        background_tasks.add_task(
-            simulation_task,
-            simulation_id,
-            simulation_run_id,
-            user_id,
-            org_id,
-            endpoint_url_id,
-            dataset_id,
-            num_users,
-            percentage_of_questions,
-            order_of_questions,
-        )
+        if start_simulation:
+            simulation_run = EvaluationRuns(
+                orgid=org_id,
+                evaluation_profile_id=simulation_id,
+                ts=datetime.utcnow(),
+                score=0.0,
+            )
+            db.session.add(simulation_run)
+            db.session.flush()
+
+            simulation_run_id = simulation_run.id
+
+            # Commit the changes to the database
+            db.session.commit()
+
+            background_tasks.add_task(
+                simulation_task,
+                simulation_id,
+                simulation_run_id,
+                user_id,
+                org_id,
+                endpoint_url_id,
+                dataset_id,
+                num_users,
+                percentage_of_questions,
+                order_of_questions,
+            )
         return JSONResponse(
             content={
-                "message": "Simulation added successfully",
-                "simulation_id": simulation_id,
+                "message": "Evaluation added successfully",
+                "evaluation_profile_id": simulation_id,
             }
         )
     except SQLAlchemyError as e:
@@ -660,7 +638,7 @@ async def add_simulation(
         return JSONResponse(
             content={
                 "message": "Oops! Something went wrong. Please try again.",
-                "simulation_id": -1,
+                "evaluation_profile_id": None,
             }
         )
 
@@ -673,15 +651,15 @@ async def trigger_simulation(
     simulation_id: str = Form(default="", max_length=1000, min_length=0),
     db_session: Session = Depends(get_db),
 ):
-    validUser, userId, orgId = get_user_info(userId, None)
+    validUser, userId, orgId = get_user_info(user_id, None)
 
     if validUser == False:
         return {"message": "Unauthorized"}
-    
-    query = select(SimulationProfile).filter(
-        SimulationProfile.id == int(simulation_id), SimulationProfile.orgid == org_id
+
+    query = select(EvaluationProfiles).filter(
+        EvaluationProfiles.id == int(simulation_id), EvaluationProfiles.orgid == org_id
     )
-    
+
     logger.info(
         {
             "message": "Triggering simulation",
@@ -692,20 +670,19 @@ async def trigger_simulation(
 
     if result:
         # Update the status
-        result.status = 'in_progress'
+        result.status = "in_progress"
         # Commit the changes to the database
         db_session.commit()
     else:
         logger.info("SimulationProfile not found")
-        
-    simulation_run = SimulationRuns(
+
+    simulation_run = EvaluationRuns(
         orgid=org_id,
-        simulation_id=result.id,
+        evaluation_profile_id=result.id,
         ts=datetime.utcnow(),
         score=0.0,
         run_status="in_progress",
     )
-   
 
     # Add the instance to the session and flush to generate the ID
     db.session.add(simulation_run)
@@ -731,88 +708,301 @@ async def trigger_simulation(
     )
     return JSONResponse(
         content={
-            "message": "Simulation added successfully",
+            "message": "Evaluation added successfully",
             "simulation_id": simulation_id,
         }
     )
 
 
-@app.get("/api/simulation/list", response_model=List[SimulationProfileResponse])
+@app.get("/api/simulation/list", response_model=List[EvaluationProfileResponse])
 async def get_endpoint_list(
     user_id: str = Query("", max_length=1000, min_length=0),
     org_id: str = Query("", max_length=1000, min_length=0),
+    token: str = Query("", max_length=1000, min_length=0),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1),
     db: Session = Depends(get_db),
 ):
-    validUser, userId, orgId = get_user_info(userId, None)
+    validUser, userId, orgId = get_user_info(user_id, token)
 
     if validUser == False:
         return {"message": "Unauthorized"}
-    
+
+    org_id = org_id if org_id != "" and org_id is not None else orgId
+
     query = (
-        select(SimulationProfile)
-        .filter(SimulationProfile.orgid == org_id)
+        select(EvaluationProfiles)
+        .filter(EvaluationProfiles.orgid == org_id)
         .offset(skip)
         .limit(limit)
-    ).order_by(desc(SimulationProfile.ts))
+    ).order_by(desc(EvaluationProfiles.ts))
 
     results = db.execute(query).scalars().all()
     return results
 
 
-@app.get("/api/simulation/id", response_model=SimulationProfileResponse)
+@app.get("/api/simulation/id", response_model=EvaluationProfileResponse)
 async def get_endpoint_id(
     simulation_id: int,
     org_id: str = Query("", max_length=1000, min_length=0),
     db: Session = Depends(get_db),
 ):
-    query = select(SimulationProfile).filter(
-        SimulationProfile.id == simulation_id, SimulationProfile.orgid == org_id
+    query = select(EvaluationProfiles).filter(
+        EvaluationProfiles.id == simulation_id, EvaluationProfiles.orgid == org_id
     )
     results = db.execute(query).scalars().first()
     return results
 
 
-@app.get("/api/evaluation/list", response_model=List[EvaluationResponse])
+@app.post("/api/evaluation/start-assesement")
+async def qa_start_assesement(
+    evaluation_id: int = Form(default=None, ge=0),
+    org_id: str = Form(default="", max_length=1000, min_length=0),
+    user_id: str = Form(default="", max_length=1000, min_length=0),
+    token: str = Form(default="", max_length=1000, min_length=0),
+):
+    validUser, userId, orgId = get_user_info(user_id, token)
+    user_id = user_id if user_id != "" and user_id is not None else userId
+    org_id = org_id if org_id != "" and org_id is not None else orgId
+
+    if validUser == False:
+        return {"message": "Unauthorized"}
+
+    query = select(EvaluationProfiles).filter(
+        EvaluationProfiles.id == evaluation_id, EvaluationProfiles.orgid == org_id
+    )
+    result = db.session.execute(query).scalars().first()
+    if result:
+        # Update the status
+        result.status = "in_progress"
+        # Commit the changes to the database
+        db.session.commit()
+    else:
+        logger.info("SimulationProfile not found")
+
+    evaluation_id = f"{uuid.uuid4().hex.upper()[0:32]}"
+    simulation_run = EvaluationRuns(
+        orgid=org_id,
+        evaluation_profile_id=result.id,
+        ts=datetime.utcnow(),
+        score=0.0,
+        run_status="in_progress",
+        evaluation_id=evaluation_id,
+    )
+
+    # Add the instance to the session and flush to generate the ID
+    db.session.add(simulation_run)
+    db.session.flush()
+
+    # Now you can access the ID
+    simulation_run_id = simulation_run.id
+
+    # Commit the changes to the database
+    db.session.commit()
+
+    return JSONResponse(
+        content={
+            "message": "Evaluation run in progress",
+            "evaluation_run_id": simulation_run_id,
+        }
+    )
+
+
+@app.post("/api/evaluation/end-assesement")
+async def qa_end_assesement(
+    evaluation_run_id: int =  Form(default=None, ge=0),
+    org_id: str = Form(default="", max_length=1000, min_length=0),
+    user_id: str = Form(default="", max_length=1000, min_length=0),
+    token: str = Form(default="", max_length=1000, min_length=0),
+):
+    validUser, userId, orgId = get_user_info(user_id, token)
+    user_id = user_id if user_id != "" and user_id is not None else userId
+    org_id = org_id if org_id != "" and org_id is not None else orgId
+
+    if validUser == False:
+        return {"message": "Unauthorized"}
+
+    query = select(EvaluationRuns).filter(
+        EvaluationRuns.id == evaluation_run_id, EvaluationRuns.orgid == org_id
+    )
+    result = db.session.execute(query).scalars().first()
+    evaluation_profile_id = result.evaluation_profile_id
+    if result:
+        # Update the status
+        result.run_status = "completed"
+        # Commit the changes to the database
+        db.session.commit()
+    else:
+        logger.info("SimulationRuns not found")
+
+    query = select(EvaluationProfiles).filter(
+        EvaluationProfiles.id == evaluation_profile_id, EvaluationProfiles.orgid == org_id
+    )
+    result = db.session.execute(query).scalars().first()
+    if result:
+        # Update the status
+        result.status = "completed"
+        # Commit the changes to the database
+        db.session.commit()
+    
+    return JSONResponse(
+        content={
+            "message": "Evaluation run is completed",
+            "evaluation_run_id": evaluation_run_id,
+        }
+    )
+
+
+@app.post("/api/evaluation/qadata-access")
+async def qa_data_evaulate(
+    background_tasks: BackgroundTasks,
+    evaluation_run_id: int = Form(default=None, ge=0),
+    chat_id: int = Form(default=None, ge=0),
+    org_id: str = Form(default="", max_length=1000, min_length=0),
+    user_id: str = Form(default="", max_length=1000, min_length=0),
+    token: str = Form(default="", max_length=1000, min_length=0),
+    question: str = Form(default="", min_length=0),
+    verified_answer: str = Form(default="", min_length=0),
+    verified_reference_context: str = Form(default="", min_length=0),
+    app_generated_answer: str = Form(default="", min_length=0),
+    app_generated_context: str = Form(default="", min_length=0),
+    model_name: str = Form(default="gpt-3.5-turbo", min_length=0),
+    evaluation_user_prompt: str = Form(default="", min_length=0),
+    openai_api_key: Optional[str] = Form(default=None),
+    db: Session = Depends(get_db),
+):
+    validUser, userId, orgId = get_user_info(user_id, token)
+    user_id = user_id if user_id != "" and user_id is not None else userId
+    org_id = org_id if org_id != "" and org_id is not None else orgId
+    if not validUser:
+        return {"message": "Unauthorized"}
+    try:
+        query = select(EvaluationRuns).filter(
+            EvaluationRuns.id == int(evaluation_run_id), EvaluationRuns.orgid == org_id
+        )
+
+        result = db.execute(query).scalars().first()
+
+        simulation_run_id = result.id
+        evaluation_profile_id = result.evaluation_profile_id
+        evaluation_id = result.evaluation_id
+
+        simulation_profile = select(EvaluationProfiles).filter(
+            EvaluationProfiles.id == evaluation_profile_id, EvaluationProfiles.orgid == org_id
+        )
+
+        simulation_result = db.execute(simulation_profile).scalars().first()
+
+        dataset_id = simulation_result.dataset_id
+
+        logger.info(
+            {
+                "message": "Triggering simulation",
+                "simulation_id": evaluation_run_id,
+                "model_name": model_name,
+                "evaluation_id": evaluation_id,
+                "dataset_id": dataset_id,
+                "simulation_run_id": simulation_run_id,
+                "chat_id": chat_id,
+                evaluation_id: evaluation_id,
+            }
+        )
+
+        background_tasks.add_task(
+            evaluation_task,
+            dataset_id,
+            evaluation_id,
+            chat_id,
+            org_id,
+            user_id,
+            question,
+            verified_answer,
+            verified_reference_context,
+            app_generated_answer,
+            app_generated_context,
+            model_name,
+            evaluation_user_prompt,
+            evaluation_profile_id,
+            simulation_run_id,
+            openai_api_key,
+        )
+
+        # Add the instance to the session and flush to generate the ID
+        return JSONResponse(
+            content={
+                "message": "Assesement added successfully",
+                "evaluation_run_id": evaluation_run_id,
+            }
+        )
+    except SQLAlchemyError as e:
+        logger.info({"error": f"Error during evaluation insertion: {e}"})
+        return JSONResponse(
+            content={
+                "message": "Oops! Something went wrong. Please try again.",
+                "evaluation_run_id": evaluation_run_id,
+            }
+        )
+
+
+@app.get("/api/assesements/list", response_model=List[EvaluationRunResponse])
+async def get_assesements_list(
+    user_id: str = Query("", max_length=1000, min_length=0),
+    org_id: str = Query("", max_length=1000, min_length=0),
+    token: str = Query("", max_length=1000, min_length=0),
+    db: Session = Depends(get_db),
+):
+    validUser, userId, orgId = get_user_info(user_id, token)
+    org_id = org_id if org_id != "" and org_id is not None else orgId
+
+    if validUser == False:
+        return {"message": "Unauthorized"}
+
+    org_id = org_id if org_id != "" and org_id is not None else orgId
+
+    query = (
+        select(EvaluationRuns)
+        .filter(EvaluationRuns.orgid == org_id)
+        .order_by(desc(EvaluationRuns.ts))
+    )
+
+    results = db.execute(query).scalars().all()
+    return results
+
+
+@app.get("/api/evaluation/list", response_model=List[AssessmentResponse])
 async def get_evaluation_list(
     user_id: str = Query("", max_length=1000, min_length=0),
     org_id: str = Query("", max_length=1000, min_length=0),
     db: Session = Depends(get_db),
 ):
-    validUser, userId, orgId = get_user_info(userId, None)
+    validUser, userId, orgId = get_user_info(user_id, None)
 
     if validUser == False:
         return {"message": "Unauthorized"}
-    
+
     query = (
         select(
             [
-                Evaluation.simulation_id.label("simulation_id"),
-                func.avg(Evaluation.score).label("average_score"),
-                func.max(Evaluation.ts).label("last_updated"),
-                func.count(Evaluation.id).label("number_of_evaluations"),
-                func.count(func.distinct(Evaluation.simulation_userid)).label(
+                Assessments.evaluation_profile_id.label("evaluation_profile_id"),
+                func.avg(Assessments.score).label("average_score"),
+                func.max(Assessments.ts).label("last_updated"),
+                func.count(Assessments.id).label("number_of_evaluations"),
+                func.count(func.distinct(Assessments.simulation_userid)).label(
                     "distinct_users"
                 ),
                 Dataset.name.label("dataset_name"),
-                LLMEndpoint.name.label("endpoint_name"),
-                SimulationProfile.name.label("simulation_name"),
-                SimulationProfile.status.label("status"),
-                Evaluation.evaluation_id.label("evaluation_id"),
+                EvaluationProfiles.name.label("simulation_name"),
+                EvaluationProfiles.status.label("status"),
             ]
         )
-        .join(Dataset, Evaluation.dataset_id == Dataset.id)
-        .join(LLMEndpoint, Evaluation.llm_endpoint_id == LLMEndpoint.id)
-        .join(SimulationProfile, Evaluation.simulation_id == SimulationProfile.id)
-        .where(Evaluation.orgid == org_id)
+        .join(Dataset, Assessments.dataset_id == Dataset.id)
+        .join(EvaluationProfiles, Assessments.evaluation_profile_id == EvaluationProfiles.id)
+        .where(Assessments.orgid == org_id)
         .group_by(
-            Evaluation.simulation_id,
+            Assessments.evaluation_profile_id,
             Dataset.name,
-            LLMEndpoint.name,
-            SimulationProfile.name,
-            SimulationProfile.status,
-            Evaluation.evaluation_id,
+            EvaluationProfiles.name,
+            EvaluationProfiles.status,
         )
         .order_by(desc("last_updated"))
     )
@@ -821,88 +1011,96 @@ async def get_evaluation_list(
     return results
 
 
-@app.get("/api/evaluation/id", response_model=List[EvaluationResponseWithSimulationRunId])
+@app.get(
+    "/api/evaluation/id", response_model=List[AssessmentResponseWithRunId]
+)
 async def get_evaluation_id(
     user_id: str = Query("", max_length=1000, min_length=0),
     org_id: str = Query("", max_length=1000, min_length=0),
-    evaluation_id: str = Query("", max_length=1000, min_length=0),
+    token: str = Query("", max_length=1000, min_length=0),
+    evaluation_profile_id: int = Query(None, ge=0),
     db: Session = Depends(get_db),
 ):
-    validUser, userId, orgId = get_user_info(userId, None)
+    validUser, userId, orgId = get_user_info(user_id, token)
+    user_id = user_id if user_id != "" and user_id is not None else userId
+    org_id = org_id if org_id != "" and org_id is not None else orgId
 
     if validUser == False:
         return {"message": "Unauthorized"}
+
     
     query = (
         select(
             [
-                Evaluation.simulation_id.label("simulation_id"),
-                Evaluation.simulation_run_id.label("simulation_run_id"),
-                Evaluation.evaluation_id.label("evaluation_id"),
-                func.avg(Evaluation.score).label("average_score"),
-                func.max(Evaluation.ts).label("last_updated"),
-                func.count(Evaluation.id).label("number_of_evaluations"),
-                func.count(func.distinct(Evaluation.simulation_userid)).label(
-                    "distinct_users"
-                ),
+                Assessments.evaluation_profile_id.label("evaluation_profile_id"),
+                Assessments.run_id.label("run_id"),
+                Assessments.evaluation_id.label("evaluation_id"),
+                func.avg(Assessments.score).label("average_score"),
+                func.max(Assessments.ts).label("last_updated"),
+                func.count(Assessments.id).label("number_of_evaluations"),
+                func.count(func.distinct(Assessments.simulation_userid)).label("distinct_users"),
                 Dataset.name.label("dataset_name"),
-                LLMEndpoint.name.label("endpoint_name"),
-                SimulationProfile.name.label("simulation_name"),
-                SimulationProfile.status.label("status"),
+                EvaluationProfiles.name.label("simulation_name"),
+                EvaluationProfiles.status.label("status"),
             ]
         )
-        .join(Dataset, Evaluation.dataset_id == Dataset.id)
-        .join(LLMEndpoint, Evaluation.llm_endpoint_id == LLMEndpoint.id)
-        .join(SimulationProfile, Evaluation.simulation_id == SimulationProfile.id)
-        .where(Evaluation.orgid == org_id, Evaluation.evaluation_id == evaluation_id)
-        .where(Evaluation.evaluation_id == evaluation_id)
+        .join(EvaluationProfiles, EvaluationProfiles.id == Assessments.evaluation_profile_id)  # Adjusted join
+        .join(Dataset, Dataset.id == Assessments.dataset_id)  # Adjusted join
+        .join(EvaluationRuns, EvaluationRuns.id == Assessments.run_id)  # Adjusted join
+        .where(
+            (EvaluationProfiles.orgid == org_id) & 
+            (EvaluationProfiles.id == evaluation_profile_id)
+        )
         .group_by(
-            Evaluation.simulation_id,
-            Evaluation.simulation_run_id,
-            Evaluation.evaluation_id,
+            Assessments.evaluation_profile_id,
+            Assessments.run_id,
+            Assessments.evaluation_id,
             Dataset.name,
-            LLMEndpoint.name,
-            SimulationProfile.name,
-            SimulationProfile.status
-        ).order_by(desc("last_updated"))
+            EvaluationProfiles.name,
+            EvaluationProfiles.status,
+        )
+        .order_by(desc("last_updated"))
     )
 
     results = db.execute(query).all()
+    logger.info(results)
     return results
 
 
 @app.get("/api/evaluation/chat", response_model=List[EvaluationChatResponse])
 async def evaluation(
     user_id: str = Query("", max_length=1000, min_length=0),
-    filter_score: float = Query(0.0, ge=0.0, le=1.0),
     org_id: str = Query("", max_length=1000, min_length=0),
-    evaluation_id: str = Query("", max_length=1000, min_length=0),
-    simulation_run_id: int = Query(0, ge=0),
+    token: str = Query("", max_length=1000, min_length=0),
+    filter_score: float = Query(0.0, ge=0.0, le=1.0),
+    run_id: int = Query(0, ge=0),
     db: Session = Depends(get_db),
 ):
-    validUser, userId, orgId = get_user_info(userId, None)
+    validUser, userId, orgId = get_user_info(user_id, token)
+    user_id = user_id if user_id != "" and user_id is not None else userId
+    org_id = org_id if org_id != "" and org_id is not None else orgId
 
     if validUser == False:
         return {"message": "Unauthorized"}
-    
+
     query = (
         select(
             [
                 QAData.chat_messages.label("chat_messages"),
                 QAData.ts.label("timestamp"),
                 QAData.reference_chunk.label("reference_chunk"),
-                Evaluation.simulation_run_id.label("simulation_run_id"),
-                Evaluation.score.label("score"),
-                Evaluation.endpoint_response.label("endpoint_response"),
+                Assessments.run_id.label("run_id"),
+                Assessments.score.label("score"),
+                Assessments.score_reason.label("score_reason"),
+                Assessments.endpoint_response.label("endpoint_response"),
             ]
         )
-        .join(Evaluation, QAData.id == Evaluation.qa_data_id)
-        .where(Evaluation.score >= filter_score)
+        .join(Assessments, QAData.id == Assessments.qa_data_id)
+        .where(Assessments.score >= filter_score)
         .filter(
             and_(
-                Evaluation.orgid == org_id, 
-                Evaluation.evaluation_id == evaluation_id,
-                Evaluation.simulation_run_id == simulation_run_id,
+                Assessments.orgid == org_id,
+                Assessments.run_id == run_id,
             )
         )
         .order_by(desc(QAData.ts))
@@ -918,14 +1116,16 @@ async def get_tokens(
     org_id: str = Query("", max_length=1000, min_length=0),
     db: Session = Depends(get_db),
 ):
-    validUser, userId, orgId = get_user_info(userId, None)
+    validUser, userId, orgId = get_user_info(user_id, None)
 
     if validUser == False:
         return {"message": "Unauthorized"}
-    
-    query = select(ApiToken).filter(
-        ApiToken.userid == user_id, ApiToken.orgid == org_id
-    ).order_by(desc(ApiToken.ts))
+
+    query = (
+        select(ApiToken)
+        .filter(ApiToken.userid == user_id, ApiToken.orgid == org_id)
+        .order_by(desc(ApiToken.ts))
+    )
 
     results = db.execute(query).scalars().all()
     return results
@@ -935,18 +1135,20 @@ async def get_tokens(
 async def add_token(
     user_id: str = Form(default=""),
     org_id: str = Form(default=""),
+    name: str = Form(default=""),
 ):
-    validUser, userId, orgId = get_user_info(userId, None)
+    validUser, userId, orgId = get_user_info(user_id, None)
 
     if validUser == False:
         return {"message": "Unauthorized"}
-    
+
     try:
         # Create a new Dataset instance
         token = ApiToken(
             userid=user_id,
             orgid=org_id,
             token=uuid.uuid4().hex,
+            name=name,
         )
 
         # Add the instance to the session and flush to generate the ID
@@ -975,6 +1177,7 @@ async def add_token(
                 "token_id": -1,
             }
         )
+
 
 @app.get("/api/ranking/{gen_id}")
 async def ranked_reports(gen_id: str):

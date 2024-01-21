@@ -128,5 +128,5 @@ class NERProcessor(DataProcessor):
         with open(file_path, "w") as output_file:
             json.dump(self.qa_array, output_file, indent=4)
 
-    def write_to_db(self, dataset_id:str, status:str, message:str) -> None:
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
         super().write_to_db(dataset_id, status, message)

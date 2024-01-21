@@ -37,7 +37,7 @@ class JSONProcessor(CSVProcessor):
             self.schema = list(df.columns)
             combined_df = pd.concat([combined_df, df], ignore_index=True)
         combined_df = combined_df.applymap(self.clean_text_to_ascii_df)
-        
+
         return combined_df
 
     def setTenant(self, tenant: str) -> None:
@@ -84,5 +84,5 @@ class JSONProcessor(CSVProcessor):
     def write(self, file_path: str) -> None:
         super().write(file_path)
 
-    def write_to_db(self, dataset_id:str, status:str, message:str) -> None:
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
         super().write_to_db(dataset_id, status, message)

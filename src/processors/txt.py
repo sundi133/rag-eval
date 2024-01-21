@@ -64,7 +64,7 @@ class TXTProcessor(DataProcessor):
         sample = data.shape[0] * (int(sample_size / 100) + 1)
         if sample > data.shape[0]:
             sample = data.shape[0]
-        
+
         return data.sample(n=sample, random_state=42)
 
     def generate_qa_pairs(
@@ -134,7 +134,7 @@ class TXTProcessor(DataProcessor):
                     )
 
                 question_array = json.loads(qa_pair)
-                
+
                 qadata = []
                 for record in question_array:
                     qadata.append(record)
@@ -157,5 +157,5 @@ class TXTProcessor(DataProcessor):
     def write(self, file_path: str) -> None:
         pass
 
-    def write_to_db(self, dataset_id:str, status:str, message:str) -> None:
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
         super().write_to_db(dataset_id, status, message)

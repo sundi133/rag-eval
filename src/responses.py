@@ -12,6 +12,7 @@ from pydantic import BaseModel, ValidationError
 from .models import Base, Dataset, QAData, LLMEndpoint
 from datetime import datetime
 
+
 class ApiTokenResponse(BaseModel):
     id: int
     name: Optional[str]  # Allow name to be None
@@ -19,6 +20,7 @@ class ApiTokenResponse(BaseModel):
     userid: str
     orgid: str
     ts: datetime
+
 
 class DatasetResponse(BaseModel):
     id: int
@@ -46,6 +48,7 @@ class DatasetResponse(BaseModel):
     error_msg: Optional[str]  # Allow error_msg to be None
     tags: Optional[str]  # Allow tags to be None
 
+
 class QADataResponse(BaseModel):
     id: int
     userid: str
@@ -72,7 +75,7 @@ class LLMEndpointResponse(BaseModel):
     requests_per_minute: Optional[int]  # Allow requests_per_minute to be None
 
 
-class SimulationProfileResponse(BaseModel):
+class EvaluationProfileResponse(BaseModel):
     id: int
     name: Optional[str]
     endpoint_url_id: Optional[int]
@@ -84,11 +87,29 @@ class SimulationProfileResponse(BaseModel):
     status: Optional[str]
 
 
-class EvaluationResponse(BaseModel):
-    simulation_id: int
+class EvaluationRunResponse(BaseModel):
+    id: int
+    evaluation_profile_id: int
+    ts: datetime
+    run_status: Optional[str]
+
+
+class AssessmentResponse(BaseModel):
+    evaluation_profile_id: int
     average_score: float
     dataset_name: str
-    endpoint_name: str
+    simulation_name: str
+    last_updated: datetime
+    number_of_evaluations: int
+    distinct_users: Optional[int]  # Allow distinct_users to be None
+    status: Optional[str]  # Allow status to be None
+
+
+class AssessmentResponseWithRunId(BaseModel):
+    evaluation_profile_id: int
+    run_id: int
+    average_score: float
+    dataset_name: str
     simulation_name: str
     last_updated: datetime
     evaluation_id: str
@@ -96,23 +117,12 @@ class EvaluationResponse(BaseModel):
     distinct_users: Optional[int]  # Allow distinct_users to be None
     status: Optional[str]  # Allow status to be None
 
-class EvaluationResponseWithSimulationRunId(BaseModel):
-    simulation_id: int
-    simulation_run_id: int
-    average_score: float
-    dataset_name: str
-    endpoint_name: str
-    simulation_name: str
-    last_updated: datetime
-    evaluation_id: str
-    number_of_evaluations: int
-    distinct_users: Optional[int]  # Allow distinct_users to be None
-    status: Optional[str]  # Allow status to be None
 
 class EvaluationChatResponse(BaseModel):
     chat_messages: str
     timestamp: datetime
     reference_chunk: str
     score: float
-    simulation_run_id: Optional[int]  # Allow simulation_run_id to be None
+    score_reason: Optional[str]  # Allow score_reason to be None
+    run_id: Optional[int]  # Allow run_id to be None
     endpoint_response: str

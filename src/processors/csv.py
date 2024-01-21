@@ -61,7 +61,6 @@ class CSVProcessor(DataProcessor):
         products_group_size: int,
         group_columns: List[str],
     ) -> pd.DataFrame:
-        
         if len(group_columns) == 0:
             if sample_size > df.shape[0]:
                 sample_size = df.shape[0]
@@ -80,11 +79,10 @@ class CSVProcessor(DataProcessor):
         group_counts = (
             filtered_df.groupby(group_columns).size().reset_index(name="count")
         )
-        
+
         # Filter groups with at least 'products_group_size' products
         group_counts_filter = group_counts[group_counts["count"] >= products_group_size]
 
-        
         # Randomly select 'sample_size' groups
         if sample_size > group_counts_filter.shape[0]:
             sample_size = group_counts_filter.shape[0]
@@ -102,11 +100,10 @@ class CSVProcessor(DataProcessor):
         number_of_questions: int,
         qa_generator: LLMChain,
     ) -> None:
-        
         for _index, group_row in randomized_samples.iterrows():
             filtered_dataframes = []
             group_filters = []
-            
+
             # Create a filter for the current group
             for column in group_columns:
                 # Create a filter condition for the current column and group_row
@@ -149,12 +146,9 @@ class CSVProcessor(DataProcessor):
             if len(records) < 20:
                 continue
 
-            
-
             if len(records) > self.chunk_size:
                 records = records[0 : self.chunk_size]
 
-            
             if (
                 "chunk_reference_first" in qa_generator.prompt.input_variables
                 and "chunk_reference_second" in qa_generator.prompt.input_variables
@@ -197,7 +191,6 @@ class CSVProcessor(DataProcessor):
                     schema=self.schema,
                     persona=self.sim_profile["persona"],
                 )
-            
 
             # Split questions by newline and process each question
             question_array = json.loads(qa_pair)
@@ -212,6 +205,6 @@ class CSVProcessor(DataProcessor):
 
     def write(self, file_path: str) -> None:
         pass
-    
-    def write_to_db(self, dataset_id:str, status:str, message:str) -> None:
+
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
         super().write_to_db(dataset_id, status, message)

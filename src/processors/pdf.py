@@ -98,6 +98,5 @@ class PDFProcessor(TXTProcessor):
     def write(self, file_path: str) -> None:
         super().write(file_path)
 
-    def write_to_db(self, dataset_id:str, status:str, message:str) -> None:
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
         super().write_to_db(dataset_id, status, message)
-

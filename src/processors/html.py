@@ -73,7 +73,9 @@ class HTMLProcessor(DataProcessor):
                     extracted_paragraphs.append((url, page_title, paragraph.text))
 
             # Extract text from other common text-containing HTML elements (e.g., <div>, <span>, <h1>, etc.)
-            other_elements = soup.find_all(["div", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li", "a", "td"])
+            other_elements = soup.find_all(
+                ["div", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li", "a", "td"]
+            )
             if other_elements:
                 for element in other_elements:
                     extracted_paragraphs.append((url, page_title, element.text))
@@ -89,9 +91,89 @@ class HTMLProcessor(DataProcessor):
         return base_domain
 
     def crawl_url(self, starting_url, url, depth):
-        if url.endswith(".pdf") or url.endswith(".docx") or url.endswith(".doc") or url.endswith(".ppt") or url.endswith(".pptx") or url.endswith(".xls") or url.endswith(".xlsx") or url.endswith(".csv") or url.endswith(".txt") or url.endswith(".rtf") or url.endswith(".odt") or url.endswith(".ods") or url.endswith(".odp") or url.endswith(".odg") or url.endswith(".odf") or url.endswith(".odc") or url.endswith(".odb") or url.endswith(".tgz") or url.endswith(".gz") or url.endswith(".zip") or url.endswith(".tar") or url.endswith(".rar") or url.endswith(".7z") or url.endswith(".bz2") or url.endswith(".xz") or url.endswith(".lz") or url.endswith(".lzma") or url.endswith(".lzo") or url.endswith(".z") or url.endswith(".Z") or url.endswith(".lz4") or url.endswith(".arj") or url.endswith(".cab") or url.endswith(".deb") or url.endswith(".pkg") or url.endswith(".rpm") or url.endswith(".sit") or url.endswith(".sitx") or url.endswith(".gz") or url.endswith(".tgz") or url.endswith(".bz2") or url.endswith(".tbz2") or url.endswith(".zip") or url.endswith(".zipx") or url.endswith(".tar") or url.endswith(".gz") or url.endswith(".tgz") or url.endswith(".bz2") or url.endswith(".tbz2") or url.endswith(".zip") or url.endswith(".tar") or url.endswith(".gz") or url.endswith(".tgz") or url.endswith(".bz2") or url.endswith(".tbz2") or url.endswith(".zip") or url.endswith(".tar") or url.endswith(".gz") or url.endswith(".tgz") or url.endswith(".bz2") or url.endswith(".tbz2") or url.endswith(".zip") or url.endswith(".tar") or url.endswith(".gz") or url.endswith(".tgz") or url.endswith(".bz2") or url.endswith(".tbz2") or url.endswith(".zip") or url.endswith(".tar") or url.endswith(".gz") or url.endswith(".tgz") or url.endswith(".bz2") or url.endswith(".tbz2") or url.endswith(".zip") or url.endswith(".tar") or url.endswith(".gz") or url.endswith(".tgz") or url.endswith(".bz2") or url.endswith(".tbz2"):
+        if (
+            url.endswith(".pdf")
+            or url.endswith(".docx")
+            or url.endswith(".doc")
+            or url.endswith(".ppt")
+            or url.endswith(".pptx")
+            or url.endswith(".xls")
+            or url.endswith(".xlsx")
+            or url.endswith(".csv")
+            or url.endswith(".txt")
+            or url.endswith(".rtf")
+            or url.endswith(".odt")
+            or url.endswith(".ods")
+            or url.endswith(".odp")
+            or url.endswith(".odg")
+            or url.endswith(".odf")
+            or url.endswith(".odc")
+            or url.endswith(".odb")
+            or url.endswith(".tgz")
+            or url.endswith(".gz")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".rar")
+            or url.endswith(".7z")
+            or url.endswith(".bz2")
+            or url.endswith(".xz")
+            or url.endswith(".lz")
+            or url.endswith(".lzma")
+            or url.endswith(".lzo")
+            or url.endswith(".z")
+            or url.endswith(".Z")
+            or url.endswith(".lz4")
+            or url.endswith(".arj")
+            or url.endswith(".cab")
+            or url.endswith(".deb")
+            or url.endswith(".pkg")
+            or url.endswith(".rpm")
+            or url.endswith(".sit")
+            or url.endswith(".sitx")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".zipx")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+        ):
             return
-        
+
         if (
             depth == 0
             or self.get_base_domain(starting_url) != self.get_base_domain(url)
@@ -104,7 +186,6 @@ class HTMLProcessor(DataProcessor):
         if len(self.to_be_visited) > self.max_crawl_links:
             return
         try:
-            
             response = requests.get(url, headers=self.headers)
             logger.info(
                 {
@@ -122,15 +203,16 @@ class HTMLProcessor(DataProcessor):
                 soup = BeautifulSoup(response.text, "html.parser")
                 links = soup.find_all("a")
                 for link in links:
-                    
                     if link.get("href"):
-                        if link.get("href").startswith("http") or link.get("href").startswith("https"):
+                        if link.get("href").startswith("http") or link.get(
+                            "href"
+                        ).startswith("https"):
                             next_url = link.get("href")
-                            
+
                             self.crawl_url(starting_url, next_url, depth - 1)
                         else:
                             next_url = urljoin(url, link.get("href"))
-                            
+
                             self.crawl_url(starting_url, next_url, depth - 1)
 
         except Exception as e:
@@ -161,7 +243,7 @@ class HTMLProcessor(DataProcessor):
 
     def parse(self) -> pd.DataFrame:
         crawling_depth = self.depth
-        
+
         combined_data = []
 
         for data in self.data_path:
@@ -170,10 +252,10 @@ class HTMLProcessor(DataProcessor):
             df = pd.DataFrame(self.data, columns=["url", "title", "text"])
             self.data = []
             combined_data.append(df)
-        
+
         # Create a DataFrame from the combined data
         df = pd.concat(combined_data, ignore_index=True)
-        
+
         df = self.process_df(df).reset_index(drop=True)
         df = df.applymap(self.clean_text_to_ascii_df)
 
@@ -211,8 +293,6 @@ class HTMLProcessor(DataProcessor):
         number_of_questions: int,
         qa_generator: LLMChain,
     ) -> None:
-        
-
         for _index, group_row in randomized_samples.iterrows():
             # conver each row to a pd dataframe
             filtered_dataframes = []
@@ -238,13 +318,10 @@ class HTMLProcessor(DataProcessor):
 
             for text_chunk in text_chunks:
                 if len(text_chunk) < 64:
-                    
                     continue
-                
 
                 if number_of_questions > self.batch_size:
                     number_of_questions = self.batch_size
-
 
                 if (
                     "chunk_reference_first" in qa_generator.prompt.input_variables
@@ -261,7 +338,6 @@ class HTMLProcessor(DataProcessor):
                     ]
                     if len(window_indices) == 0:
                         continue
-                    
 
                     desired_index = window_indices[-1]
                     row_content = randomized_samples.iloc[desired_index]
@@ -301,14 +377,14 @@ class HTMLProcessor(DataProcessor):
                     records = text_chunk
 
                 # Log generated questions
-                
+
                 # Split questions by newline and process each question
                 question_array = json.loads(qa_pair)
                 qadata = []
                 for record in question_array:
                     qadata.append(record)
                 self.add_output_sample(qadata, chunk=records)
-                
+
         return self.qa_dict
 
     def add_output_sample(self, records: List[dict], chunk: str) -> None:
@@ -317,7 +393,7 @@ class HTMLProcessor(DataProcessor):
     def write(self, file_path: str) -> None:
         pass
 
-    def write_to_db(self, dataset_id:str, status:str, message:str) -> None:
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
         super().write_to_db(dataset_id, status, message)
 
     @staticmethod

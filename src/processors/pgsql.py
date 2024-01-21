@@ -35,5 +35,5 @@ class PGSQLProcessor(DataProcessor):
     def write(self, file_path: str) -> None:
         pass
 
-    def write_to_db(self, dataset_id:str, status:str, message:str) -> None:
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
         super().write_to_db(dataset_id, status, message)
