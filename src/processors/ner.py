@@ -17,9 +17,8 @@ logger.addHandler(ch)
 
 
 class NERProcessor(DataProcessor):
-    def __init__(self, data_path: str) -> None:
-        super().__init__(data_path)
-        self.file_extension = os.path.splitext(data_path)[-1].lower()
+    def __init__(self, data_path: str, dataset_id: str) -> None:
+        super().__init__(data_path, dataset_id)
         self.qa_dict = {}
         self.qa_dict["training_data"] = []
         self.entities_json = {}
@@ -27,6 +26,12 @@ class NERProcessor(DataProcessor):
         self.entity_name = ""
         self.topics = []
         self.batch_size = 25
+
+    def setTenant(self, tenant: str) -> None:
+        super().setTenant(tenant)
+
+    def setUser(self, user: str) -> None:
+        super().setUser(user)
 
     def set_entity(self, entities_file) -> None:
         with open(entities_file, "r") as json_file:
@@ -122,3 +127,6 @@ class NERProcessor(DataProcessor):
     def write(self, file_path: str) -> None:
         with open(file_path, "w") as output_file:
             json.dump(self.qa_array, output_file, indent=4)
+
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
+        super().write_to_db(dataset_id, status, message)

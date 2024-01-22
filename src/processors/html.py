@@ -1,18 +1,24 @@
 import os
 import pandas as pd
 import json
-import requests
 import io
 import logging
+import random
+import time
 import numpy as np
-import re
+import requests
 import tldextract
+import re
 
 from langchain.chains import LLMChain
-from urllib.parse import urljoin
 from typing import List
-from bs4 import BeautifulSoup
 from .basefile import DataProcessor
+from ..models import QAData
+from sqlalchemy.orm import Session
+from datetime import datetime
+from fastapi_sqlalchemy import DBSessionMiddleware, db
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -23,10 +29,10 @@ logger.addHandler(ch)
 
 
 class HTMLProcessor(DataProcessor):
-    def __init__(self, data_path: str) -> None:
-        super().__init__(data_path)
-        self.file_extension = os.path.splitext(data_path)[-1].lower()
+    def __init__(self, data_path: List[str], dataset_id: str) -> None:
+        super().__init__(data_path, dataset_id)
         self.visited = {}
+        self.to_be_visited = {}
         self.data = []
         self.depth = 2
         self.qa_dict = {}
@@ -38,18 +44,24 @@ class HTMLProcessor(DataProcessor):
         self.chunk_size = 2000
         self.chunk_reference_max_distance = 4
 
+    def setTenant(self, tenant: str) -> None:
+        super().setTenant(tenant)
+
+    def setUser(self, user: str) -> None:
+        super().setUser(user)
+
+    def setSimProfile(self, profile: dict) -> None:
+        super().setSimProfile(profile)
+
     def set_depth(self, depth: int) -> None:
         self.depth = depth
 
-    def extract_paragraphs_from_headers(self, url):
+    def extract_content(self, url, html):
         if url in self.visited:
             return
         try:
-            response = requests.get(url, headers=self.headers)
             self.visited[url] = True
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = BeautifulSoup(html, "html.parser")
 
             page_title = soup.title.string if soup.title else "No title"
 
@@ -59,6 +71,15 @@ class HTMLProcessor(DataProcessor):
             if paragraphs:
                 for paragraph in paragraphs:
                     extracted_paragraphs.append((url, page_title, paragraph.text))
+
+            # Extract text from other common text-containing HTML elements (e.g., <div>, <span>, <h1>, etc.)
+            other_elements = soup.find_all(
+                ["div", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li", "a", "td"]
+            )
+            if other_elements:
+                for element in other_elements:
+                    extracted_paragraphs.append((url, page_title, element.text))
+
             return extracted_paragraphs
         except Exception as e:
             print(f"Error extracting content from {url}: {str(e)}")
@@ -71,17 +92,110 @@ class HTMLProcessor(DataProcessor):
 
     def crawl_url(self, starting_url, url, depth):
         if (
-            depth == 0
-            or self.get_base_domain(starting_url) != self.get_base_domain(url)
-            or not url.startswith("http")
-            or url in self.visited
+            url.endswith(".pdf")
+            or url.endswith(".docx")
+            or url.endswith(".doc")
+            or url.endswith(".ppt")
+            or url.endswith(".pptx")
+            or url.endswith(".xls")
+            or url.endswith(".xlsx")
+            or url.endswith(".csv")
+            or url.endswith(".txt")
+            or url.endswith(".rtf")
+            or url.endswith(".odt")
+            or url.endswith(".ods")
+            or url.endswith(".odp")
+            or url.endswith(".odg")
+            or url.endswith(".odf")
+            or url.endswith(".odc")
+            or url.endswith(".odb")
+            or url.endswith(".tgz")
+            or url.endswith(".gz")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".rar")
+            or url.endswith(".7z")
+            or url.endswith(".bz2")
+            or url.endswith(".xz")
+            or url.endswith(".lz")
+            or url.endswith(".lzma")
+            or url.endswith(".lzo")
+            or url.endswith(".z")
+            or url.endswith(".Z")
+            or url.endswith(".lz4")
+            or url.endswith(".arj")
+            or url.endswith(".cab")
+            or url.endswith(".deb")
+            or url.endswith(".pkg")
+            or url.endswith(".rpm")
+            or url.endswith(".sit")
+            or url.endswith(".sitx")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".zipx")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
+            or url.endswith(".zip")
+            or url.endswith(".tar")
+            or url.endswith(".gz")
+            or url.endswith(".tgz")
+            or url.endswith(".bz2")
+            or url.endswith(".tbz2")
         ):
             return
 
+        if (
+            depth == 0
+            or self.get_base_domain(starting_url) != self.get_base_domain(url)
+            or url in self.visited
+        ):
+            return
+        if not url.startswith("http") or not url.startswith("https"):
+            return
+
+        if len(self.to_be_visited) > self.max_crawl_links:
+            return
         try:
             response = requests.get(url, headers=self.headers)
+            logger.info(
+                {
+                    "message": "Crawling URL",
+                    "url": url,
+                    "response": response.status_code,
+                }
+            )
             if response.status_code == 200:
-                extracted_paragraphs = self.extract_paragraphs_from_headers(url)
+                extracted_paragraphs = self.extract_content(url, response.text)
                 if extracted_paragraphs:
                     self.data.extend(extracted_paragraphs)
 
@@ -89,21 +203,17 @@ class HTMLProcessor(DataProcessor):
                 soup = BeautifulSoup(response.text, "html.parser")
                 links = soup.find_all("a")
                 for link in links:
-                    logger.info(
-                        {
-                            "message": "Found link",
-                            "link": link.get("href"),
-                        }
-                    )
-                    if link.get("href").startswith("http"):
-                        logger.info(
-                            {
-                                "message": "Next crawl link",
-                                "link": link.get("href"),
-                            }
-                        )
-                        next_url = urljoin(url, link.get("href"))
-                        self.crawl_url(starting_url, next_url, depth - 1)
+                    if link.get("href"):
+                        if link.get("href").startswith("http") or link.get(
+                            "href"
+                        ).startswith("https"):
+                            next_url = link.get("href")
+
+                            self.crawl_url(starting_url, next_url, depth - 1)
+                        else:
+                            next_url = urljoin(url, link.get("href"))
+
+                            self.crawl_url(starting_url, next_url, depth - 1)
 
         except Exception as e:
             print(f"Error crawling {url}: {str(e)}")
@@ -133,15 +243,22 @@ class HTMLProcessor(DataProcessor):
 
     def parse(self) -> pd.DataFrame:
         crawling_depth = self.depth
-        self.crawl_url(self.data_path, self.data_path, crawling_depth)
-        df = pd.DataFrame(self.data, columns=["url", "title", "text"])
-        logger.info(
-            {
-                "message": "Parsed data",
-                "df": df.shape,
-            }
-        )
+
+        combined_data = []
+
+        for data in self.data_path:
+            # Assuming crawl_url returns a list of dictionaries containing data
+            self.crawl_url(data, data, depth=crawling_depth)
+            df = pd.DataFrame(self.data, columns=["url", "title", "text"])
+            self.data = []
+            combined_data.append(df)
+
+        # Create a DataFrame from the combined data
+        df = pd.concat(combined_data, ignore_index=True)
+
         df = self.process_df(df).reset_index(drop=True)
+        df = df.applymap(self.clean_text_to_ascii_df)
+
         logger.info(
             {
                 "message": "Deduped data",
@@ -176,14 +293,6 @@ class HTMLProcessor(DataProcessor):
         number_of_questions: int,
         qa_generator: LLMChain,
     ) -> None:
-        logger.info(
-            {
-                "randomized_samples shape": randomized_samples.shape,
-                "sample_size": sample_size,
-                "products_group_size": products_group_size,
-            }
-        )
-
         for _index, group_row in randomized_samples.iterrows():
             # conver each row to a pd dataframe
             filtered_dataframes = []
@@ -208,23 +317,11 @@ class HTMLProcessor(DataProcessor):
             text_chunks = self.chunk_text(records, chunk_size=self.chunk_size)
 
             for text_chunk in text_chunks:
-                logger.info(
-                    {
-                        "message": "Generating question",
-                        "group_row": _index,
-                        "text_chunk": text_chunk,
-                        "chunk_reference_max_distance": self.chunk_reference_max_distance,
-                    }
-                )
+                if len(text_chunk) < 64:
+                    continue
 
                 if number_of_questions > self.batch_size:
                     number_of_questions = self.batch_size
-
-                # qa_pair = self.completions_with_backoff(
-                #     qa_generator,
-                #     records=text_chunk,
-                #     number_of_questions=number_of_questions,
-                # )
 
                 if (
                     "chunk_reference_first" in qa_generator.prompt.input_variables
@@ -241,12 +338,6 @@ class HTMLProcessor(DataProcessor):
                     ]
                     if len(window_indices) == 0:
                         continue
-                    logger.info(
-                        {
-                            "message": "window_indices",
-                            "window_indices": window_indices,
-                        }
-                    )
 
                     desired_index = window_indices[-1]
                     row_content = randomized_samples.iloc[desired_index]
@@ -268,6 +359,7 @@ class HTMLProcessor(DataProcessor):
                         chunk_reference_first=text_chunk,
                         chunk_reference_second=chunk_reference_second,
                         number_of_questions=number_of_questions,
+                        persona=self.sim_profile["persona"],
                     )
                     records = (
                         text_chunk
@@ -276,61 +368,33 @@ class HTMLProcessor(DataProcessor):
                         + chunk_reference_second
                     )
                 else:
-                    qa_pair = self.completions_with_backoff(
-                        qa_generator,
-                        records=text_chunk,
+                    qa_pair = qa_generator.run(
+                        products=text_chunk,
                         number_of_questions=number_of_questions,
+                        persona=self.sim_profile["persona"],
                     )
+
                     records = text_chunk
 
-                logger.info(
-                    {
-                        "message": "Generated question",
-                        "qa_pair": qa_pair,
-                        "reference": records,
-                    }
-                )
-                try:
-                    # Split questions by newline and process each question
-                    question_array = json.loads(qa_pair)
-                    for record in question_array:
-                        record["url"] = group_row["url"]
-                        # Log each generated question
-                        logger.info(
-                            {
-                                "message": "Generated question",
-                                "question_answer": record,
-                                "reference": records,
-                            }
-                        )
-                    self.add_output_sample(record, chunk=records)
-                except Exception as e:
-                    logger.info(
-                        {
-                            "log_type": "error",
-                            "message": "Error generating question",
-                            "exception": str(e),
-                        }
-                    )
+                # Log generated questions
+
+                # Split questions by newline and process each question
+                question_array = json.loads(qa_pair)
+                qadata = []
+                for record in question_array:
+                    qadata.append(record)
+                self.add_output_sample(qadata, chunk=records)
+
         return self.qa_dict
 
-    def add_output_sample(self, record: json, chunk: str) -> None:
-        self.qa_array.append(
-            {
-                "question_answer": record,
-                "reference": chunk,
-            }
-        )
+    def add_output_sample(self, records: List[dict], chunk: str) -> None:
+        super().add_output_sample(records, chunk=chunk)
 
     def write(self, file_path: str) -> None:
-        logger.info(
-            {
-                "message": "Writing generated questions to file",
-                "file_path": file_path,
-            }
-        )
-        with open(file_path, "w") as output_file:
-            json.dump(self.qa_array, output_file, indent=4)
+        pass
+
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
+        super().write_to_db(dataset_id, status, message)
 
     @staticmethod
     @DataProcessor.retry_with_exponential_backoff

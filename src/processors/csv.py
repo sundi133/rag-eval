@@ -1,11 +1,20 @@
-import pandas as pd
 import os
+import pandas as pd
+import json
 import io
 import logging
-import json
-from typing import List
+import random
+import time
+import numpy as np
+
 from langchain.chains import LLMChain
+from typing import List
 from .basefile import DataProcessor
+from ..models import QAData
+from sqlalchemy.orm import Session
+from datetime import datetime
+from fastapi_sqlalchemy import DBSessionMiddleware, db
+
 
 # TODO move to central logger
 logger = logging.getLogger(__name__)
@@ -17,21 +26,33 @@ logger.addHandler(ch)
 
 
 class CSVProcessor(DataProcessor):
-    def __init__(self, data_path: str) -> None:
-        super().__init__(data_path)
-        self.file_extension = os.path.splitext(data_path)[-1].lower()
-        self.data = self.parse()
+    def __init__(self, data_path: List[str], dataset_id: str) -> None:
+        super().__init__(data_path, dataset_id)
         self.qa_dict = {}
         self.qa_array = []
         self.schema = None
         self.batch_size = 25
         self.chunk_size = 2000
 
+    def setTenant(self, tenant: str) -> None:
+        super().setTenant(tenant)
+
+    def setUser(self, user: str) -> None:
+        super().setUser(user)
+
+    def setSimProfile(self, profile: dict) -> None:
+        super().setSimProfile(profile)
+
     def parse(self) -> pd.DataFrame:
-        df = pd.read_csv(self.data_path, index_col=False)
-        self.schema = list(df.columns)
-        df.fillna("", inplace=True)
-        return df
+        combined_df = pd.DataFrame()
+        for file_path in self.data_path:
+            # Read each CSV file into a DataFrame
+            df = pd.read_csv(file_path, index_col=False)
+            df.fillna("", inplace=True)
+            self.schema = list(df.columns)
+            combined_df = pd.concat([combined_df, df], ignore_index=True)
+        combined_df = combined_df.applymap(self.clean_text_to_ascii_df)
+        return combined_df
 
     def randomize_samples(
         self,
@@ -40,15 +61,6 @@ class CSVProcessor(DataProcessor):
         products_group_size: int,
         group_columns: List[str],
     ) -> pd.DataFrame:
-        logger.info(
-            {
-                "message": "Getting randomized samples",
-                "df": df.shape,
-                "sample_size": sample_size,
-                "products_group_size": products_group_size,
-                "group_columns": group_columns,
-            }
-        )
         if len(group_columns) == 0:
             if sample_size > df.shape[0]:
                 sample_size = df.shape[0]
@@ -63,30 +75,18 @@ class CSVProcessor(DataProcessor):
         # Apply the filter function to each group and concatenate the results
         filtered_df = grouped.filter(filter_groups)
 
-        # Calculate group counts after filtering
+        # Calculate group csounts after filtering
         group_counts = (
             filtered_df.groupby(group_columns).size().reset_index(name="count")
         )
-        logger.info(
-            {
-                "message": "Filtered groups",
-                "group_counts": group_counts.head(),
-                "group_counts_shape": group_counts.shape,
-            }
-        )
+
         # Filter groups with at least 'products_group_size' products
         group_counts_filter = group_counts[group_counts["count"] >= products_group_size]
 
-        logger.info(
-            {
-                "message": "Filtered groups",
-                "group_counts_filter": group_counts_filter.shape,
-                "group_counts_filter_head": group_counts_filter.head(),
-            }
-        )
         # Randomly select 'sample_size' groups
         if sample_size > group_counts_filter.shape[0]:
             sample_size = group_counts_filter.shape[0]
+
         randomized_grouping = group_counts_filter.sample(n=sample_size, random_state=42)
         return randomized_grouping
 
@@ -100,27 +100,10 @@ class CSVProcessor(DataProcessor):
         number_of_questions: int,
         qa_generator: LLMChain,
     ) -> None:
-        logger.info(
-            {
-                "message": "Generating question & answer pairs",
-                "randomized_samples": randomized_samples.shape,
-            }
-        )
         for _index, group_row in randomized_samples.iterrows():
             filtered_dataframes = []
             group_filters = []
-            logger.info(
-                {
-                    "message": "Generating question",
-                    "_index": _index,
-                    "group_columns": group_columns,
-                    "group_row": group_row.shape,
-                    "df": df.shape,
-                    "df_columns": df.columns,
-                }
-            )
-            logger.info("****")
-            logger.info(group_row.head())
+
             # Create a filter for the current group
             for column in group_columns:
                 # Create a filter condition for the current column and group_row
@@ -155,30 +138,17 @@ class CSVProcessor(DataProcessor):
             # Close the buffer (optional)
             csv_buffer.close()
 
+            # too many questions will cause the model to pollute the answer
             if number_of_questions > 25:
                 number_of_questions = self.batch_size
 
+            # skip if the chunk is too small
             if len(records) < 20:
                 continue
-
-            logger.info(
-                {
-                    "message": "Generated question",
-                    "group_row": _index,
-                    "records": records,
-                    "records length": len(records),
-                }
-            )
 
             if len(records) > self.chunk_size:
                 records = records[0 : self.chunk_size]
 
-            logger.info(
-                {
-                    "message": "check qa_generator",
-                    "qa_generator": qa_generator.prompt.input_variables,
-                }
-            )
             if (
                 "chunk_reference_first" in qa_generator.prompt.input_variables
                 and "chunk_reference_second" in qa_generator.prompt.input_variables
@@ -197,7 +167,6 @@ class CSVProcessor(DataProcessor):
 
                 row_df = pd.DataFrame([row_content])
 
-                # Convert DataFrame to a CSV-formatted string in memory
                 csv_string_io = io.StringIO()
                 row_df.to_csv(csv_string_io, index=False)
                 chunk_reference_second = csv_string_io.getvalue()
@@ -206,6 +175,8 @@ class CSVProcessor(DataProcessor):
                     chunk_reference_first=records,
                     chunk_reference_second=chunk_reference_second,
                     number_of_questions=number_of_questions,
+                    schema=self.schema,
+                    persona=self.sim_profile["persona"],
                 )
                 records = (
                     records
@@ -217,45 +188,23 @@ class CSVProcessor(DataProcessor):
                 qa_pair = qa_generator.run(
                     products=records,
                     number_of_questions=number_of_questions,
+                    schema=self.schema,
+                    persona=self.sim_profile["persona"],
                 )
-
-            # Log generated questions
-            logger.info(
-                {
-                    "message": "Generated question & answer pair",
-                    "questions": qa_pair,
-                }
-            )
 
             # Split questions by newline and process each question
             question_array = json.loads(qa_pair)
-
+            qadata = []
             for record in question_array:
-                # Log each generated question
-                logger.info(
-                    {
-                        "message": "Generated question",
-                        "question_answer": record,
-                        "reference": records,
-                    }
-                )
-                self.add_output_sample(record, chunk=records)
+                qadata.append(record)
+            self.add_output_sample(qadata, chunk=records)
         return self.qa_dict
 
-    def add_output_sample(self, record: json, chunk: str) -> None:
-        self.qa_array.append(
-            {
-                "question_answer": record,
-                "reference": chunk,
-            }
-        )
+    def add_output_sample(self, records: List[dict], chunk: str) -> None:
+        super().add_output_sample(records, chunk=chunk)
 
     def write(self, file_path: str) -> None:
-        logger.info(
-            {
-                "message": "Writing generated questions to file",
-                "file_path": file_path,
-            }
-        )
-        with open(file_path, "w") as output_file:
-            json.dump(self.qa_array, output_file, indent=4)
+        pass
+
+    def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
+        super().write_to_db(dataset_id, status, message)

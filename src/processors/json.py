@@ -5,12 +5,11 @@ import io
 import logging
 import random
 import time
-import fitz
 
 from langchain.chains import LLMChain
 from typing import List
 from .basefile import DataProcessor
-from .txt import TXTProcessor
+from .csv import CSVProcessor
 from ..models import QAData
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -25,32 +24,21 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-class PDFProcessor(TXTProcessor):
+class JSONProcessor(CSVProcessor):
     def __init__(self, data_path: str, dataset_id: str) -> None:
         super().__init__(data_path, dataset_id)
 
     def parse(self) -> pd.DataFrame:
-        combined_content = ""
-        for data in self.data_path:
-            with open(data, "rb") as file:
-                pdf_document = fitz.open(data)
+        combined_df = pd.DataFrame()
+        for file_path in self.data_path:
+            # Read each CSV file into a DataFrame
+            df = pd.read_json(file_path, lines=True, orient="records")
+            df.fillna("", inplace=True)
+            self.schema = list(df.columns)
+            combined_df = pd.concat([combined_df, df], ignore_index=True)
+        combined_df = combined_df.applymap(self.clean_text_to_ascii_df)
 
-                text = ""
-                for page_num in range(pdf_document.page_count):
-                    page = pdf_document[page_num]
-                    text += page.get_text()
-
-                combined_content += text
-                pdf_document.close()
-        combined_content = self.clean_text_to_ascii(combined_content)
-
-        data = self.recursive_chunk_split(combined_content)
-
-        df = pd.DataFrame({"chunk": data})
-        df["chunk"] = df["chunk"].apply(lambda x: x.strip())
-        df = df[df["chunk"].notna() & (df["chunk"] != "")].reset_index(drop=True)
-
-        return df
+        return combined_df
 
     def setTenant(self, tenant: str) -> None:
         super().setTenant(tenant)
@@ -68,9 +56,7 @@ class PDFProcessor(TXTProcessor):
         products_group_size: int,
         group_columns: List[str],
     ) -> pd.DataFrame:
-        return super().randomize_samples(
-            data, sample_size, products_group_size, group_columns
-        )
+        super().randomize_samples(data, sample_size, products_group_size, group_columns)
 
     def generate_qa_pairs(
         self,
@@ -82,7 +68,7 @@ class PDFProcessor(TXTProcessor):
         number_of_questions: int,
         qa_generator: LLMChain,
     ) -> None:
-        return super().generate_qa_pairs(
+        super().generate_qa_pairs(
             randomized_samples,
             df,
             sample_size,
