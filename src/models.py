@@ -50,6 +50,8 @@ class Dataset(Base):
     error_msg = Column(String)
     data_source = Column(String)
     tags = Column(String)
+    tokens_cost = Column(Float, nullable=True)
+    tokens_used = Column(Integer, nullable=True)
 
     # Define relationships
     qa_data = relationship("QAData", back_populates="dataset")

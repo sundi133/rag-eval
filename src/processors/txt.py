@@ -7,6 +7,8 @@ import random
 import time
 
 from langchain.chains import LLMChain
+from langchain.callbacks import get_openai_callback  # For OpenAI models
+
 from typing import List
 from .basefile import DataProcessor
 from ..models import QAData
@@ -114,24 +116,38 @@ class TXTProcessor(DataProcessor):
                     # Check if "chunk" column exists, otherwise access the entire row
                     chunk_reference_second = row_content["chunk"]
 
-                    qa_pair = qa_generator.run(
-                        chunk_reference_first=records,
-                        chunk_reference_second=chunk_reference_second,
-                        number_of_questions=number_of_questions,
-                        persona=self.sim_profile["persona"],
-                    )
-                    records = (
-                        records
-                        + "\n\n"
-                        + "Distant reference chunk: "
-                        + chunk_reference_second
-                    )
+                    with get_openai_callback() as cb:
+                        qa_pair = qa_generator.run(
+                            chunk_reference_first=records,
+                            chunk_reference_second=chunk_reference_second,
+                            number_of_questions=number_of_questions,
+                            persona=self.sim_profile["persona"],
+                        )
+                        records = (
+                            records
+                            + "\n\n"
+                            + "Distant reference chunk: "
+                            + chunk_reference_second
+                        )
+                        logger.info(
+                            {
+                                "total_tokens" : cb.total_tokens,
+                                "total_cost" : cb.total_cost,
+                            }
+                        )
                 else:
-                    qa_pair = qa_generator.run(
-                        products=records,
-                        number_of_questions=number_of_questions,
-                        persona=self.sim_profile["persona"],
-                    )
+                    with get_openai_callback() as cb:
+                        qa_pair = qa_generator.run(
+                            products=records,
+                            number_of_questions=number_of_questions,
+                            persona=self.sim_profile["persona"],
+                        )
+                        logger.info(
+                            {
+                                "total_tokens" : cb.total_tokens,
+                                "total_cost" : cb.total_cost,
+                            }
+                        )
 
                 question_array = json.loads(qa_pair)
 
