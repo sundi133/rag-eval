@@ -810,7 +810,7 @@ async def qa_start_assesement(
 
 @app.post("/api/evaluation/end-assesement")
 async def qa_end_assesement(
-    evaluation_run_id: int =  Form(default=None, ge=0),
+    evaluation_run_id: int = Form(default=None, ge=0),
     org_id: str = Form(default="", max_length=1000, min_length=0),
     user_id: str = Form(default="", max_length=1000, min_length=0),
     token: str = Form(default="", max_length=1000, min_length=0),
@@ -836,7 +836,8 @@ async def qa_end_assesement(
         logger.info("SimulationRuns not found")
 
     query = select(EvaluationProfiles).filter(
-        EvaluationProfiles.id == evaluation_profile_id, EvaluationProfiles.orgid == org_id
+        EvaluationProfiles.id == evaluation_profile_id,
+        EvaluationProfiles.orgid == org_id,
     )
     result = db.session.execute(query).scalars().first()
     if result:
@@ -844,7 +845,7 @@ async def qa_end_assesement(
         result.status = "completed"
         # Commit the changes to the database
         db.session.commit()
-    
+
     return JSONResponse(
         content={
             "message": "Evaluation run is completed",
@@ -888,7 +889,8 @@ async def qa_data_evaulate(
         evaluation_id = result.evaluation_id
 
         simulation_profile = select(EvaluationProfiles).filter(
-            EvaluationProfiles.id == evaluation_profile_id, EvaluationProfiles.orgid == org_id
+            EvaluationProfiles.id == evaluation_profile_id,
+            EvaluationProfiles.orgid == org_id,
         )
 
         simulation_result = db.execute(simulation_profile).scalars().first()
@@ -996,7 +998,10 @@ async def get_evaluation_list(
             ]
         )
         .join(Dataset, Assessments.dataset_id == Dataset.id)
-        .join(EvaluationProfiles, Assessments.evaluation_profile_id == EvaluationProfiles.id)
+        .join(
+            EvaluationProfiles,
+            Assessments.evaluation_profile_id == EvaluationProfiles.id,
+        )
         .where(Assessments.orgid == org_id)
         .group_by(
             Assessments.evaluation_profile_id,
@@ -1011,9 +1016,7 @@ async def get_evaluation_list(
     return results
 
 
-@app.get(
-    "/api/evaluation/id", response_model=List[AssessmentResponseWithRunId]
-)
+@app.get("/api/evaluation/id", response_model=List[AssessmentResponseWithRunId])
 async def get_evaluation_id(
     user_id: str = Query("", max_length=1000, min_length=0),
     org_id: str = Query("", max_length=1000, min_length=0),
@@ -1028,7 +1031,6 @@ async def get_evaluation_id(
     if validUser == False:
         return {"message": "Unauthorized"}
 
-    
     query = (
         select(
             [
@@ -1040,18 +1042,23 @@ async def get_evaluation_id(
                 func.avg(Assessments.max_retrieval_score).label("max_retrieval_score"),
                 func.max(Assessments.ts).label("last_updated"),
                 func.count(Assessments.id).label("number_of_evaluations"),
-                func.count(func.distinct(Assessments.simulation_userid)).label("distinct_users"),
+                func.count(func.distinct(Assessments.simulation_userid)).label(
+                    "distinct_users"
+                ),
                 Dataset.name.label("dataset_name"),
                 EvaluationProfiles.name.label("simulation_name"),
                 EvaluationProfiles.status.label("status"),
             ]
         )
-        .join(EvaluationProfiles, EvaluationProfiles.id == Assessments.evaluation_profile_id)  # Adjusted join
+        .join(
+            EvaluationProfiles,
+            EvaluationProfiles.id == Assessments.evaluation_profile_id,
+        )  # Adjusted join
         .join(Dataset, Dataset.id == Assessments.dataset_id)  # Adjusted join
         .join(EvaluationRuns, EvaluationRuns.id == Assessments.run_id)  # Adjusted join
         .where(
-            (EvaluationProfiles.orgid == org_id) & 
-            (EvaluationProfiles.id == evaluation_profile_id)
+            (EvaluationProfiles.orgid == org_id)
+            & (EvaluationProfiles.id == evaluation_profile_id)
             # (Assessments.min_retrieval_score != None) &
             # (Assessments.max_retrieval_score != None)
         )
@@ -1100,7 +1107,9 @@ async def evaluation(
                 Assessments.min_retrieval_score.label("min_retrieval_score"),
                 Assessments.max_retrieval_score.label("max_retrieval_score"),
                 Assessments.avg_retrieval_score.label("avg_retrieval_score"),
-                Assessments.verified_reference_context.label("verified_reference_context"),
+                Assessments.verified_reference_context.label(
+                    "verified_reference_context"
+                ),
                 Assessments.chunks_retrieved.label("chunks_retrieved"),
             ]
         )

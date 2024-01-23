@@ -131,8 +131,8 @@ class TXTProcessor(DataProcessor):
                         )
                         logger.info(
                             {
-                                "total_tokens" : cb.total_tokens,
-                                "total_cost" : cb.total_cost,
+                                "total_tokens": cb.total_tokens,
+                                "total_cost": cb.total_cost,
                             }
                         )
                 else:
@@ -144,8 +144,8 @@ class TXTProcessor(DataProcessor):
                         )
                         logger.info(
                             {
-                                "total_tokens" : cb.total_tokens,
-                                "total_cost" : cb.total_cost,
+                                "total_tokens": cb.total_tokens,
+                                "total_cost": cb.total_cost,
                             }
                         )
 
