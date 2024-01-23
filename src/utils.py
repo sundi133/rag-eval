@@ -181,6 +181,11 @@ def save_simulation_results(
     score: float = None,
     score_reason: str = None,
     evaluation_id: str = None,
+    verified_reference_context: str = None,
+    app_generated_context: List[str] = None,
+    min_retrieval_score: float = None,
+    max_retrieval_score: float = None,
+    avg_retrieval_score: float = None,
 ) -> None:
     """
     Save the results of a simulation.
@@ -198,6 +203,11 @@ def save_simulation_results(
             score=score,
             score_reason=score_reason,
             evaluation_id=evaluation_id,
+            verified_reference_context=verified_reference_context,
+            chunks_retrieved=app_generated_context,
+            min_retrieval_score=min_retrieval_score,
+            max_retrieval_score=max_retrieval_score,
+            avg_retrieval_score=avg_retrieval_score,
         )
     else:
         evaluation = Assessments(
@@ -212,6 +222,11 @@ def save_simulation_results(
             score=score,
             score_reason=score_reason,
             evaluation_id=evaluation_id,
+            verified_reference_context=verified_reference_context,
+            chunks_retrieved=app_generated_context,
+            min_retrieval_score=min_retrieval_score,
+            max_retrieval_score=max_retrieval_score,
+            avg_retrieval_score=avg_retrieval_score,
         )
     db.session.add(evaluation)
     db.session.commit()
