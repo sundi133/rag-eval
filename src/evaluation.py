@@ -49,16 +49,15 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 logger = logging.getLogger(__name__)
 
+
 def get_embedding(text, key=None, model="text-embedding-ada-002"):
-    
-    embeddings = OpenAIEmbeddings(
-        model=model,
-        openai_api_key=key
-    )
+    embeddings = OpenAIEmbeddings(model=model, openai_api_key=key)
     return embeddings.embed_query(text)
+
 
 def cosine_similarity(embedding1, embedding2):
     return 1 - cosine(embedding1, embedding2)
+
 
 def evaluation_task(
     dataset_id: int,
@@ -120,19 +119,22 @@ def evaluation_task(
 
         evaluation = json.loads(evaluation_response)
 
-        
         score = evaluation["score"]
         score_reason = evaluation["reason"]
         userid = generate_random_hex_user_id()
 
         scores = []
-        verified_reference_context_embedding = get_embedding(verified_reference_context, openai_api_key)
+        verified_reference_context_embedding = get_embedding(
+            verified_reference_context, openai_api_key
+        )
         for context in app_generated_context:
             # Obtain the embedding for the app_generated context
             context_embedding = get_embedding(context, openai_api_key)
 
             # Calculate the similarity score
-            score = cosine_similarity(verified_reference_context_embedding, context_embedding)
+            score = cosine_similarity(
+                verified_reference_context_embedding, context_embedding
+            )
             scores.append(score)
 
         min_retrieval_score = min(scores)
@@ -158,7 +160,6 @@ def evaluation_task(
             avg_retrieval_score,
         )
 
-        
     except Exception as e:
         logger.error(
             {

@@ -169,6 +169,7 @@ def generate_random_hex_user_id() -> str:
     """
     return f"user_id_{uuid.uuid4().hex.upper()[0:12]}"
 
+
 def save_simulation_results(
     simulation_id: int,
     simulation_run_id: int,
@@ -190,7 +191,7 @@ def save_simulation_results(
     """
     Save the results of a simulation.
     """
-    
+
     if endpoint_url_id is None:
         evaluation = Assessments(
             evaluation_profile_id=simulation_id,

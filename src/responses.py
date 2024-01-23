@@ -128,7 +128,9 @@ class EvaluationChatResponse(BaseModel):
     score_reason: Optional[str]  # Allow score_reason to be None
     run_id: Optional[int]  # Allow run_id to be None
     endpoint_response: str
-    verified_reference_context: Optional[str]  # Allow verified_reference_context to be None
+    verified_reference_context: Optional[
+        str
+    ]  # Allow verified_reference_context to be None
     chunks_retrieved: Optional[List[str]]  # Allow chunks_retrieved to be None
     min_retrieval_score: Optional[float]  # Allow min_retrieval_score to be None
     max_retrieval_score: Optional[float]  # Allow max_retrieval_score to be None

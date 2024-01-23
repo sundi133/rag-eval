@@ -837,8 +837,8 @@ QuestionGeneratorPromptTemplate = {
     ]
     """,
     "evaluation_prompt": """
-    Instruction: Evaluate and rank the provided answers in terms of their relevance and accuracy in addressing the following question. Consider both the 'relevant_chunk' and 'retrieved_chunk' as sources of information. Assign a relevancy score from 1 to 5 to each answer, where 5 indicates high relevance and accuracy, and 1 indicates low relevance or inaccuracy. If both answers are equally relevant and accurate, assign them the same score. If you find that neither of the answers is relevant or accurate based on the provided chunks, or if the question cannot be answered from the given context, assign a score of 1 to both answers and state "Insufficient Information" as your reasoning. Do not make any changes to the sentences from the given context. Ensure your assessment is based solely on how well each answer addresses the question with respect to the information in the 'relevant_chunk' and 'retrieved_chunk'.
-
+    Instruction: Evaluate and compare Verified Answer with the App Generated Answer on relevancy and accuracy for the given question and context.
+    
     *** Question: 
     ### Start of question
         {question}
@@ -856,9 +856,10 @@ QuestionGeneratorPromptTemplate = {
 
     Evaluation Measure:
 
-    *** Provide a answer relevancy score of how relevant the App Generated Answer to the Verified Answer.
-    *** The score should be a float between 0 and 1 with 1 being the highest relevant
-    *** Provide a reasoning for the relevance score
+    **Calculate an Answer Relevance Score to assess the relevance of the App Generated Answer compared to the Verified Answer. 
+    **The score, ranging from 0 to 1, quantifies relevance where 0 indicates no relevance and 1 indicates maximum relevance.
+    **Provide a rationale for the assigned relevance score.
+
 
     The output should be in JSON
     {{

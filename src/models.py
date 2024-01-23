@@ -163,10 +163,11 @@ class Assessments(Base):
     max_retrieval_score = Column(Float, nullable=True)
     avg_retrieval_score = Column(Float, nullable=True)
 
-
     # Define relationships
     dataset = relationship("Dataset", back_populates="assessments")
     llm_endpoint = relationship("LLMEndpoint", back_populates="assessments")
     qa_data = relationship("QAData", back_populates="assessments")
-    evaluation_profiles = relationship("EvaluationProfiles", back_populates="assessments")
+    evaluation_profiles = relationship(
+        "EvaluationProfiles", back_populates="assessments"
+    )
     evaluation_runs = relationship("EvaluationRuns", back_populates="assessments")
