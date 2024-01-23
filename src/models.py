@@ -157,6 +157,12 @@ class Assessments(Base):
     score_reason = Column(String, nullable=True)
     endpoint_response = Column(String)
     evaluation_id = Column(String)
+    verified_reference_context = Column(String, nullable=True)
+    chunks_retrieved = Column(JSON, nullable=True)
+    min_retrieval_score = Column(Float, nullable=True)
+    max_retrieval_score = Column(Float, nullable=True)
+    avg_retrieval_score = Column(Float, nullable=True)
+
 
     # Define relationships
     dataset = relationship("Dataset", back_populates="assessments")

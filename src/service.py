@@ -865,7 +865,7 @@ async def qa_data_evaulate(
     verified_answer: str = Form(default="", min_length=0),
     verified_reference_context: str = Form(default="", min_length=0),
     app_generated_answer: str = Form(default="", min_length=0),
-    app_generated_context: str = Form(default="", min_length=0),
+    app_generated_context: List[str] = Form(default=[""]),
     model_name: str = Form(default="gpt-3.5-turbo", min_length=0),
     evaluation_user_prompt: str = Form(default="", min_length=0),
     openai_api_key: Optional[str] = Form(default=None),
@@ -1036,6 +1036,8 @@ async def get_evaluation_id(
                 Assessments.run_id.label("run_id"),
                 Assessments.evaluation_id.label("evaluation_id"),
                 func.avg(Assessments.score).label("average_score"),
+                func.avg(Assessments.min_retrieval_score).label("min_retrieval_score"),
+                func.avg(Assessments.max_retrieval_score).label("max_retrieval_score"),
                 func.max(Assessments.ts).label("last_updated"),
                 func.count(Assessments.id).label("number_of_evaluations"),
                 func.count(func.distinct(Assessments.simulation_userid)).label("distinct_users"),
@@ -1050,6 +1052,8 @@ async def get_evaluation_id(
         .where(
             (EvaluationProfiles.orgid == org_id) & 
             (EvaluationProfiles.id == evaluation_profile_id)
+            # (Assessments.min_retrieval_score != None) &
+            # (Assessments.max_retrieval_score != None)
         )
         .group_by(
             Assessments.evaluation_profile_id,
@@ -1093,6 +1097,11 @@ async def evaluation(
                 Assessments.score.label("score"),
                 Assessments.score_reason.label("score_reason"),
                 Assessments.endpoint_response.label("endpoint_response"),
+                Assessments.min_retrieval_score.label("min_retrieval_score"),
+                Assessments.max_retrieval_score.label("max_retrieval_score"),
+                Assessments.avg_retrieval_score.label("avg_retrieval_score"),
+                Assessments.verified_reference_context.label("verified_reference_context"),
+                Assessments.chunks_retrieved.label("chunks_retrieved"),
             ]
         )
         .join(Assessments, QAData.id == Assessments.qa_data_id)
