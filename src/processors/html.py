@@ -18,7 +18,9 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
+import socket
+import ipaddress
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -26,6 +28,49 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
+
+def is_url_safe(url):
+    """
+    Prevent SSRF by ensuring the URL does not resolve to private or local addresses.
+    """
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            return False
+
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+
+        # Prevent localhost and loopback
+        if hostname in ("localhost", "127.0.0.1", "::1"):
+            return False
+
+        # Prevent .local and .internal TLDs
+        if hostname.endswith(".local") or hostname.endswith(".internal"):
+            return False
+
+        # Resolve the hostname to IP(s)
+        try:
+            addrinfo = socket.getaddrinfo(hostname, None)
+            for family, _, _, _, sockaddr in addrinfo:
+                ip = sockaddr[0]
+                ip_obj = ipaddress.ip_address(ip)
+                if (
+                    ip_obj.is_private
+                    or ip_obj.is_loopback
+                    or ip_obj.is_link_local
+                    or ip_obj.is_reserved
+                    or ip_obj.is_multicast
+                ):
+                    return False
+        except Exception:
+            return False
+
+        return True
+    except Exception:
+        return False
 
 
 class HTMLProcessor(DataProcessor):
@@ -165,12 +210,6 @@ class HTMLProcessor(DataProcessor):
             or url.endswith(".tgz")
             or url.endswith(".bz2")
             or url.endswith(".tbz2")
-            or url.endswith(".zip")
-            or url.endswith(".tar")
-            or url.endswith(".gz")
-            or url.endswith(".tgz")
-            or url.endswith(".bz2")
-            or url.endswith(".tbz2")
         ):
             return
 
@@ -180,13 +219,20 @@ class HTMLProcessor(DataProcessor):
             or url in self.visited
         ):
             return
-        if not url.startswith("http") or not url.startswith("https"):
+        # Fix: Properly check for http/https and validate URL safety
+        if not (url.startswith("http://") or url.startswith("https://")):
+            return
+
+        # SSRF mitigation: validate the URL before making the request
+        if not is_url_safe(url):
+            logger.warning({"message": "Blocked unsafe URL (SSRF protection)", "url": url})
             return
 
         if len(self.to_be_visited) > self.max_crawl_links:
             return
         try:
-            response = requests.get(url, headers=self.headers)
+            # Security fix: Only make requests to validated, safe URLs
+            response = requests.get(url, headers=self.headers, timeout=10)
             logger.info(
                 {
                     "message": "Crawling URL",
@@ -204,16 +250,18 @@ class HTMLProcessor(DataProcessor):
                 links = soup.find_all("a")
                 for link in links:
                     if link.get("href"):
-                        if link.get("href").startswith("http") or link.get(
-                            "href"
-                        ).startswith("https"):
-                            next_url = link.get("href")
-
-                            self.crawl_url(starting_url, next_url, depth - 1)
+                        href = link.get("href")
+                        if href.startswith("http://") or href.startswith("https://"):
+                            next_url = href
                         else:
-                            next_url = urljoin(url, link.get("href"))
+                            next_url = urljoin(url, href)
 
-                            self.crawl_url(starting_url, next_url, depth - 1)
+                        # SSRF mitigation for discovered links
+                        if not is_url_safe(next_url):
+                            logger.warning({"message": "Blocked unsafe linked URL (SSRF protection)", "url": next_url})
+                            continue
+
+                        self.crawl_url(starting_url, next_url, depth - 1)
 
         except Exception as e:
             print(f"Error crawling {url}: {str(e)}")
