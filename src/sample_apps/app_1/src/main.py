@@ -2,14 +2,20 @@ import openai
 import chromadb
 import uvicorn
 import os
+import imghdr
+import magic
 
 from .data import Query
 from fastapi import FastAPI, Form
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException, status
 
 DATAPATH = os.environ.get("DATAPATH", "fixtures/data.txt")
 PORT = os.environ.get("PORT", 8001)
 upload_directory = "/tmp"
+
+# Allowed file extensions and MIME types
+ALLOWED_EXTENSIONS = {".txt"}
+ALLOWED_MIME_TYPES = {"text/plain"}
 
 app = FastAPI()
 chroma = chromadb.Client()
@@ -84,11 +90,46 @@ async def generate_response(query: str = Form(...)):
 
 @app.post("/ping/")
 async def ping(file: UploadFile = File(...)):
-    # Process the uploaded file
-    with open(os.path.join(upload_directory, file.filename), "wb") as f:
-        file_content = await file.read()
+    # Security fix: Restrict file uploads to .txt files and validate MIME type and content
+
+    filename = file.filename
+    file_ext = os.path.splitext(filename)[1].lower()
+
+    # Check file extension
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file extension. Only .txt files are allowed."
+        )
+
+    # Read file content (but don't write to disk yet)
+    file_content = await file.read()
+
+    # Check MIME type using python-magic (content-based)
+    mime = magic.Magic(mime=True)
+    detected_mime = mime.from_buffer(file_content)
+    if detected_mime not in ALLOWED_MIME_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file type. Only plain text files are allowed."
+        )
+
+    # Optionally, check for binary bytes (rudimentary check for non-text files)
+    try:
+        file_content.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File is not valid UTF-8 text."
+        )
+
+    # Write file to disk only after validation
+    safe_filename = os.path.basename(filename)
+    file_path = os.path.join(upload_directory, safe_filename)
+    with open(file_path, "wb") as f:
         f.write(file_content)
-    DATAPATH = os.path.join(upload_directory, file.filename)
+
+    DATAPATH = file_path
     process_data(DATAPATH)
     return {"status": "pong"}
 
