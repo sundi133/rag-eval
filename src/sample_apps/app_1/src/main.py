@@ -2,10 +2,12 @@ import openai
 import chromadb
 import uvicorn
 import os
+import re
 
 from .data import Query
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, HTTPException
 from fastapi import FastAPI, File, Form, UploadFile
+from starlette.status import HTTP_400_BAD_REQUEST
 
 DATAPATH = os.environ.get("DATAPATH", "fixtures/data.txt")
 PORT = os.environ.get("PORT", 8001)
@@ -75,8 +77,34 @@ def process_data(file_path):
         collection.add(documents=documents, embeddings=embeddings, ids=ids)
 
 
+def is_valid_query(query: str) -> bool:
+    """
+    Validates the input query to prevent injection attacks and abuse.
+    - Restricts length to 512 characters.
+    - Allows only printable characters.
+    - Optionally, restricts to a safe character set (letters, numbers, punctuation, whitespace).
+    """
+    if not isinstance(query, str):
+        return False
+    if len(query) == 0 or len(query) > 512:
+        return False
+    # Allow only printable characters (prevents control chars, etc.)
+    if not all(32 <= ord(c) <= 126 for c in query):
+        return False
+    # Optionally, restrict to a safer subset:
+    # if not re.match(r"^[\w\s.,!?;:'\"@#%&()\-+=/\\]*$", query):
+    #     return False
+    return True
+
+
 @app.post("/chat/")
 async def generate_response(query: str = Form(...)):
+    # Input validation to prevent injection attacks and abuse
+    if not is_valid_query(query):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Invalid query parameter. Please provide a valid query (1-512 printable characters)."
+        )
     print(query)
     response = await generate_response_with_retrieval_augmentation(query)
     return response
