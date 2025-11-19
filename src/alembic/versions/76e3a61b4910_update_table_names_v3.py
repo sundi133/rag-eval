@@ -75,7 +75,9 @@ def upgrade() -> None:
         sa.Column("name", sa.String(), nullable=True),
         sa.Column("endpoint_url", sa.String(), nullable=True),
         sa.Column("ts", sa.DateTime(), nullable=True),
-        sa.Column("access_token", sa.String(), nullable=True),
+        # SECURITY FIX: Store access_token encrypted using sa.LargeBinary instead of plain string
+        # The application layer must handle encryption/decryption of this field
+        sa.Column("access_token", sa.LargeBinary(), nullable=True),
         sa.Column("payload_format", sa.String(), nullable=True),
         sa.Column("payload_user_key", sa.String(), nullable=True),
         sa.Column("payload_message_key", sa.String(), nullable=True),
