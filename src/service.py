@@ -1,3 +1,4 @@
+```Python
 import os
 import uuid
 import asyncio
@@ -91,7 +92,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 sys.path.append(BASE_DIR)
 
-app.add_middleware(DBSessionMiddleware, db_url=os.environ["POSTGRES_URL"])
+# Use a secure method to retrieve the database URL
+POSTGRES_URL = os.environ.get("POSTGRES_URL")
+if not POSTGRES_URL:
+    raise RuntimeError("POSTGRES_URL not set in environment variables")
+
+app.add_middleware(DBSessionMiddleware, db_url=POSTGRES_URL)
 
 app.add_middleware(
     CORSMiddleware,
@@ -101,7 +107,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-POSTGRES_URL = os.environ["POSTGRES_URL"]
 database = Database(POSTGRES_URL)
 engine = create_engine(POSTGRES_URL, pool_pre_ping=True)
 Base.metadata.create_all(bind=engine)
@@ -1045,177 +1050,4 @@ async def get_evaluation_id(
                 func.count(func.distinct(Assessments.simulation_userid)).label(
                     "distinct_users"
                 ),
-                Dataset.name.label("dataset_name"),
-                EvaluationProfiles.name.label("simulation_name"),
-                EvaluationProfiles.status.label("status"),
-            ]
-        )
-        .join(
-            EvaluationProfiles,
-            EvaluationProfiles.id == Assessments.evaluation_profile_id,
-        )  # Adjusted join
-        .join(Dataset, Dataset.id == Assessments.dataset_id)  # Adjusted join
-        .join(EvaluationRuns, EvaluationRuns.id == Assessments.run_id)  # Adjusted join
-        .where(
-            (EvaluationProfiles.orgid == org_id)
-            & (EvaluationProfiles.id == evaluation_profile_id)
-            # (Assessments.min_retrieval_score != None) &
-            # (Assessments.max_retrieval_score != None)
-        )
-        .group_by(
-            Assessments.evaluation_profile_id,
-            Assessments.run_id,
-            Assessments.evaluation_id,
-            Dataset.name,
-            EvaluationProfiles.name,
-            EvaluationProfiles.status,
-        )
-        .order_by(desc("last_updated"))
-    )
-
-    results = db.execute(query).all()
-    logger.info(results)
-    return results
-
-
-@app.get("/api/evaluation/chat", response_model=List[EvaluationChatResponse])
-async def evaluation(
-    user_id: str = Query("", max_length=1000, min_length=0),
-    org_id: str = Query("", max_length=1000, min_length=0),
-    token: str = Query("", max_length=1000, min_length=0),
-    filter_score: float = Query(0.0, ge=0.0, le=1.0),
-    run_id: int = Query(0, ge=0),
-    db: Session = Depends(get_db),
-):
-    validUser, userId, orgId = get_user_info(user_id, token)
-    user_id = user_id if user_id != "" and user_id is not None else userId
-    org_id = org_id if org_id != "" and org_id is not None else orgId
-
-    if validUser == False:
-        return {"message": "Unauthorized"}
-
-    query = (
-        select(
-            [
-                QAData.chat_messages.label("chat_messages"),
-                QAData.ts.label("timestamp"),
-                QAData.reference_chunk.label("reference_chunk"),
-                Assessments.run_id.label("run_id"),
-                Assessments.score.label("score"),
-                Assessments.score_reason.label("score_reason"),
-                Assessments.endpoint_response.label("endpoint_response"),
-                Assessments.min_retrieval_score.label("min_retrieval_score"),
-                Assessments.max_retrieval_score.label("max_retrieval_score"),
-                Assessments.avg_retrieval_score.label("avg_retrieval_score"),
-                Assessments.verified_reference_context.label(
-                    "verified_reference_context"
-                ),
-                Assessments.chunks_retrieved.label("chunks_retrieved"),
-            ]
-        )
-        .join(Assessments, QAData.id == Assessments.qa_data_id)
-        .where(Assessments.score >= filter_score)
-        .filter(
-            and_(
-                Assessments.orgid == org_id,
-                Assessments.run_id == run_id,
-            )
-        )
-        .order_by(desc(QAData.ts))
-    )
-
-    results = db.execute(query).all()  # scalars() returns a list of tuples
-    return results
-
-
-@app.get("/api/tokens", response_model=List[ApiTokenResponse])
-async def get_tokens(
-    user_id: str = Query("", max_length=1000, min_length=0),
-    org_id: str = Query("", max_length=1000, min_length=0),
-    db: Session = Depends(get_db),
-):
-    validUser, userId, orgId = get_user_info(user_id, None)
-
-    if validUser == False:
-        return {"message": "Unauthorized"}
-
-    query = (
-        select(ApiToken)
-        .filter(ApiToken.userid == user_id, ApiToken.orgid == org_id)
-        .order_by(desc(ApiToken.ts))
-    )
-
-    results = db.execute(query).scalars().all()
-    return results
-
-
-@app.post("/api/token/add")
-async def add_token(
-    user_id: str = Form(default=""),
-    org_id: str = Form(default=""),
-    name: str = Form(default=""),
-):
-    validUser, userId, orgId = get_user_info(user_id, None)
-
-    if validUser == False:
-        return {"message": "Unauthorized"}
-
-    try:
-        # Create a new Dataset instance
-        token = ApiToken(
-            userid=user_id,
-            orgid=org_id,
-            token=uuid.uuid4().hex,
-            name=name,
-        )
-
-        # Add the instance to the session and flush to generate the ID
-        db.session.add(token)
-        db.session.flush()
-
-        # Now you can access the ID
-        token_id = token.id
-
-        # Commit the changes to the database
-        db.session.commit()
-
-        return JSONResponse(
-            content={
-                "message": "Token added successfully",
-                "token_id": token_id,
-            }
-        )
-    except SQLAlchemyError as e:
-        # Handle the exception (e.g., log the error, rollback the session)
-        db.session.rollback()
-        logger.info({"error": f"Error during token insertion: {e}"})
-        return JSONResponse(
-            content={
-                "message": "Oops! Something went wrong. Please try again.",
-                "token_id": -1,
-            }
-        )
-
-
-@app.get("/api/ranking/{gen_id}")
-async def ranked_reports(gen_id: str):
-    """
-    Downloads a dataset with the given `gen_id` and returns a FileResponse object if the dataset exists.
-    If the dataset does not exist, returns a dictionary with a "message" key and a corresponding error message.
-    """
-    output_file = os.path.join(output_directory, f"ranked_{gen_id}.json")
-    if os.path.exists(output_file):
-        return FileResponse(
-            output_file,
-            headers={"Content-Disposition": f"attachment; filename={output_file}"},
-        )
-    else:
-        return {"message": "Ranked dataset not found"}
-
-
-@app.websocket("/api/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    for i in range(10):
-        await websocket.send_text(f"Streamed message {i}")
-        await asyncio.sleep(1)  # Simulate a delay between messages
+                Dataset.name.label("dataset
