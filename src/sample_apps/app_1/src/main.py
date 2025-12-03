@@ -1,3 +1,4 @@
+```Python
 import openai
 import chromadb
 import uvicorn
@@ -5,11 +6,12 @@ import os
 
 from .data import Query
 from fastapi import FastAPI, Form
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 
 DATAPATH = os.environ.get("DATAPATH", "fixtures/data.txt")
 PORT = os.environ.get("PORT", 8001)
 upload_directory = "/tmp"
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB limit for uploaded files
 
 app = FastAPI()
 chroma = chromadb.Client()
@@ -84,6 +86,16 @@ async def generate_response(query: str = Form(...)):
 
 @app.post("/ping/")
 async def ping(file: UploadFile = File(...)):
+    # Check file size before processing
+    file_size = 0
+    async for chunk in file.stream():
+        file_size += len(chunk)
+        if file_size > MAX_FILE_SIZE:
+            raise HTTPException(status_code=413, detail="File too large")
+    
+    # Reset file stream to read from the beginning
+    file.file.seek(0)
+
     # Process the uploaded file
     with open(os.path.join(upload_directory, file.filename), "wb") as f:
         file_content = await file.read()
@@ -95,3 +107,4 @@ async def ping(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=PORT)
+```
