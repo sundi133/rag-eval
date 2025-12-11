@@ -84,11 +84,12 @@ async def generate_response(query: str = Form(...)):
 
 @app.post("/ping/")
 async def ping(file: UploadFile = File(...)):
-    # Process the uploaded file
-    with open(os.path.join(upload_directory, file.filename), "wb") as f:
+    # Security fix: Prevent path traversal by sanitizing the filename
+    safe_filename = os.path.basename(file.filename)
+    with open(os.path.join(upload_directory, safe_filename), "wb") as f:
         file_content = await file.read()
         f.write(file_content)
-    DATAPATH = os.path.join(upload_directory, file.filename)
+    DATAPATH = os.path.join(upload_directory, safe_filename)
     process_data(DATAPATH)
     return {"status": "pong"}
 
