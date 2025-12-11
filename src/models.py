@@ -1,11 +1,65 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Float, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from datetime import datetime
+
+# --- Security Fix: Import cryptography for field encryption ---
+try:
+    from cryptography.fernet import Fernet, InvalidToken
+except ImportError:
+    Fernet = None
+    InvalidToken = Exception
+
+import os
+import base64
 
 Base = declarative_base()
 
+# --- Security Fix: Helper for encryption key management ---
+def get_llm_token_encryption_key():
+    key = os.environ.get("LLM_TOKEN_ENCRYPTION_KEY")
+    if key is None:
+        raise RuntimeError("LLM_TOKEN_ENCRYPTION_KEY environment variable not set")
+    if isinstance(key, str):
+        try:
+            key_bytes = key.encode()
+            # Validate base64 and length
+            decoded = base64.urlsafe_b64decode(key_bytes)
+            if len(decoded) != 32:
+                raise RuntimeError("LLM_TOKEN_ENCRYPTION_KEY is invalid. Must be 32 url-safe base64-encoded bytes.")
+        except Exception:
+            raise RuntimeError("LLM_TOKEN_ENCRYPTION_KEY is invalid. Must be 32 url-safe base64-encoded bytes.")
+    else:
+        key_bytes = key
+    if Fernet is None:
+        raise RuntimeError("cryptography.fernet is required for token encryption")
+    try:
+        Fernet(key if isinstance(key, bytes) else key.encode())
+    except Exception:
+        raise RuntimeError("LLM_TOKEN_ENCRYPTION_KEY is invalid. Must be 32 url-safe base64-encoded bytes.")
+    return key if isinstance(key, bytes) else key.encode()
+
+def encrypt_token(token: str) -> str:
+    if token is None:
+        return None
+    if Fernet is None:
+        raise RuntimeError("cryptography.fernet is required for token encryption")
+    key = get_llm_token_encryption_key()
+    f = Fernet(key)
+    return f.encrypt(token.encode()).decode()
+
+def decrypt_token(token: str) -> str:
+    if token is None:
+        return None
+    if Fernet is None:
+        raise RuntimeError("cryptography.fernet is required for token decryption")
+    key = get_llm_token_encryption_key()
+    f = Fernet(key)
+    try:
+        return f.decrypt(token.encode()).decode()
+    except Exception:
+        # If token is not encrypted, return as is (for backward compatibility)
+        return token
 
 class ApiToken(Base):
     __tablename__ = "api_tokens"
@@ -16,7 +70,6 @@ class ApiToken(Base):
     name = Column(String)
     token = Column(String)
     ts = Column(DateTime, default=datetime.utcnow)
-
 
 class Dataset(Base):
     __tablename__ = "datasets"
@@ -58,7 +111,6 @@ class Dataset(Base):
     assessments = relationship("Assessments", back_populates="dataset")
     evaluation_profiles = relationship("EvaluationProfiles", back_populates="dataset")
 
-
 class QAData(Base):
     __tablename__ = "qa_data"
 
@@ -74,7 +126,6 @@ class QAData(Base):
     dataset = relationship("Dataset", back_populates="qa_data")
     assessments = relationship("Assessments", back_populates="qa_data")
 
-
 class LLMEndpoint(Base):
     __tablename__ = "llm_endpoints"
 
@@ -84,7 +135,7 @@ class LLMEndpoint(Base):
     name = Column(String, index=True)
     endpoint_url = Column(String)
     ts = Column(DateTime, default=datetime.utcnow)
-    access_token = Column(String)
+    _access_token = Column("access_token", String)
     payload_format = Column(String)
     payload_user_key = Column(String)
     payload_message_key = Column(String)
@@ -97,6 +148,18 @@ class LLMEndpoint(Base):
         "EvaluationProfiles", back_populates="llm_endpoint"
     )
 
+    @property
+    def access_token(self):
+        if self._access_token is None:
+            return None
+        return decrypt_token(self._access_token)
+
+    @access_token.setter
+    def access_token(self, value):
+        if value is None:
+            self._access_token = None
+        else:
+            self._access_token = encrypt_token(value)
 
 class EvaluationProfiles(Base):
     __tablename__ = "evaluation_profiles"
@@ -122,7 +185,6 @@ class EvaluationProfiles(Base):
         "EvaluationRuns", back_populates="evaluation_profiles"
     )
 
-
 class EvaluationRuns(Base):
     __tablename__ = "evaluation_runs"
 
@@ -139,7 +201,6 @@ class EvaluationRuns(Base):
         "EvaluationProfiles", back_populates="evaluation_runs"
     )
     assessments = relationship("Assessments", back_populates="evaluation_runs")
-
 
 class Assessments(Base):
     __tablename__ = "assessments"
