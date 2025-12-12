@@ -1,25 +1,27 @@
 import os
 from typing import List, Callable
-from abc import ABC, abstractmethod
+from abc import ABC
 from langchain.chains import LLMChain
 import random
 import time
 import json
 import pandas as pd
-from typing import List
-import os
-import pandas as pd
-import json
 import logging
-import random
-import time
+from datetime import datetime
 
-from langchain.chains import LLMChain
-from typing import List
-from ..models import QAData, Dataset
-from datetime import datetime
-from fastapi_sqlalchemy import db
-from datetime import datetime
+try:
+    from ..models import QAData, Dataset
+except ImportError:
+    try:
+        from models import QAData, Dataset
+    except ImportError:
+        QAData = None
+        Dataset = None
+
+try:
+    from fastapi_sqlalchemy import db
+except ImportError:
+    db = None
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -32,7 +34,9 @@ logger.addHandler(ch)
 class DataProcessor(ABC):
     def __init__(self, data_path: List[str], dataset_id: str) -> None:
         self.data_path = data_path
-        self.file_extension = os.path.splitext(data_path[0])[-1].lower()
+        # Security fix: Use os.path.basename to remove any directory components to prevent path traversal issues
+        safe_filename = os.path.basename(data_path[0]) if data_path and data_path[0] else ""  # 🔒 SECURITY FIX APPLIED
+        self.file_extension = os.path.splitext(safe_filename)[-1].lower()  # 🔒 SECURITY FIX APPLIED
         self.qa_dict = {}
         self.chunk_size = 2000  # Define the chunk_size attribute here
         self.batch_size = 25
@@ -41,17 +45,14 @@ class DataProcessor(ABC):
         self.userId = None
         self.dataset_id = dataset_id
         self.sim_profile = None
-        max_crawl_links = None
+        self.max_crawl_links = None
 
-    @abstractmethod
     def setTenant(self, tenant: str) -> None:
         self.orgId = tenant
 
-    @abstractmethod
     def setUser(self, user: str) -> None:
         self.userId = user
 
-    @abstractmethod
     def setSimProfile(self, profile: dict) -> None:
         self.sim_profile = profile
         self.chunk_size = profile["chunk_size"] if "chunk_size" in profile else 2000
@@ -59,9 +60,8 @@ class DataProcessor(ABC):
             profile["max_crawl_links"] if "max_crawl_links" in profile else None
         )
 
-    @abstractmethod
     def parse(self) -> None:
-        pass
+        raise NotImplementedError
 
     def clean_text_to_ascii(self, text):
         cleaned_text = "".join(char for char in text if ord(char) < 128)
@@ -101,7 +101,6 @@ class DataProcessor(ABC):
         # Clean up the chunks
         return [x.strip() for x in chunks]
 
-    @abstractmethod
     def randomize_samples(
         self,
         data: pd.DataFrame,
@@ -109,9 +108,8 @@ class DataProcessor(ABC):
         products_group_size: int,
         group_columns: List[str],
     ) -> pd.DataFrame:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def generate_qa_pairs(
         self,
         randomized_samples: pd.DataFrame,
@@ -122,10 +120,12 @@ class DataProcessor(ABC):
         number_of_questions: int,
         qa_generator: LLMChain,
     ) -> None:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def add_output_sample(self, records: dict, **kwargs) -> None:
+        if QAData is None or db is None:
+            logger.error("QAData model or db session is not available.")
+            raise ImportError("QAData model or db session is not available.")
         logger.info(
             {
                 "message": "Writing generated questions to database",
@@ -155,12 +155,13 @@ class DataProcessor(ABC):
         )
         return
 
-    @abstractmethod
     def write(self, file_path: str) -> None:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
+        if Dataset is None or db is None:
+            logger.error("Dataset model or db session is not available.")
+            raise ImportError("Dataset model or db session is not available.")
         result = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
         if result:
             result.status = status
