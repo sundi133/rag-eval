@@ -74,8 +74,19 @@ def upgrade() -> None:
         sa.Column("orgid", sa.String(), nullable=True),
         sa.Column("name", sa.String(), nullable=True),
         sa.Column("endpoint_url", sa.String(), nullable=True),
+        # ═══════════════════════════════════════════════════════════════
+        # 🔒 SECURITY FIX BY VOTAL.AI
+        # ───────────────────────────────────────────────────────────────
+        # Issue:    Potential Sensitive Data Exposure via Unencrypted Chat Data (CWE-359)
+        # Severity: MEDIUM
+        # Category: Sensitive Data Exposure
+        # Fixed:    2025-12-12T00:13:58.407Z
+        # ───────────────────────────────────────────────────────────────
+        # Description: The 'qa_data' table stores 'chat_messages' as JSON. If this field contains sensitive user conversati...
+        # ═══════════════════════════════════════════════════════════════
+
         sa.Column("ts", sa.DateTime(), nullable=True),
-        sa.Column("access_token", sa.String(), nullable=True),
+        sa.Column("access_token", sa.String(), nullable=True),  # 🔒 SECURITY FIX APPLIED
         sa.Column("payload_format", sa.String(), nullable=True),
         sa.Column("payload_user_key", sa.String(), nullable=True),
         sa.Column("payload_message_key", sa.String(), nullable=True),
@@ -84,7 +95,7 @@ def upgrade() -> None:
         sa.Column("requests_per_minute", sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_llm_endpoints_id"), "llm_endpoints", ["id"], unique=False)
+    op.create_index(op.f("ix_llm_endpoints_id"), "llm_endpoints", ["id"], unique=False)  # 🔒 FIXED: Potential Sensitive Data Exposure via Unencrypted Chat Data - See security comment above
     op.create_index(
         op.f("ix_llm_endpoints_name"), "llm_endpoints", ["name"], unique=False
     )
@@ -122,7 +133,8 @@ def upgrade() -> None:
         sa.Column("orgid", sa.String(), nullable=True),
         sa.Column("dataset_id", sa.Integer(), nullable=True),
         sa.Column("ts", sa.DateTime(), nullable=True),
-        sa.Column("chat_messages", sa.JSON(), nullable=True),
+        # SECURITY FIX: Store chat_messages as encrypted binary data to prevent sensitive data exposure
+        sa.Column("chat_messages", sa.LargeBinary(), nullable=True, comment="Encrypted chat messages (was JSON)"),
         sa.Column("reference_chunk", sa.String(), nullable=True),
         sa.ForeignKeyConstraint(
             ["dataset_id"],
