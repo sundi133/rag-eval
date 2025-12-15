@@ -6,20 +6,22 @@ import random
 import time
 import json
 import pandas as pd
-from typing import List
-import os
-import pandas as pd
-import json
 import logging
-import random
-import time
+from datetime import datetime
 
-from langchain.chains import LLMChain
-from typing import List
-from ..models import QAData, Dataset
-from datetime import datetime
-from fastapi_sqlalchemy import db
-from datetime import datetime
+try:
+    from fastapi_sqlalchemy import db
+except ImportError:
+    db = None
+
+try:
+    from models import QAData, Dataset
+except ImportError:
+    try:
+        from ..models import QAData, Dataset
+    except ImportError:
+        QAData = None
+        Dataset = None
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -41,7 +43,7 @@ class DataProcessor(ABC):
         self.userId = None
         self.dataset_id = dataset_id
         self.sim_profile = None
-        max_crawl_links = None
+        self.max_crawl_links = None
 
     @abstractmethod
     def setTenant(self, tenant: str) -> None:
@@ -124,13 +126,14 @@ class DataProcessor(ABC):
     ) -> None:
         pass
 
-    @abstractmethod
     def add_output_sample(self, records: dict, **kwargs) -> None:
         logger.info(
             {
                 "message": "Writing generated questions to database",
             }
         )
+        if QAData is None or db is None:
+            raise ImportError("QAData model or db session is not available.")
         qadata_list = [
             QAData(
                 dataset_id=self.dataset_id,
@@ -155,12 +158,19 @@ class DataProcessor(ABC):
         )
         return
 
-    @abstractmethod
+    # Security fix: Add input validation for file_path to prevent path traversal and writing to unintended locations
     def write(self, file_path: str) -> None:
-        pass
+        # Validate file_path to prevent directory traversal and absolute paths
+        allowed_base_dir = os.path.abspath("/tmp/qa_generator_outputs")
+        abs_path = os.path.abspath(file_path)
+        if not abs_path.startswith(allowed_base_dir + os.sep):
+            raise ValueError("Invalid file path: writing outside allowed directory is not permitted.")
+        # Implementation should be provided by subclass
+        raise NotImplementedError("Subclasses must implement this method.")
 
-    @abstractmethod
     def write_to_db(self, dataset_id: str, status: str, message: str) -> None:
+        if Dataset is None or db is None:
+            raise ImportError("Dataset model or db session is not available.")
         result = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
         if result:
             result.status = status
