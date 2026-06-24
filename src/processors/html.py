@@ -142,9 +142,23 @@ class HTMLProcessor(DataProcessor):
             # )
 
             # Split questions by newline and process each question
-            question_array = json.loads(qa_pair)
+            try:
+                question_array = json.loads(qa_pair)
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to decode JSON from LLM output: {e}")
+                logger.debug(f"Malformed LLM output: {qa_pair}")
+                continue # Skip to the next iteration if JSON is malformed
+
+            # Basic validation of the expected structure
+            if not isinstance(question_array, list):
+                logger.error(f"LLM output is not a list: {qa_pair}")
+                continue
 
             for record in question_array:
+                if not isinstance(record, dict) or "question" not in record or "answer" not in record:
+                    logger.error(f"Invalid record structure in LLM output: {record}")
+                    continue
+
                 record["url"] = group_row["url"]
                 # Log each generated question
                 logger.info(
